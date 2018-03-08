@@ -1,0 +1,45 @@
+image: "docker.adeo.no:5000/dok/dokopp"
+replicas:
+  min: 1
+  max: 2
+  cpuThresholdPercentage: 50
+port: 8080
+healthcheck:
+  liveness:
+    path: /isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  readiness:
+    path: /isReady
+    initialDelay: 30
+prometheus:
+  enabled: true
+  path: /prometheus
+resources:
+  limits:
+    cpu: 1000m
+fasitResources:
+  used:
+  - alias: mqGateway01
+    resourceType: queueManager
+  - alias: dokopp_channel
+    resourceType: channel
+  - alias: DOKOPP
+    resourceType: queue
+
+#  - alias: ArkiverDokumentmottak_v2
+#    resourceType: webserviceendpoint
+  - alias: srvdokopp
+    resourceType: credential
+    propertyMap:
+      username: SERVICEUSER_USERNAME
+      password: SERVICEUSER_PASSWORD
+  - alias: srvdokopp
+    resourceType: certificate
+    propertyMap:
+      keystorealias: SRVDOKOPP_CERT_KEYSTOREALIAS
+      password: SRVDOKOPP_CERT_PASSWORD
+exposed:
+  - alias: DOKOPP
+    resourceType: queue
+    name: DOKOPP
