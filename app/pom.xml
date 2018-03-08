@@ -28,16 +28,16 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.apache.camel</groupId>-->
-			<!--<artifactId>camel-spring-boot-starter</artifactId>-->
-			<!--<version>${camel.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>org.apache.camel</groupId>-->
-			<!--<artifactId>camel-jms</artifactId>-->
-			<!--<version>${camel.version}</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-spring-boot-starter</artifactId>
+			<version>${camel.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-jms</artifactId>
+			<version>${camel.version}</version>
+		</dependency>
 		<!--<dependency>-->
 			<!--<groupId>org.apache.camel</groupId>-->
 			<!--<artifactId>camel-jaxb</artifactId>-->
@@ -48,31 +48,31 @@
 			<!--<artifactId>Saxon-B</artifactId>-->
 			<!--<version>${saxon.version}</version>-->
 		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>io.prometheus</groupId>-->
-			<!--<artifactId>simpleclient</artifactId>-->
-			<!--<version>${prometheus.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>io.prometheus</groupId>-->
-			<!--<artifactId>simpleclient_hotspot</artifactId>-->
-			<!--<version>${prometheus.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>io.prometheus</groupId>-->
-			<!--<artifactId>simpleclient_servlet</artifactId>-->
-			<!--<version>${prometheus.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>io.prometheus</groupId>-->
-			<!--<artifactId>simpleclient_pushgateway</artifactId>-->
-			<!--<version>${prometheus.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>io.prometheus</groupId>-->
-			<!--<artifactId>simpleclient_spring_boot</artifactId>-->
-			<!--<version>${prometheus.version}</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient</artifactId>
+			<version>${prometheus.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_hotspot</artifactId>
+			<version>${prometheus.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_servlet</artifactId>
+			<version>${prometheus.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_pushgateway</artifactId>
+			<version>${prometheus.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_spring_boot</artifactId>
+			<version>${prometheus.version}</version>
+		</dependency>
 		<!--<dependency>-->
 			<!--<groupId>org.apache.geronimo.specs</groupId>-->
 			<!--<artifactId>geronimo-jms_1.1_spec</artifactId>-->
@@ -83,88 +83,66 @@
 			<!--<artifactId>jta</artifactId>-->
 			<!--<version>${transaction.version}</version>-->
 		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>javax.inject</groupId>-->
-			<!--<artifactId>javax.inject</artifactId>-->
-			<!--<version>${inject.version}</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>${inject.version}</version>
+		</dependency>
 		<!--<dependency>-->
 			<!--<groupId>org.apache.httpcomponents</groupId>-->
 			<!--<artifactId>httpclient</artifactId>-->
 		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>org.apache.cxf</groupId>-->
-			<!--<artifactId>cxf-spring-boot-starter-jaxws</artifactId>-->
-			<!--<version>${cxf.version}</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-spring-boot-starter-jaxws</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
 		<!--&lt;!&ndash; IBM MQ 8 Series is backwards compatible with older versions.-->
  <!--Please see http://www-01.ibm.com/support/docview.wss?uid=swg21312967-->
  <!--&ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>com.ibm.mq</groupId>-->
-			<!--<artifactId>com.ibm.mq.allclient</artifactId>-->
-			<!--<version>${wmq.version}</version>-->
-		<!--</dependency>-->
-		<!--&lt;!&ndash; modig &ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>no.nav.modig</groupId>-->
-			<!--<artifactId>modig-log-common</artifactId>-->
-			<!--<version>${modig-log-common.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>no.nav.modig</groupId>-->
-			<!--<artifactId>modig-security-ws</artifactId>-->
-			<!--<version>${modig-security.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>no.nav.modig</groupId>-->
-			<!--<artifactId>modig-security-loginmodule</artifactId>-->
-			<!--<scope>runtime</scope>-->
-			<!--<version>${modig-security.version}</version>-->
-		<!--</dependency>-->
-		<!--&lt;!&ndash; tjenester &ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>no.nav.dokmot</groupId>-->
-			<!--<artifactId>dokmot-schemas</artifactId>-->
-			<!--<version>${dokmot-schemas.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>no.nav.dokkat</groupId>-->
-			<!--<artifactId>dokkat-api</artifactId>-->
-			<!--<version>${dokkat-api.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>no.nav.tjenester</groupId>-->
-			<!--<artifactId>nav-person-v3-tjenestespesifikasjon</artifactId>-->
-			<!--<version>${nav-person-v3-tjenestespesifikasjon.version}</version>-->
-			<!--<classifier>jaxws</classifier>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>no.nav.tjenester.fim</groupId>-->
-			<!--<artifactId>nav-fim-organisasjon-v4-tjenestespesifikasjon</artifactId>-->
-			<!--<version>${nav-fim-organisasjon-v4-tjenestespesifikasjon.version}</version>-->
-			<!--<classifier>jaxws</classifier>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>com.ibm.mq.allclient</artifactId>
+			<version>${wmq.version}</version>
+		</dependency>
+		<!-- modig -->
+		<dependency>
+			<groupId>no.nav.modig</groupId>
+			<artifactId>modig-log-common</artifactId>
+			<version>${modig-log-common.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.modig</groupId>
+			<artifactId>modig-security-ws</artifactId>
+			<version>${modig-security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.modig</groupId>
+			<artifactId>modig-security-loginmodule</artifactId>
+			<scope>runtime</scope>
+			<version>${modig-security.version}</version>
+		</dependency>
+		<!-- tjenester -->
 		<!--<dependency>-->
 			<!--<groupId>no.nav.tjenester.brevogarkiv</groupId>-->
 			<!--<artifactId>arkiverdokumentmottak-tjenestespesifikasjon-v2</artifactId>-->
 			<!--<version>${arkiverdokumentmottak-tjenestespesifikasjon-v2.version}</version>-->
 			<!--<classifier>jaxws</classifier>-->
 		<!--</dependency>-->
-		<!--&lt;!&ndash; Provided dependencies &ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>org.projectlombok</groupId>-->
-			<!--<artifactId>lombok</artifactId>-->
-			<!--<version>${lombok.version}</version>-->
-			<!--<scope>provided</scope>-->
-		<!--</dependency>-->
-		<!--&lt;!&ndash;Logging&ndash;&gt;-->
-		<!--<dependency>-->
-			<!--<groupId>net.logstash.logback</groupId>-->
-			<!--<artifactId>logstash-logback-encoder</artifactId>-->
-			<!--<version>${logstash-logback-encode.version}</version>-->
-		<!--</dependency>-->
-		<!--&lt;!&ndash; test &ndash;&gt;-->
+		<!-- Provided dependencies -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<!--Logging-->
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+			<version>${logstash-logback-encode.version}</version>
+		</dependency>
+		<!-- test -->
 		<!--<dependency>-->
 			<!--<groupId>org.springframework.boot</groupId>-->
 			<!--<artifactId>spring-boot-starter-test</artifactId>-->
@@ -218,12 +196,12 @@
 			<!--<version>${modig-testcertificates.version}</version>-->
 			<!--<scope>test</scope>-->
 		<!--</dependency>-->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-contract-wiremock</artifactId>
-			<version>1.2.1.RELEASE</version>
-			<scope>test</scope>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.springframework.cloud</groupId>-->
+			<!--<artifactId>spring-cloud-contract-wiremock</artifactId>-->
+			<!--<version>1.2.1.RELEASE</version>-->
+			<!--<scope>test</scope>-->
+		<!--</dependency>-->
 	</dependencies>
 
 </project>
