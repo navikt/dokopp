@@ -13,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 @Getter
 @Setter
 @ToString
-@ConfigurationProperties("DOKMOTSED_CHANNEL")
+@ConfigurationProperties("DOKOPP_CHANNEL")
 @Validated
 public class MqChannelAlias {
 	@NotEmpty

@@ -33,7 +33,7 @@ import org.springframework.jms.annotation.EnableJms;
 		MqChannelAlias.class,
 		MqGatewayAlias.class,
 		ServiceuserAlias.class,
-		ArkiverDokumentmottakV2Alias.class,
+//		ArkiverDokumentmottakV2Alias.class,
 		NavAppCertAlias.class,
 })
 @Import({
