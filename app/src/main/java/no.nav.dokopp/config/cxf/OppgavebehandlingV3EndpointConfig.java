@@ -31,7 +31,7 @@ public class OppgavebehandlingV3EndpointConfig extends AbstractCxfEndpointConfig
 		setAdress(oppgavebehandlingV3Alias.getEndpointurl());
 		setReceiveTimeout(oppgavebehandlingV3Alias.getReadtimeoutms());
 		setConnectTimeout(oppgavebehandlingV3Alias.getConnecttimeoutms());
-		addOutInterceptor(new SystemSAMLOutInterceptor());
+//		addOutInterceptor(new SystemSAMLOutInterceptor());
 		addFeature(new WSAddressingFeature());
 		return createPort(OppgavebehandlingV3.class);
 	}
