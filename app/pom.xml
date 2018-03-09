@@ -123,6 +123,12 @@
 			<version>${modig-security.version}</version>
 		</dependency>
 		<!-- tjenester -->
+		<dependency>
+			<groupId>no.nav.tjenester.fim</groupId>
+			<artifactId>nav-fim-oppgavebehandling-v3-tjenestespesifikasjon</artifactId>
+			<version>${nav-fim-oppgavebehandling-v3-tjenestespesifikasjon}</version>
+			<classifier>jaxws</classifier>
+		</dependency>
 		<!--<dependency>-->
 			<!--<groupId>no.nav.tjenester.brevogarkiv</groupId>-->
 			<!--<artifactId>arkiverdokumentmottak-tjenestespesifikasjon-v2</artifactId>-->

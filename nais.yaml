@@ -29,6 +29,8 @@ fasitResources:
 
 #  - alias: ArkiverDokumentmottak_v2
 #    resourceType: webserviceendpoint
+ - alias: "virksomhet:Oppgavebehandling_v3"
+    resourceType: webserviceendpoint
   - alias: srvdokopp
     resourceType: credential
     propertyMap:
