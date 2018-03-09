@@ -4,6 +4,7 @@ import static no.nav.dokopp.config.metrics.PrometheusMetrics.isReady;
 import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokopp.nais.checks.OppgavebehandlingV3Check;
 import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
 //import no.nav.dokopp.nais.checks.Tjoark203Check;
 import no.nav.dokopp.nais.selftest.ApplicationNotReadyException;
@@ -33,16 +34,19 @@ public class NaisContract {
 
 	private final ProducerTemplate producerTemplate;
 	private final Qopp001QueueCheck qopp001;
+	private final OppgavebehandlingV3Check oppgavebehandlingV3;
 //	private final Tjoark203Check tjoark203;
 
 
 	@Inject
 	public NaisContract(ProducerTemplate producerTemplate,
-						Qopp001QueueCheck qopp001
+						Qopp001QueueCheck qopp001,
+						OppgavebehandlingV3Check oppgavebehandlingV3
 //						Tjoark203Check tjoark203
  ) {
 		this.producerTemplate = producerTemplate;
 		this.qopp001 = qopp001;
+		this.oppgavebehandlingV3 = oppgavebehandlingV3;
 //		this.tjoark203 = tjoark203;
 	}
 
@@ -57,6 +61,7 @@ public class NaisContract {
 		try {
 			String routeStatus = qmot004RouteStatus();
 			qopp001.check();
+			oppgavebehandlingV3.check();
 //			tjoark203.check();
 			isReady.set(1);
 			if (ROUTE_SUSPENDED.equals(routeStatus)) {
