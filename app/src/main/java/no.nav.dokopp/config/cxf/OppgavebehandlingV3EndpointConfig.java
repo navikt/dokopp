@@ -14,7 +14,7 @@ import javax.xml.namespace.QName;
  */
 //TODO Add secutity properties to message
 public class OppgavebehandlingV3EndpointConfig extends AbstractCxfEndpointConfig {
-	private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/organisasjon/v4/Binding";
+	private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/oppgavebehandling/v3/Binding";
 	
 	private static final QName OPPGAVEBEHANDLING_V3_PORT_QNAME = new QName(NAMESPACE, "oppgavebehandling_v3Port");
 	private static final QName OPPGAVEBEHANDLING_V3_SERVICE_QNAME = new QName(NAMESPACE, "oppgavebehandling_v3");
