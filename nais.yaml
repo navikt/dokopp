@@ -24,7 +24,7 @@ fasitResources:
     resourceType: queueManager
   - alias: dokopp_channel
     resourceType: channel
-  - alias: DOKOPP
+  - alias: dokopp_OPPRETT_OPPGAVE
     resourceType: queue
 
 #  - alias: ArkiverDokumentmottak_v2
@@ -40,6 +40,6 @@ fasitResources:
       keystorealias: SRVDOKOPP_CERT_KEYSTOREALIAS
       password: SRVDOKOPP_CERT_PASSWORD
 exposed:
-  - alias: DOKOPP
+  - alias: dokopp_OPPRETT_OPPGAVE
     resourceType: queue
-    name: DOKOPP
+    name: dokopp_OPPRETT_OPPGAVE

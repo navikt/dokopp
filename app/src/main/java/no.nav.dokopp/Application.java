@@ -2,6 +2,7 @@ package no.nav.dokopp;
 
 
 import no.nav.dokopp.config.JmsConfig;
+import no.nav.dokopp.util.DokoppConfigSetter;
 import org.apache.camel.spring.boot.CamelAutoConfiguration;
 import org.apache.cxf.spring.boot.autoconfigure.CxfAutoConfiguration;
 import org.springframework.boot.SpringApplication;
@@ -46,6 +47,9 @@ import org.springframework.context.annotation.Import;
 		ApplicationConfig.class})
 public class Application {
 	public static void main(String[] args) {
+		DokoppConfigSetter configSetter = new DokoppConfigSetter();
+		configSetter.configureSsl();
+		configSetter.setAppConfig();
 		SpringApplication.run(Application.class, args);
 	}
 }

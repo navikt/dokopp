@@ -38,16 +38,16 @@
 			<artifactId>camel-jms</artifactId>
 			<version>${camel.version}</version>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.apache.camel</groupId>-->
-			<!--<artifactId>camel-jaxb</artifactId>-->
-			<!--<version>${camel.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>net.sf.saxon</groupId>-->
-			<!--<artifactId>Saxon-B</artifactId>-->
-			<!--<version>${saxon.version}</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-jaxb</artifactId>
+			<version>${camel.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.saxon</groupId>
+			<artifactId>Saxon-B</artifactId>
+			<version>${saxon.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>io.prometheus</groupId>
 			<artifactId>simpleclient</artifactId>
@@ -73,25 +73,25 @@
 			<artifactId>simpleclient_spring_boot</artifactId>
 			<version>${prometheus.version}</version>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.apache.geronimo.specs</groupId>-->
-			<!--<artifactId>geronimo-jms_1.1_spec</artifactId>-->
-			<!--<version>${geronimo.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>javax.transaction</groupId>-->
-			<!--<artifactId>jta</artifactId>-->
-			<!--<version>${transaction.version}</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jms_1.1_spec</artifactId>
+			<version>${geronimo.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>${transaction.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 			<version>${inject.version}</version>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.apache.httpcomponents</groupId>-->
-			<!--<artifactId>httpclient</artifactId>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-spring-boot-starter-jaxws</artifactId>
