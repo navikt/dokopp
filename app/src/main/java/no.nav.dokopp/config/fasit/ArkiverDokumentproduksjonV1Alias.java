@@ -15,9 +15,9 @@ import javax.validation.constraints.Min;
 @Getter
 @Setter
 @ToString
-@ConfigurationProperties("ARKIVERDOKUMENTMOTTAK_V2")
+@ConfigurationProperties("ARKIVERDOKUMENTPRODUKSJON_V1")
 @Validated
-public class ArkiverDokumentmottakV2Alias {
+public class ArkiverDokumentproduksjonV1Alias {
 	@NotEmpty
 	private String endpointurl;
 	private String description;

@@ -3,9 +3,11 @@ package no.nav.dokopp;
 import io.prometheus.client.spring.boot.EnablePrometheusEndpoint;
 import io.prometheus.client.spring.boot.EnableSpringBootMetricsCollector;
 import no.nav.dokopp.config.TomcatConfig;
-import no.nav.dokopp.config.cxf.ArkiverDokumentmottakV2Config;
+import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1Config;
+import no.nav.dokopp.config.cxf.DokumentproduksjonInfoV1Config;
 import no.nav.dokopp.config.cxf.OppgavebehandlingV3EndpointConfig;
-import no.nav.dokopp.config.fasit.ArkiverDokumentmottakV2Alias;
+import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
+import no.nav.dokopp.config.fasit.DokumentproduksjonInfoV1Alias;
 import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.NavAppCertAlias;
@@ -16,6 +18,8 @@ import no.nav.dokopp.config.props.SrvAppserverProperties;
 import no.nav.dokopp.nais.NaisContract;
 import no.nav.dokopp.nais.checks.OppgavebehandlingV3Check;
 import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
+import no.nav.dokopp.nais.checks.Tjoark110Check;
+import no.nav.dokopp.nais.checks.Tjoark122Check;
 import no.nav.dokopp.qopp001.Qopp001Route;
 import no.nav.dokopp.qopp001.oppgavebehandlingV3.OpprettOppgaveRequestMapper;
 import no.nav.dokopp.util.ValidatorFeilhaandtering;
@@ -38,19 +42,20 @@ import org.springframework.jms.annotation.EnableJms;
 		MqGatewayAlias.class,
 		ServiceuserAlias.class,
 		OppgavebehandlingV3Alias.class,
-//		ArkiverDokumentmottakV2Alias.class,
+		ArkiverDokumentproduksjonV1Alias.class,
+		DokumentproduksjonInfoV1Alias.class,
 		NavAppCertAlias.class,
 })
 @Import({
-//		ArkiverDokumentmottakV2Config.class,
+		DokumentproduksjonInfoV1Config.class,
 		OppgavebehandlingV3EndpointConfig.class,
 		TomcatConfig.class,
-//		RestConfig.class,
 		NaisContract.class,
 		ValidatorFeilhaandtering.class,
-//		Tjoark203JournalfoerForsendelse.class,
+		ArkiverDokumentproduksjonV1Config.class,
 //		JournalfoerInngaaendeForsendelseRequestMapper.class,
-//		Tjoark203Check.class,
+		Tjoark110Check.class,
+		Tjoark122Check.class,
 		OpprettOppgaveRequestMapper.class,
 		OppgavebehandlingV3Check.class,
 		Qopp001QueueCheck.class,
