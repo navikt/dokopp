@@ -1,3 +1,4 @@
+
 package no.nav.dokopp.config;
 
 import com.ibm.mq.constants.MQConstants;

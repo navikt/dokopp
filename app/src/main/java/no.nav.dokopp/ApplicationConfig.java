@@ -21,6 +21,7 @@ import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
 import no.nav.dokopp.nais.checks.Tjoark110Check;
 import no.nav.dokopp.nais.checks.Tjoark122Check;
 import no.nav.dokopp.qopp001.Qopp001Route;
+import no.nav.dokopp.qopp001.oppgavebehandlingV3.OpprettOppgave;
 import no.nav.dokopp.qopp001.oppgavebehandlingV3.OpprettOppgaveRequestMapper;
 import no.nav.dokopp.util.ValidatorFeilhaandtering;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -53,6 +54,7 @@ import org.springframework.jms.annotation.EnableJms;
 		NaisContract.class,
 		ValidatorFeilhaandtering.class,
 		ArkiverDokumentproduksjonV1Config.class,
+		OpprettOppgave.class,
 //		JournalfoerInngaaendeForsendelseRequestMapper.class,
 		Tjoark110Check.class,
 		Tjoark122Check.class,
