@@ -16,10 +16,10 @@ import javax.xml.namespace.QName;
 public class OppgavebehandlingV3EndpointConfig extends AbstractCxfEndpointConfig {
 	private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/oppgavebehandling/v3/Binding";
 	
-	private static final QName OPPGAVEBEHANDLING_V3_PORT_QNAME = new QName(NAMESPACE, "oppgavebehandling_v3Port");
-	private static final QName OPPGAVEBEHANDLING_V3_SERVICE_QNAME = new QName(NAMESPACE, "oppgavebehandling_v3");
+	private static final QName OPPGAVEBEHANDLING_V3_PORT_QNAME = new QName(NAMESPACE, "Oppgavebehandling_v3Port");
+	private static final QName OPPGAVEBEHANDLING_V3_SERVICE_QNAME = new QName(NAMESPACE, "Oppgavebehandling_v3");
 	
-	public static final String WSDL_URL = "wsdl/no/nav/tjeneste/virksomhet/oppgavebehandling/v3/oppgavebehandling.wsdl";
+	public static final String WSDL_URL = "wsdl/no/nav/tjeneste/virksomhet/oppgavebehandling/v3/Binding.wsdl";
 	
 	@Bean
 	public OppgavebehandlingV3 oppgavebehandlingV3(OppgavebehandlingV3Alias oppgavebehandlingV3Alias, NavAppCertAlias navAppCertAlias) {
