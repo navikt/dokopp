@@ -1,7 +1,7 @@
 package no.nav.dokopp.config.metrics;
 
 import static no.nav.dokopp.config.metrics.PrometheusMetrics.requestLatency;
-import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
+import static no.nav.dokopp.qopp001.route.Qopp001Route.SERVICE_ID;
 
 import io.prometheus.client.Histogram;
 import org.apache.camel.Exchange;

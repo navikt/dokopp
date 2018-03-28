@@ -20,10 +20,12 @@ import no.nav.dokopp.nais.checks.OppgavebehandlingV3Check;
 import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
 import no.nav.dokopp.nais.checks.Tjoark110Check;
 import no.nav.dokopp.nais.checks.Tjoark122Check;
-import no.nav.dokopp.qopp001.Qopp001Route;
+import no.nav.dokopp.qopp001.joark.Tjoark110SettJournalpostAttributter;
+import no.nav.dokopp.qopp001.joark.Tjoark122HentJournalpostInfo;
 import no.nav.dokopp.qopp001.oppgavebehandlingV3.OpprettOppgave;
 import no.nav.dokopp.qopp001.oppgavebehandlingV3.OpprettOppgaveRequestMapper;
-import no.nav.dokopp.util.ValidatorFeilhaandtering;
+import no.nav.dokopp.qopp001.route.Qopp001Route;
+import no.nav.dokopp.qopp001.support.Qopp001InputValidationProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -48,14 +50,15 @@ import org.springframework.jms.annotation.EnableJms;
 		NavAppCertAlias.class,
 })
 @Import({
-		DokumentproduksjonInfoV1Config.class,
-		OppgavebehandlingV3EndpointConfig.class,
 		TomcatConfig.class,
 		NaisContract.class,
-		ValidatorFeilhaandtering.class,
+		DokumentproduksjonInfoV1Config.class,
 		ArkiverDokumentproduksjonV1Config.class,
+		OppgavebehandlingV3EndpointConfig.class,
+		Tjoark110SettJournalpostAttributter.class,
+		Tjoark122HentJournalpostInfo.class,
 		OpprettOppgave.class,
-//		JournalfoerInngaaendeForsendelseRequestMapper.class,
+		Qopp001InputValidationProcessor.class,
 		Tjoark110Check.class,
 		Tjoark122Check.class,
 		OpprettOppgaveRequestMapper.class,
