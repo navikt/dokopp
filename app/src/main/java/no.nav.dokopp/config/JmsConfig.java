@@ -31,8 +31,7 @@ public class JmsConfig {
 	public Queue qopp001(@Value("${DOKOPP_OPPRETT_OPPGAVE_QUEUENAME}") String qopp001QueueName) throws JMSException {
 		return new MQQueue(qopp001QueueName);
 	}
-
-
+	
 	@Bean
 	public ConnectionFactory wmqConnectionFactory(final MqGatewayAlias mqGatewayAlias,
 												  final MqChannelAlias mqChannelAlias,
