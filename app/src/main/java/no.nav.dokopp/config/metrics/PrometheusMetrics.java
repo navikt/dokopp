@@ -10,7 +10,7 @@ import static no.nav.dokopp.config.metrics.PrometheusLabels.LABEL_FUNCTIONAL_EXC
 import static no.nav.dokopp.config.metrics.PrometheusLabels.LABEL_PROCESS;
 import static no.nav.dokopp.config.metrics.PrometheusLabels.LABEL_PROCESS_CALLED;
 import static no.nav.dokopp.config.metrics.PrometheusLabels.LABEL_PROCESS_TITLE;
-import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
+import static no.nav.dokopp.qopp001.route.Qopp001Route.SERVICE_ID;
 
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;

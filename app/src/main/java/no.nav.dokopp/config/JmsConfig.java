@@ -28,7 +28,7 @@ public class JmsConfig {
 	private static final int UTF_8_WITH_PUA = 1208;
 
 	@Bean
-	public Queue qopp001(@Value("${DOKOPP_QUEUENAME}") String qopp001QueueName) throws JMSException {
+	public Queue qopp001(@Value("${DOKOPP_OPPRETT_OPPGAVE_QUEUENAME}") String qopp001QueueName) throws JMSException {
 		return new MQQueue(qopp001QueueName);
 	}
 

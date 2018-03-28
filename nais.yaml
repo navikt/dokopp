@@ -22,9 +22,9 @@ fasitResources:
   used:
   - alias: mqGateway01
     resourceType: queueManager
-  - alias: dokopp_channel
+  - alias: DOKOPP_CHANNEL_NAME
     resourceType: channel
-  - alias: dokopp_OPPRETT_OPPGAVE
+  - alias: DOKOPP_OPPRETT_OPPGAVE_QUEUENAME
     resourceType: queue
   - alias: "virksomhet:Oppgavebehandling_v3"
     resourceType: webserviceendpoint
