@@ -3,8 +3,8 @@ package no.nav.dokopp;
 import io.prometheus.client.spring.boot.EnablePrometheusEndpoint;
 import io.prometheus.client.spring.boot.EnableSpringBootMetricsCollector;
 import no.nav.dokopp.config.TomcatConfig;
-import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1Config;
-import no.nav.dokopp.config.cxf.DokumentproduksjonInfoV1Config;
+import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1EndpointConfig;
+import no.nav.dokopp.config.cxf.DokumentproduksjonInfoV1EndpointConfig;
 import no.nav.dokopp.config.cxf.OppgavebehandlingV3EndpointConfig;
 import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
 import no.nav.dokopp.config.fasit.DokumentproduksjonInfoV1Alias;
@@ -52,8 +52,8 @@ import org.springframework.jms.annotation.EnableJms;
 @Import({
 		TomcatConfig.class,
 		NaisContract.class,
-		DokumentproduksjonInfoV1Config.class,
-		ArkiverDokumentproduksjonV1Config.class,
+		DokumentproduksjonInfoV1EndpointConfig.class,
+		ArkiverDokumentproduksjonV1EndpointConfig.class,
 		OppgavebehandlingV3EndpointConfig.class,
 		Tjoark110SettJournalpostAttributter.class,
 		Tjoark122HentJournalpostInfo.class,

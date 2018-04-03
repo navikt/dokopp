@@ -18,7 +18,7 @@ import java.util.Map;
  * @author Joakim Bjørnstad, Jbit AS
  */
 @Configuration
-public class ArkiverDokumentproduksjonV1Config extends AbstractCxfEndpointConfig {
+public class ArkiverDokumentproduksjonV1EndpointConfig extends AbstractCxfEndpointConfig {
 	
 	private static final String NAMESPACE = "http://nav.no/tjeneste/domene/brevogarkiv/arkiverdokumentproduksjon/v1/";
 	

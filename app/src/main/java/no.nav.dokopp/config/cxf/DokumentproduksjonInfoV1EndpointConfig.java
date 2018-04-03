@@ -18,7 +18,7 @@ import java.util.Map;
  * @author Joakim Bjørnstad, Jbit AS
  */
 @Configuration
-public class DokumentproduksjonInfoV1Config extends AbstractCxfEndpointConfig {
+public class DokumentproduksjonInfoV1EndpointConfig extends AbstractCxfEndpointConfig {
 	
 	private static final String NAMESPACE = "http://nav.no/tjeneste/domene/brevogarkiv/dokumentproduksjoninfo/v1/";
 	//TODO: DokumentproduksjonInfo_v1 or DokumentproduksjonInfoV1_Service?
