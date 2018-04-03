@@ -1,7 +1,7 @@
 package no.nav.dokopp.nais;
 
 import static no.nav.dokopp.config.metrics.PrometheusMetrics.isReady;
-import static no.nav.dokopp.qopp001.route.Qopp001Route.SERVICE_ID;
+import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.nais.checks.BehandleOppgaveV1Check;
