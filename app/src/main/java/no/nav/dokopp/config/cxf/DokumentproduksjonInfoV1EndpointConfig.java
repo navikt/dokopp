@@ -21,7 +21,6 @@ import java.util.Map;
 public class DokumentproduksjonInfoV1EndpointConfig extends AbstractCxfEndpointConfig {
 	
 	private static final String NAMESPACE = "http://nav.no/tjeneste/domene/brevogarkiv/dokumentproduksjoninfo/v1/";
-	//TODO: DokumentproduksjonInfo_v1 or DokumentproduksjonInfoV1_Service?
 	private static final QName SERVICE_QNAME = new QName(NAMESPACE, "DokumentproduksjonInfo_v1");
 	private static final QName PORT_QNAME = new QName(NAMESPACE, "DokumentproduksjonInfoPort_v1");
 	
