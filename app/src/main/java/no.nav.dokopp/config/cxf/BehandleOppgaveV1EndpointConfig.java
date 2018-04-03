@@ -12,7 +12,6 @@ import javax.xml.namespace.QName;
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
-//TODO Add secutity properties to message
 public class BehandleOppgaveV1EndpointConfig extends AbstractCxfEndpointConfig {
 	private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/behandleOppgave/v1/Binding";
 	
