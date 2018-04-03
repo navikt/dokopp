@@ -18,7 +18,7 @@ public class BehandleOppgaveV1EndpointConfig extends AbstractCxfEndpointConfig {
 	private static final QName BEHANDLEOPPGAVE_V3_PORT_QNAME = new QName(NAMESPACE, "BehandleOppgave_v1Port");
 	private static final QName BEHANDLEOPPGAVE__V3_SERVICE_QNAME = new QName(NAMESPACE, "BehandleOppgave_v1");
 	
-	public static final String WSDL_URL = "wsdl/no/nav/tjeneste/virksomhet/behandleOppgave/v1/Binding.wsdl";
+	public static final String WSDL_URL = "wsdl/no/nav/tjeneste/virksomhet/behandleOppgave/v1/behandleOppgave.wsdl";
 	
 	@Bean
 	public BehandleOppgaveV1 behandleOppgaveV1(BehandleOppgaveV1Alias behandleOppgaveV1Alias, NavAppCertAlias navAppCertAlias) {
