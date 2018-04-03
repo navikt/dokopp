@@ -21,7 +21,7 @@ import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
 import no.nav.dokopp.nais.checks.Tjoark110Check;
 import no.nav.dokopp.nais.checks.Tjoark122Check;
 import no.nav.dokopp.qopp001.joark.Tjoark110SettJournalpostAttributter;
-import no.nav.dokopp.qopp001.joark.Tjoark122HentJournalpostInfo;
+import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgave;
 import no.nav.dokopp.qopp001.route.Qopp001Route;
 import no.nav.dokopp.qopp001.support.Qopp001InputValidationProcessor;
