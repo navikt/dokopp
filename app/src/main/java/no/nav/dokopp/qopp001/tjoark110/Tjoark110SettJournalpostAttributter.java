@@ -1,5 +1,7 @@
 package no.nav.dokopp.qopp001.tjoark110;
 
+import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
+
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.ArkiverDokumentproduksjonV1;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.meldinger.SettJournalpostAttributterRequest;
 import org.apache.camel.Handler;
@@ -26,6 +28,7 @@ public class Tjoark110SettJournalpostAttributter {
 
 	private SettJournalpostAttributterRequest mapRequest(SettJournalpostAttributterRequestTo settJournalpostAttributterRequestTo) {
 		return new SettJournalpostAttributterRequest()
+				.withEndretAvNavn(SERVICE_ID)
 				.withJournalpostIdListe(Long.valueOf(settJournalpostAttributterRequestTo.getJournalpostId()))
 				.withAntallReturpost(settJournalpostAttributterRequestTo.getAntallRetur());
 	}
