@@ -4,7 +4,6 @@ import no.nav.dokopp.config.fasit.NavAppCertAlias;
 import no.nav.dokopp.config.fasit.OppgavebehandlingV3Alias;
 import no.nav.modig.security.ws.SystemSAMLOutInterceptor;
 import no.nav.tjeneste.virksomhet.oppgavebehandling.v3.binding.OppgavebehandlingV3;
-import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.context.annotation.Bean;
 
 import javax.xml.namespace.QName;
@@ -31,8 +30,8 @@ public class OppgavebehandlingV3EndpointConfig extends AbstractCxfEndpointConfig
 		setAdress(oppgavebehandlingV3Alias.getEndpointurl());
 		setReceiveTimeout(oppgavebehandlingV3Alias.getReadtimeoutms());
 		setConnectTimeout(oppgavebehandlingV3Alias.getConnecttimeoutms());
-//		addOutInterceptor(new SystemSAMLOutInterceptor());
-		addFeature(new WSAddressingFeature());
+		addOutInterceptor(new SystemSAMLOutInterceptor());
+//		addFeature(new WSAddressingFeature());
 		return createPort(OppgavebehandlingV3.class);
 	}
 }

@@ -31,7 +31,7 @@ public class OppgavebehandlingV3Check extends AbstractSelftest {
 		try {
 			oppgavebehandlingV3.ping();
 		} catch (Exception e) {
-			throw new ApplicationNotReadyException("Could not ping OrganisasjonV4", e);
+			throw new ApplicationNotReadyException("Could not ping oppgavebehandlingV3", e);
 		}
 	}
 }
