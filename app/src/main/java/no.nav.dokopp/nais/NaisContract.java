@@ -65,7 +65,7 @@ public class NaisContract {
 		try {
 			String routeStatus = qmot004RouteStatus();
 			qopp001.check();
-			behandleOppgaveV1.check();
+//			behandleOppgaveV1.check();
 			tjoark110.check();
 			tjoark122.check();
 			isReady.set(1);
