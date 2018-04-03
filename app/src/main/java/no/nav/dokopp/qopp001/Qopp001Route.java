@@ -1,4 +1,4 @@
-package no.nav.dokopp.qopp001.route;
+package no.nav.dokopp.qopp001;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.props.DokoppProperties;
