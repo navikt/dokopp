@@ -10,7 +10,6 @@ import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import javax.jms.JMSException;
 import javax.jms.Queue;
 
 /**
