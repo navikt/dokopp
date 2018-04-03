@@ -119,9 +119,9 @@
 		</dependency>
 		<!-- tjenester -->
 		<dependency>
-			<groupId>no.nav.tjenester.fim</groupId>
-			<artifactId>nav-fim-oppgavebehandling-v3-tjenestespesifikasjon</artifactId>
-			<version>${nav-fim-oppgavebehandling-v3-tjenestespesifikasjon}</version>
+			<groupId>no.nav.tjenester</groupId>
+			<artifactId>nav-behandleOppgave-v1-tjenestespesifikasjon</artifactId>
+			<version>${nav-behandleOppgave-v1-tjenestespesifikasjon}</version>
 			<classifier>jaxws</classifier>
 		</dependency>
 		<dependency>

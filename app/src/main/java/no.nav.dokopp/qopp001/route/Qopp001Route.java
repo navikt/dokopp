@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.props.DokoppProperties;
 import no.nav.dokopp.qopp001.joark.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.joark.Tjoark122HentJournalpostInfo;
-import no.nav.dokopp.qopp001.oppgavebehandlingV3.OpprettOppgave;
+import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgave;
 import no.nav.dokopp.qopp001.support.Qopp001InputValidationProcessor;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.stereotype.Component;

@@ -15,9 +15,9 @@ import javax.validation.constraints.Min;
 @Getter
 @Setter
 @ToString
-@ConfigurationProperties("VIRKSOMHET_OPPGAVEBEHANDLING_V3")
+@ConfigurationProperties("VIRKSOMHET_BEHANDLEOPPGAVE_V1")
 @Validated
-public class OppgavebehandlingV3Alias {
+public class BehandleOppgaveV1Alias {
 	@NotEmpty
 	private String endpointurl;
 	private String description;
