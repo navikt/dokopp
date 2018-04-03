@@ -1,8 +1,6 @@
 package no.nav.dokopp.qopp001.tjoark122;
 
-import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.exception.AvsluttBehandlingException;
-import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.DokumentproduksjonInfoV1;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.HentJournalpostInfoJournalpostIkkeFunnet;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.meldinger.HentJournalpostInfoRequest;
