@@ -56,9 +56,9 @@ public class PrometheusMetrics {
 	
 	public static void registerFunctionalExceptionMetrics(Throwable throwable) {
 		if (throwable instanceof DokoppFunctionalException) {
-			requestExceptionCounter.labels(SERVICE_ID, LABEL_FUNCTIONAL_EXCEPTION, throwable.getClass().getSimpleName(),((DokoppFunctionalException)throwable).getShortMessage()).inc();
+			requestExceptionCounter.labels(SERVICE_ID, LABEL_FUNCTIONAL_EXCEPTION, throwable.getClass().getSimpleName(), throwable.getMessage()).inc();
 		} else {
-			requestExceptionCounter.labels(SERVICE_ID, LABEL_FUNCTIONAL_EXCEPTION, throwable.getClass().getSimpleName(), " ").inc();
+			requestExceptionCounter.labels(SERVICE_ID, LABEL_FUNCTIONAL_EXCEPTION, throwable.getClass().getSimpleName(), "").inc();
 			
 		}
 		

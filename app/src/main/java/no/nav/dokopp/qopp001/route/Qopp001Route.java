@@ -2,15 +2,14 @@ package no.nav.dokopp.qopp001.route;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.props.DokoppProperties;
-import no.nav.dokopp.qopp001.joark.Tjoark110SettJournalpostAttributter;
-import no.nav.dokopp.qopp001.joark.Tjoark122HentJournalpostInfo;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgave;
+import no.nav.dokopp.qopp001.joark.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.support.Qopp001InputValidationProcessor;
+import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import javax.jms.JMSException;
 import javax.jms.Queue;
 
 /**
@@ -20,16 +19,16 @@ import javax.jms.Queue;
 @Slf4j
 @Component
 public class Qopp001Route extends SpringRouteBuilder {
-	
+
 	public static final String SERVICE_ID = "qopp001";
-	
+
 	private final DokoppProperties dokoppProperties;
 	private final Queue qopp001;
 	private final OpprettOppgave opprettOppgave;
 	private final Qopp001InputValidationProcessor qopp001InputValidationProcessor;
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
-	
+
 	@Inject
 	public Qopp001Route(DokoppProperties dokoppProperties,
 						Queue qopp001,
@@ -44,21 +43,20 @@ public class Qopp001Route extends SpringRouteBuilder {
 		this.tjoark122HentJournalpostInfo = tjoark122HentJournalpostInfo;
 		this.tjoark110SettJournalpostAttributter = tjoark110SettJournalpostAttributter;
 	}
-	
-	
+
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void configure() throws Exception {
-		from(jmsEndpoint(qopp001))
+		from("jms:" + qopp001.getQueueName() +
+				"?transacted=true" +
+				"&cacheLevelName=CACHE_CONSUMER" +
+				"&errorHandlerLogStackTrace=false" +
+				"&errorHandlerLoggingLevel=DEBUG")
 				.routeId(SERVICE_ID)
 				.process(qopp001InputValidationProcessor)
 				.bean(tjoark122HentJournalpostInfo)
 				.bean(opprettOppgave)
 				.bean(tjoark110SettJournalpostAttributter);
-	}
-	
-	private String jmsEndpoint(final Queue queue) throws JMSException {
-		String[] split = queue.getQueueName().split("/");
-		return "jms:" + split[split.length - 1] + "?transacted=true&cacheLevelName=CACHE_CONSUMER&errorHandlerLogStackTrace=false&errorHandlerLoggingLevel=DEBUG";
 	}
 }

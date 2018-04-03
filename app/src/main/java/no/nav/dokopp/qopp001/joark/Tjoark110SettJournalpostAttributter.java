@@ -1,7 +1,10 @@
 package no.nav.dokopp.qopp001.joark;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -9,5 +12,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 //TODO: Implement class
-public class Tjoark122HentJournalpostInfo {
+public class Tjoark110SettJournalpostAttributter {
+	@Handler
+	public void settJournalpostAttributter() {
+
+	}
 }
