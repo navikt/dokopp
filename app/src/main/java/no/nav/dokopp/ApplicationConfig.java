@@ -20,7 +20,7 @@ import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
 import no.nav.dokopp.nais.checks.Tjoark110Check;
 import no.nav.dokopp.nais.checks.Tjoark122Check;
 import no.nav.dokopp.qopp001.Qopp001Route;
-import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgave;
+import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveGosys;
 import no.nav.dokopp.qopp001.service.ServiceOrchestrator;
 import no.nav.dokopp.qopp001.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
@@ -45,7 +45,7 @@ import org.springframework.jms.annotation.EnableJms;
 		BehandleOppgaveV1Alias.class,
 		ArkiverDokumentproduksjonV1Alias.class,
 		DokumentproduksjonInfoV1Alias.class,
-		NavAppCertAlias.class,
+		NavAppCertAlias.class
 })
 @Import({
 		TomcatConfig.class,
@@ -55,7 +55,7 @@ import org.springframework.jms.annotation.EnableJms;
 		BehandleOppgaveV1EndpointConfig.class,
 		Tjoark110SettJournalpostAttributter.class,
 		Tjoark122HentJournalpostInfo.class,
-		OpprettOppgave.class,
+		OpprettOppgaveGosys.class,
 		ServiceOrchestrator.class,
 		ValidatorFeilhaandtering.class,
 		Tjoark110Check.class,

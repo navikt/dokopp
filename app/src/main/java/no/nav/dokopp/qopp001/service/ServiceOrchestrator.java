@@ -6,13 +6,14 @@ import static no.nav.dokopp.qopp001.domain.DomainConstants.BEHANDLE_RETURPOST;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
-import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgave;
+import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveGosys;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveRequestTo;
 import no.nav.dokopp.qopp001.domain.BrukerType;
 import no.nav.dokopp.qopp001.tjoark110.SettJournalpostAttributterRequestTo;
 import no.nav.dokopp.qopp001.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.tjoark122.HentJournalpostInfoResponseTo;
 import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
+import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
@@ -26,67 +27,55 @@ import javax.inject.Inject;
 @Service
 public class ServiceOrchestrator {
 	
-	private static final String FAGOMRADE_GOSYS = "GOSYS";
-	private static final String FAGOMRADE_GSAK = "GSAK";
-	
-	private final OpprettOppgave opprettOppgave;
+	private final OpprettOppgaveGosys opprettOppgaveGosys;
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
 	
 	@Inject
-	public ServiceOrchestrator(OpprettOppgave opprettOppgave,
+	public ServiceOrchestrator(OpprettOppgaveGosys opprettOppgaveGosys,
 							   Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo,
 							   Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter) {
-		this.opprettOppgave = opprettOppgave;
+		this.opprettOppgaveGosys = opprettOppgaveGosys;
 		this.tjoark122HentJournalpostInfo = tjoark122HentJournalpostInfo;
 		this.tjoark110SettJournalpostAttributter = tjoark110SettJournalpostAttributter;
 	}
 	
 	@Handler
-	private void orchestrate(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId, no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave opprettOppgaveInput) {
-		validateOppgaveTypeAndArkivsystem(opprettOppgaveInput);
+	private void orchestrate(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId, OpprettOppgave opprettOppgave) {
+		validateOppgaveTypeAndArkivsystem(opprettOppgave);
 		
 		HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo = tjoark122HentJournalpostInfo.hentJournalpostInfo(journalpostId);
-		log.info("Qopp001 har hentet journalpostInfo fra Joark for forespørsel med journalpostId=" + journalpostId + ".");
+		log.info("qopp001 har hentet journalpostInfo fra Joark for forespørsel med journalpostId=" + journalpostId + ".");
 		
-		opprettOppgave.opprettOppgave(mapToOpprettOppgaveRequestTo(hentJournalpostInfoResponseTo, opprettOppgaveInput));
-		log.info("Qopp001 har opprettet oppgave i Gosys for forespørsel med journalpostId=" + journalpostId + ".");
+		String oppgaveId = opprettOppgaveGosys.opprettOppgave(mapToOpprettOppgaveRequestTo(hentJournalpostInfoResponseTo, opprettOppgave));
+		log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId=" + oppgaveId + " for forespørsel med journalpostId=" + journalpostId + ".");
 		
 		tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, 1));
-		log.info("Qopp001 har oppdatert journalpost med journalpostId=" + journalpostId + " i Joark.");
+		log.info("qopp001 har oppdatert journalpost med journalpostId=" + journalpostId + " i Joark.");
 	}
-	
 	
 	private void validateOppgaveTypeAndArkivsystem(no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave opprettOppgave) {
-		if (!BEHANDLE_RETURPOST.equals(opprettOppgave.getOppgaveType().trim().toUpperCase())) {
-			throw new UgyldigInputverdiException("input.oppgavetype må være \"BEHANDLE_RETURPOST\". Fikk: " + opprettOppgave.getOppgaveType());
+		if (!BEHANDLE_RETURPOST.equals(opprettOppgave.getOppgaveType().trim())) {
+			throw new UgyldigInputverdiException("input.oppgavetype må være BEHANDLE_RETURPOST. Fikk: " + opprettOppgave.getOppgaveType());
 		}
 		
-		if (!ARKIVSYSTEM_JOARK.equals(opprettOppgave.getArkivSystem().trim().toUpperCase())) {
-			throw new UgyldigInputverdiException("input.arkivsystem må være \"JOARK\". Fikk: " + opprettOppgave.getArkivSystem());
+		if (!ARKIVSYSTEM_JOARK.equals(opprettOppgave.getArkivSystem().trim())) {
+			throw new UgyldigInputverdiException("input.arkivsystem må være JOARK. Fikk: " + opprettOppgave.getArkivSystem());
 		}
 	}
 	
-	private OpprettOppgaveRequestTo mapToOpprettOppgaveRequestTo(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo, no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave opprettOppgaveInput) {
+	private OpprettOppgaveRequestTo mapToOpprettOppgaveRequestTo(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo, OpprettOppgave opprettOppgave) {
 		return OpprettOppgaveRequestTo.builder()
-				.oppgavetype(opprettOppgaveInput.getOppgaveType())
+				.oppgavetype(opprettOppgave.getOppgaveType())
 				.fagomrade(hentJournalpostInfoResponseTo.getFagomrade())
 				.prioritetkode("")
 				.beskrivelse("")
 				.journalFEnhet(hentJournalpostInfoResponseTo.getJournalfEnhet())
-				.journalpostId(opprettOppgaveInput.getArkivKode())
+				.journalpostId(opprettOppgave.getArkivKode())
 				.brukerId(hentJournalpostInfoResponseTo.getBrukerId())
 				.brukertypeKode(BrukerType.valueOf(hentJournalpostInfoResponseTo.getBrukertype()))
-				.saksnummer(settSaksnummer(hentJournalpostInfoResponseTo.getSaksnummer(), hentJournalpostInfoResponseTo.getFagomrade()))
+				.saksnummer(hentJournalpostInfoResponseTo.getSaksnummer())
 				.build();
-	}
-	
-	private String settSaksnummer(String saksnummer, String fagomrade) {
-		if (FAGOMRADE_GOSYS.equals(fagomrade) || FAGOMRADE_GSAK.equals(fagomrade)) {
-			return saksnummer;
-		} else {
-			return "";
-		}
 	}
 	
 	
