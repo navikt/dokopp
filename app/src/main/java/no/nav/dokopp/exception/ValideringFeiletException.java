@@ -7,8 +7,4 @@ public class ValideringFeiletException extends DokoppFunctionalException {
 	public ValideringFeiletException(String message) {
 		super(message);
 	}
-	
-	public ValideringFeiletException(String message, Throwable cause) {
-		super(message, cause);
-	}
 }
