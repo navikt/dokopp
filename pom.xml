@@ -83,7 +83,6 @@
 		<inject.version>1</inject.version>
 		<modig-log-common.version>1.1.3</modig-log-common.version>
 		<nav-behandleOppgave-v1-tjenestespesifikasjon>1.0.7</nav-behandleOppgave-v1-tjenestespesifikasjon>
-		<!--<arkiverdokumentmottak-tjenestespesifikasjon-v2.version>2.1.3</arkiverdokumentmottak-tjenestespesifikasjon-v2.version>-->
 		<awaitility.version>3.0.0</awaitility.version>
 		<junit.version>4.12</junit.version>
 		<commons-io.version>2.4</commons-io.version>
