@@ -2,6 +2,7 @@ package no.nav.dokopp.qopp001;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.props.DokoppProperties;
+import no.nav.dokopp.qopp001.service.ServiceOrchestrator;
 import no.nav.dokopp.qopp001.support.OpprettOppgaveInputMapper;
 import no.nav.dokopp.qopp001.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
@@ -32,6 +33,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
 	private final ValidatorFeilhaandtering validatorFeilhaandtering;
+	private final ServiceOrchestrator serviceOrchestrator;
 	
 	@Inject
 	public Qopp001Route(DokoppProperties dokoppProperties,
@@ -40,7 +42,8 @@ public class Qopp001Route extends SpringRouteBuilder {
 						OpprettOppgaveInputMapper OpprettOppgaveInputMapper,
 						Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo,
 						Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter,
-						ValidatorFeilhaandtering validatorFeilhaandtering) {
+						ValidatorFeilhaandtering validatorFeilhaandtering,
+						ServiceOrchestrator serviceOrchestrator) {
 		this.dokoppProperties = dokoppProperties;
 		this.qopp001 = qopp001;
 		this.opprettOppgave = opprettOppgave;
@@ -48,6 +51,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 		this.tjoark122HentJournalpostInfo = tjoark122HentJournalpostInfo;
 		this.tjoark110SettJournalpostAttributter = tjoark110SettJournalpostAttributter;
 		this.validatorFeilhaandtering = validatorFeilhaandtering;
+		this.serviceOrchestrator = serviceOrchestrator;
 	}
 	
 	
@@ -67,11 +71,8 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.bean(validatorFeilhaandtering)
 				.end()
 				.setProperty(PROPERTY_JOURNALPOST_ID, simple("${body.arkivKode}", String.class))
-				.log("Qopp001 har mottatt forespørsel med journalpostId=" + simple("${property." + PROPERTY_JOURNALPOST_ID + "}"))
-				.bean(OpprettOppgaveInputMapper)
-				.bean(tjoark122HentJournalpostInfo)
-				.bean(opprettOppgave)
-				.bean(tjoark110SettJournalpostAttributter);
+				.log("Qopp001 har mottatt og validert forespørsel med journalpostId= ${property." + PROPERTY_JOURNALPOST_ID + "} OK.")
+				.bean(serviceOrchestrator);
 	}
 	
 	
