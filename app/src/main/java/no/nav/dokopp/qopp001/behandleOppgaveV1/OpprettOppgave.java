@@ -1,38 +1,85 @@
 package no.nav.dokopp.qopp001.behandleOppgaveV1;
 
-import lombok.extern.slf4j.Slf4j;
+import no.nav.dokopp.exception.AvsluttBehandlingException;
+import no.nav.dokopp.qopp001.domain.BrukerType;
+import no.nav.dokopp.util.XmlGregorianConverter;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktor;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktorType;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.time.LocalDateTime;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
-@Slf4j
 @Service
 public class OpprettOppgave {
-	
+
 	private final BehandleOppgaveV1 behandleOppgaveV1;
-	
+
 	@Inject
 	public OpprettOppgave(BehandleOppgaveV1 behandleOppgaveV1) {
 		this.behandleOppgaveV1 = behandleOppgaveV1;
 	}
 
+	// TODO retry
 	public String opprettOppgave(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		try {
-			//TODO: Do the call and return the response
-			
-			//TODO catch correct exception type and log a suitable message
-		} catch (Exception e) {
-			log.info("");
+			WSOpprettOppgaveResponse wsOpprettOppgaveResponse = behandleOppgaveV1.opprettOppgave(mapRequest(opprettOppgaveRequestTo));
+			return wsOpprettOppgaveResponse.getOppgaveId();
+		} catch (WSSikkerhetsbegrensningException e) {
+			throw new AvsluttBehandlingException("OpprettOppgave tilgang avvist for journalpostId=" + opprettOppgaveRequestTo.getJournalpostId(), e);
+		}
+	}
+
+	private WSOpprettOppgaveRequest mapRequest(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
+		final WSAktor wsAktor = mapAktoer(opprettOppgaveRequestTo);
+		return new WSOpprettOppgaveRequest()
+				//TODO hva er dette
+				.withOpprettetAvEnhetId(9999)
+				.withWsOppgave(new WSOppgave()
+						.withOppgavetypeKode(opprettOppgaveRequestTo.getOppgavetype())
+						.withFagomradeKode(opprettOppgaveRequestTo.getFagomrade())
+						.withPrioritetKode(opprettOppgaveRequestTo.getPrioritetkode())
+						.withBeskrivelse(opprettOppgaveRequestTo.getBeskrivelse())
+						.withAnsvarligEnhetId(opprettOppgaveRequestTo.getJournalFEnhet())
+						.withDokumentId(opprettOppgaveRequestTo.getJournalpostId())
+						.withSaksnummer(mapSaksnummer(opprettOppgaveRequestTo))
+						.withAktivFra(XmlGregorianConverter.toXmlGregorianCalendar(LocalDateTime.now()))
+						.withLest(false)
+						.withGjelderBruker(wsAktor));
+	}
+
+	private WSAktor mapAktoer(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
+		if (opprettOppgaveRequestTo.containsBruker()) {
+			return new WSAktor()
+					.withAktorType(mapAktoerType(opprettOppgaveRequestTo.getBrukertypeKode()))
+					.withIdent(opprettOppgaveRequestTo.getBrukerId());
 		}
 		return null;
 	}
 
-	private WSOpprettOppgaveRequest mapRequest() {
+	private WSAktorType mapAktoerType(BrukerType brukertypeKode) {
+		switch (brukertypeKode) {
+			case PERSON:
+				return WSAktorType.PERSON;
+			case ORGANISASJON:
+				return WSAktorType.ORGANISASJON;
+			default:
+				return WSAktorType.UKJENT;
+		}
+	}
+
+	private String mapSaksnummer(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
+		if(opprettOppgaveRequestTo.isFagomradeGosys()) {
+			return opprettOppgaveRequestTo.getSaksnummer();
+		}
 		return null;
 	}
 }
