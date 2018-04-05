@@ -3,7 +3,7 @@ package no.nav.dokopp.config.cxf;
 import no.nav.dokopp.config.fasit.BehandleOppgaveV1Alias;
 import no.nav.dokopp.config.fasit.NavAppCertAlias;
 import no.nav.modig.security.ws.SystemSAMLOutInterceptor;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.binding.BehandleOppgaveV1;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.context.annotation.Bean;
 
@@ -13,17 +13,17 @@ import javax.xml.namespace.QName;
  * @author Sigurd Midttun, Visma Consulting.
  */
 public class BehandleOppgaveV1EndpointConfig extends AbstractCxfEndpointConfig {
-	private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/behandleOppgave/v1/Binding";
-	
-	private static final QName BEHANDLEOPPGAVE_V3_PORT_QNAME = new QName(NAMESPACE, "BehandleOppgave_v1Port");
+	private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/behandleoppgave/v1";
+
+	private static final QName BEHANDLEOPPGAVE_V3_PORT_QNAME = new QName(NAMESPACE, "BehandleOppgaveV1");
 	private static final QName BEHANDLEOPPGAVE__V3_SERVICE_QNAME = new QName(NAMESPACE, "BehandleOppgave_v1");
-	
-	public static final String WSDL_URL = "wsdl/no/nav/tjeneste/virksomhet/behandleOppgave/v1/Binding.wsdl";
-	
+
+	public static final String WSDL_URL = "behandleoppgave/wsdl/BehandleOppgaveV1.wsdl";
+
 	@Bean
 	public BehandleOppgaveV1 behandleOppgaveV1(BehandleOppgaveV1Alias behandleOppgaveV1Alias, NavAppCertAlias navAppCertAlias) {
 		navAppCertAlias.postConstruct();
-		
+
 		setWsdlUrl(WSDL_URL);
 		setEndpointName(BEHANDLEOPPGAVE_V3_PORT_QNAME);
 		setServiceName(BEHANDLEOPPGAVE__V3_SERVICE_QNAME);
