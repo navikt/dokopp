@@ -2,7 +2,7 @@ package no.nav.dokopp.qopp001.behandleOppgaveV1;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
-import org.apache.camel.Handler;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -12,7 +12,6 @@ import javax.inject.Inject;
  */
 @Slf4j
 @Service
-//TODO Implement this class - as of now it is only a rough sketch
 public class OpprettOppgave {
 	
 	private final BehandleOppgaveV1 behandleOppgaveV1;
@@ -21,10 +20,8 @@ public class OpprettOppgave {
 	public OpprettOppgave(BehandleOppgaveV1 behandleOppgaveV1) {
 		this.behandleOppgaveV1 = behandleOppgaveV1;
 	}
-	
-	@Handler
-	public String opprettOppgave() {
-//TODO: Make request
+
+	public String opprettOppgave(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		try {
 			//TODO: Do the call and return the response
 			
@@ -34,5 +31,8 @@ public class OpprettOppgave {
 		}
 		return null;
 	}
-	
+
+	private WSOpprettOppgaveRequest mapRequest() {
+		return null;
+	}
 }
