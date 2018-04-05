@@ -7,6 +7,7 @@ import static no.nav.dokopp.qopp001.domain.DomainConstants.BEHANDLE_RETURPOST;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgave;
+import no.nav.dokopp.qopp001.tjoark110.SettJournalpostAttributterRequestTo;
 import no.nav.dokopp.qopp001.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
 import org.apache.camel.ExchangeProperty;
@@ -42,10 +43,11 @@ public class ServiceOrchestrator {
 		tjoark122HentJournalpostInfo.hentJournalpostInfo(journalpostId);
 		log.info("Qopp001 har hentet journalpostInfo fra Joark for forespørsel med journalpostId=" + journalpostId + ".");
 		
+		
 		opprettOppgave.opprettOppgave()
 		log.info("Qopp001 har opprettet oppgave i Gosys for forespørsel med journalpostId=" + journalpostId + ".");
 		
-		tjoark110SettJournalpostAttributter
+		tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, 1));
 		log.info("Qopp001 har oppdatert journalpost med journalpostId=" + journalpostId + " i Joark.");
 		
 	}
@@ -59,6 +61,10 @@ public class ServiceOrchestrator {
 		if (!ARKIVSYSTEM_JOARK.equals(opprettOppgave.getArkivSystem().trim().toUpperCase())) {
 			throw new UgyldigInputverdiException("input.arkivsystem må være \"JOARK\". Fikk: " + opprettOppgave.getArkivSystem());
 		}
+	}
+	
+	private OpprettOppgaveRequestTo maoTOOpprettOppgaveRequestTo() {
+	
 	}
 	
 	
