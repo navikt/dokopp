@@ -22,9 +22,10 @@ import no.nav.dokopp.nais.checks.Tjoark110Check;
 import no.nav.dokopp.nais.checks.Tjoark122Check;
 import no.nav.dokopp.qopp001.Qopp001Route;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgave;
-import no.nav.dokopp.qopp001.support.Qopp001InputValidationProcessor;
+import no.nav.dokopp.qopp001.support.OpprettOppgaveInputMapper;
 import no.nav.dokopp.qopp001.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
+import no.nav.dokopp.util.ValidatorFeilhaandtering;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -57,7 +58,8 @@ import org.springframework.jms.annotation.EnableJms;
 		Tjoark110SettJournalpostAttributter.class,
 		Tjoark122HentJournalpostInfo.class,
 		OpprettOppgave.class,
-		Qopp001InputValidationProcessor.class,
+		ValidatorFeilhaandtering.class,
+		OpprettOppgaveInputMapper.class,
 		Tjoark110Check.class,
 		Tjoark122Check.class,
 		BehandleOppgaveV1Check.class,

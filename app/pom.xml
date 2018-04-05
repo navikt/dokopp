@@ -136,6 +136,11 @@
 			<version>2.1.0-SNAPSHOT</version>
 			<classifier>jaxws</classifier>
 		</dependency>
+		<dependency>
+			<groupId>no.nav.dok</groupId>
+			<artifactId>opprettoppgave-tjenestespesifikasjon-v1</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 		<!-- Provided dependencies -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
