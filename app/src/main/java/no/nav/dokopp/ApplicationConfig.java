@@ -13,7 +13,6 @@ import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.NavAppCertAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
-import no.nav.dokopp.config.props.DokoppProperties;
 import no.nav.dokopp.config.props.SrvAppserverProperties;
 import no.nav.dokopp.nais.NaisContract;
 import no.nav.dokopp.nais.checks.BehandleOppgaveV1Check;
@@ -39,7 +38,6 @@ import org.springframework.jms.annotation.EnableJms;
 @EnablePrometheusEndpoint
 @EnableSpringBootMetricsCollector
 @EnableConfigurationProperties({
-		DokoppProperties.class,
 		SrvAppserverProperties.class,
 		MqChannelAlias.class,
 		MqGatewayAlias.class,
