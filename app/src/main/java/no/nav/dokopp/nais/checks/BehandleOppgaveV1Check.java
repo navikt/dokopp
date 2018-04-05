@@ -4,7 +4,7 @@ import no.nav.dokopp.config.fasit.BehandleOppgaveV1Alias;
 import no.nav.dokopp.nais.selftest.AbstractSelftest;
 import no.nav.dokopp.nais.selftest.ApplicationNotReadyException;
 import no.nav.dokopp.nais.selftest.Ping;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.binding.BehandleOppgaveV1;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;

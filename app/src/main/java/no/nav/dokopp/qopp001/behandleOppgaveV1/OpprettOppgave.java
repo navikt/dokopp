@@ -1,7 +1,7 @@
 package no.nav.dokopp.qopp001.behandleOppgaveV1;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.binding.BehandleOppgaveV1;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 

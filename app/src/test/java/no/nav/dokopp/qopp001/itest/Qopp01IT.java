@@ -1,10 +1,15 @@
 package no.nav.dokopp.qopp001.itest;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.modig.common.MDCOperations.MDC_CALL_ID;
+import static org.awaitility.Awaitility.await;
 
 import no.nav.dokopp.Application;
 import no.nav.modig.core.test.FileUtils;
@@ -12,6 +17,7 @@ import no.nav.modig.testcertificates.TestCertificates;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,8 +62,9 @@ public class Qopp01IT {
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
 	}
 
+	@Ignore
 	@Test
-	public void shouldOppretteOppgave() throws Exception {
+	public void shouldOppretteOppgaveGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
@@ -66,7 +73,21 @@ public class Qopp01IT {
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
 		//TODO uncomment when impl ready
-//		await().atMost(5, SECONDS).until(() -> findAll(postRequestedFor(urlEqualTo("/arkiverdokumentmottak"))).size() == 1);
+		await().atMost(5, SECONDS).until(() -> findAll(postRequestedFor(urlEqualTo("/arkiverdokumentmottak"))).size() == 1);
+//		verify(postRequestedFor(urlEqualTo("/arkiverdokumentmottak")).withRequestBody(matchingXPath("//journalpostIdListe", equalTo("100000"))));
+	}
+
+	@Ignore
+	@Test
+	public void shouldNotOppretteOppgaveWithSaksnummerWhenFagomradeNotGosys() throws Exception {
+		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark110/tjoark110_happy.xml")));
+		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark122/tjoark122_pensjon.xml")));
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+
+		await().atMost(5, SECONDS).until(() -> findAll(postRequestedFor(urlEqualTo("/behandleoppgave"))).size() == 1);
 //		verify(postRequestedFor(urlEqualTo("/arkiverdokumentmottak")).withRequestBody(matchingXPath("//journalpostIdListe", equalTo("100000"))));
 	}
 
