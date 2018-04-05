@@ -1,10 +1,13 @@
 package no.nav.dokopp.qopp001.tjoark122;
 
+import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
+
 import no.nav.dokopp.exception.AvsluttBehandlingException;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.DokumentproduksjonInfoV1;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.HentJournalpostInfoJournalpostIkkeFunnet;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.meldinger.HentJournalpostInfoRequest;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.meldinger.HentJournalpostInfoResponse;
+import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +26,7 @@ public class Tjoark122HentJournalpostInfo {
 	}
 
 	@Handler
-	public HentJournalpostInfoResponseTo hentJournalpostInfo(String journalpostId) {
+	public HentJournalpostInfoResponseTo hentJournalpostInfo(@ExchangeProperty(PROPERTY_JOURNALPOST_ID)  String journalpostId) {
 		if(journalpostId == null) {
 			throw new AvsluttBehandlingException("journalpostId er null");
 		}
