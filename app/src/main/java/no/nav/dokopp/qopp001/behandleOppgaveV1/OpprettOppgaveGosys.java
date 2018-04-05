@@ -19,12 +19,12 @@ import java.time.LocalDateTime;
  * @author Sigurd Midttun, Visma Consulting.
  */
 @Service
-public class OpprettOppgave {
+public class OpprettOppgaveGosys {
 
 	private final BehandleOppgaveV1 behandleOppgaveV1;
 
 	@Inject
-	public OpprettOppgave(BehandleOppgaveV1 behandleOppgaveV1) {
+	public OpprettOppgaveGosys(BehandleOppgaveV1 behandleOppgaveV1) {
 		this.behandleOppgaveV1 = behandleOppgaveV1;
 	}
 

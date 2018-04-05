@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.dokopp.qopp001.service.ServiceOrchestrator;
 import no.nav.dokopp.util.ValidatorFeilhaandtering;
+import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.processor.validation.SchemaValidationException;
@@ -25,16 +26,16 @@ public class Qopp001Route extends SpringRouteBuilder {
 	public static final String PROPERTY_JOURNALPOST_ID = "journalpostId";
 	
 	@Value("${DOKOPP_QOPP001_MAXIMUMREDELIVERIES}")
-	private int DOKOPP_QOPP001_MAXIMUMREDELIVERIES;
+	private int MAXIMUMREDELIVERIES;
 	
 	@Value("${DOKOPP_QOPP001_MAXIMUMREDELIVERYDELAYMS}")
-	private int DOKOPP_QOPP001_MAXIMUMREDELIVERYDELAYMS;
+	private int MAXIMUMREDELIVERYDELAYMS;
 	
 	@Value("${DOKOPP_QOPP001_REDELIVERYDELAYMS}")
-	private int DOKOPP_QOPP001_REDELIVERYDELAYMS;
+	private int REDELIVERYDELAYMS;
 	
 	@Value("${DOKOPP_QOPP001_BACKOFFMULTIPLIER}")
-	private int DOKOPP_QOPP001_BACKOFFMULTIPLIER;
+	private int BACKOFFMULTIPLIER;
 	
 	private final Queue qopp001;
 	private final ValidatorFeilhaandtering validatorFeilhaandtering;
@@ -49,15 +50,14 @@ public class Qopp001Route extends SpringRouteBuilder {
 		this.serviceOrchestrator = serviceOrchestrator;
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void configure() throws Exception {
 		errorHandler(defaultErrorHandler()
-				.maximumRedeliveries(DOKOPP_QOPP001_MAXIMUMREDELIVERIES)
-				.maximumRedeliveryDelay(DOKOPP_QOPP001_MAXIMUMREDELIVERYDELAYMS)
-				.redeliveryDelay(DOKOPP_QOPP001_REDELIVERYDELAYMS)
-				.backOffMultiplier(DOKOPP_QOPP001_BACKOFFMULTIPLIER)
+				.maximumRedeliveries(MAXIMUMREDELIVERIES)
+				.maximumRedeliveryDelay(MAXIMUMREDELIVERYDELAYMS)
+				.redeliveryDelay(REDELIVERYDELAYMS)
+				.backOffMultiplier(BACKOFFMULTIPLIER)
 				.useExponentialBackOff()
 				.retryAttemptedLogLevel(LoggingLevel.ERROR)
 				.logRetryStackTrace(false)
@@ -65,7 +65,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.loggingLevel(LoggingLevel.ERROR));
 		
 		onException(DokoppFunctionalException.class)
-				.handled(true)
+				.handled(false)
 				.maximumRedeliveries(0)
 				.logExhaustedMessageBody(false)
 				.logExhaustedMessageHistory(false)
@@ -80,13 +80,15 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.routeId(SERVICE_ID)
 				.doTry()
 				.to("validator:xsd/opprett_oppgave.xsd")
-				.unmarshal(new JaxbDataFormat(no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave.class.getPackage()
-						.getName()))
+				.unmarshal(new JaxbDataFormat(OpprettOppgave.class.getPackage().getName()))
 				.doCatch(SchemaValidationException.class, Exception.class)
 				.bean(validatorFeilhaandtering)
 				.end()
 				.setProperty(PROPERTY_JOURNALPOST_ID, simple("${body.arkivKode}", String.class))
 				.log("Qopp001 har mottatt og validert forespørsel med journalpostId= ${property." + PROPERTY_JOURNALPOST_ID + "} OK.")
+				.process(exchange ->{
+				
+				})
 				.bean(serviceOrchestrator);
 	}
 }
