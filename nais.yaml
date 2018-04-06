@@ -26,6 +26,8 @@ fasitResources:
     resourceType: channel
   - alias: dokopp_OPPRETT_OPPGAVE
     resourceType: queue
+  - alias: dokopp_funksjonell_BOQ
+    resourceType: queue
   - alias: "virksomhet:BehandleOppgave_v1"
     resourceType: webserviceendpoint
   - alias: ArkiverDokumentproduksjon_v1

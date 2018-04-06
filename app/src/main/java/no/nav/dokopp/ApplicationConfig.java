@@ -13,16 +13,16 @@ import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.NavAppCertAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
-import no.nav.dokopp.config.props.DokoppProperties;
 import no.nav.dokopp.config.props.SrvAppserverProperties;
 import no.nav.dokopp.nais.NaisContract;
 import no.nav.dokopp.nais.checks.BehandleOppgaveV1Check;
+import no.nav.dokopp.nais.checks.FunctionalBoqCheck;
 import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
 import no.nav.dokopp.nais.checks.Tjoark110Check;
 import no.nav.dokopp.nais.checks.Tjoark122Check;
 import no.nav.dokopp.qopp001.Qopp001Route;
-import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgave;
-import no.nav.dokopp.qopp001.support.OpprettOppgaveInputMapper;
+import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveGosys;
+import no.nav.dokopp.qopp001.service.ServiceOrchestrator;
 import no.nav.dokopp.qopp001.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
 import no.nav.dokopp.util.ValidatorFeilhaandtering;
@@ -39,7 +39,6 @@ import org.springframework.jms.annotation.EnableJms;
 @EnablePrometheusEndpoint
 @EnableSpringBootMetricsCollector
 @EnableConfigurationProperties({
-		DokoppProperties.class,
 		SrvAppserverProperties.class,
 		MqChannelAlias.class,
 		MqGatewayAlias.class,
@@ -47,7 +46,7 @@ import org.springframework.jms.annotation.EnableJms;
 		BehandleOppgaveV1Alias.class,
 		ArkiverDokumentproduksjonV1Alias.class,
 		DokumentproduksjonInfoV1Alias.class,
-		NavAppCertAlias.class,
+		NavAppCertAlias.class
 })
 @Import({
 		TomcatConfig.class,
@@ -57,13 +56,14 @@ import org.springframework.jms.annotation.EnableJms;
 		BehandleOppgaveV1EndpointConfig.class,
 		Tjoark110SettJournalpostAttributter.class,
 		Tjoark122HentJournalpostInfo.class,
-		OpprettOppgave.class,
+		OpprettOppgaveGosys.class,
+		ServiceOrchestrator.class,
 		ValidatorFeilhaandtering.class,
-		OpprettOppgaveInputMapper.class,
 		Tjoark110Check.class,
 		Tjoark122Check.class,
 		BehandleOppgaveV1Check.class,
 		Qopp001QueueCheck.class,
+		FunctionalBoqCheck.class,
 		ApplicationReadyListener.class,
 		Qopp001Route.class
 })
