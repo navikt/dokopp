@@ -26,7 +26,7 @@ public class Tjoark122HentJournalpostInfo {
 	}
 
 	@Handler
-	public HentJournalpostInfoResponseTo hentJournalpostInfo(@ExchangeProperty(PROPERTY_JOURNALPOST_ID)  String journalpostId) {
+	public HentJournalpostInfoResponseTo hentJournalpostInfo(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId) {
 		if(journalpostId == null) {
 			throw new AvsluttBehandlingException("journalpostId er null");
 		}

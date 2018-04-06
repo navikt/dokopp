@@ -1,5 +1,6 @@
 package no.nav.dokopp.qopp001.itest;
 
+import com.ibm.mq.jms.MQQueue;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.broker.BrokerService;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
 import javax.jms.Queue;
 
 /**
@@ -18,9 +20,12 @@ import javax.jms.Queue;
 @Profile("itest")
 @Configuration
 public class JmsTestConfig {
-	@Bean
 	public Queue qopp001(@Value("${DOKOPP_OPPRETT_OPPGAVE_QUEUENAME}") String qopp001QueueName) {
 		return new ActiveMQQueue(qopp001QueueName);
+	}
+	
+	public Queue functionalBOQ(@Value("${DOKOPP_FUNKSJONELL_BOQ_QUEUENAME}") String functionalBOQName) throws JMSException {
+		return new MQQueue(functionalBOQName);
 	}
 	
 	@Bean
@@ -34,7 +39,7 @@ public class JmsTestConfig {
 		service.setPersistent(false);
 		return service;
 	}
-
+	
 	@Bean
 	public ConnectionFactory activemqConnectionFactory() {
 		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://localhost?create=false");
