@@ -26,51 +26,55 @@ public class Qopp001Route extends SpringRouteBuilder {
 	public static final String PROPERTY_JOURNALPOST_ID = "journalpostId";
 	
 	@Value("${DOKOPP_QOPP001_MAXIMUMREDELIVERIES}")
-	private int MAXIMUMREDELIVERIES;
+	private int maximumRedeliveries;
 	
 	@Value("${DOKOPP_QOPP001_MAXIMUMREDELIVERYDELAYMS}")
-	private int MAXIMUMREDELIVERYDELAYMS;
+	private int maximumRedeliveryDelayMs;
 	
 	@Value("${DOKOPP_QOPP001_REDELIVERYDELAYMS}")
-	private int REDELIVERYDELAYMS;
+	private int redeliveryDelayMs;
 	
 	@Value("${DOKOPP_QOPP001_BACKOFFMULTIPLIER}")
-	private int BACKOFFMULTIPLIER;
+	private int backoffMultiplier;
 	
 	private final Queue qopp001;
+	private final Queue functionalBOQ;
 	private final ValidatorFeilhaandtering validatorFeilhaandtering;
 	private final ServiceOrchestrator serviceOrchestrator;
 	
 	@Inject
 	public Qopp001Route(Queue qopp001,
+						Queue functionalBOQ,
 						ValidatorFeilhaandtering validatorFeilhaandtering,
 						ServiceOrchestrator serviceOrchestrator) {
 		this.qopp001 = qopp001;
 		this.validatorFeilhaandtering = validatorFeilhaandtering;
 		this.serviceOrchestrator = serviceOrchestrator;
+		this.functionalBOQ = functionalBOQ;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void configure() throws Exception {
 		errorHandler(defaultErrorHandler()
-				.maximumRedeliveries(MAXIMUMREDELIVERIES)
-				.maximumRedeliveryDelay(MAXIMUMREDELIVERYDELAYMS)
-				.redeliveryDelay(REDELIVERYDELAYMS)
-				.backOffMultiplier(BACKOFFMULTIPLIER)
+				.maximumRedeliveries(maximumRedeliveries)
+				.maximumRedeliveryDelay(maximumRedeliveryDelayMs)
+				.redeliveryDelay(redeliveryDelayMs)
+				.backOffMultiplier(backoffMultiplier)
 				.useExponentialBackOff()
-				.retryAttemptedLogLevel(LoggingLevel.ERROR)
+				.retryAttemptedLogLevel(LoggingLevel.INFO)
 				.logRetryStackTrace(false)
-				.logExhaustedMessageBody(false)
+				.logExhaustedMessageBody(true)
 				.loggingLevel(LoggingLevel.ERROR));
 		
 		onException(DokoppFunctionalException.class)
-				.handled(false)
+				.handled(true)
 				.maximumRedeliveries(0)
 				.logExhaustedMessageBody(false)
 				.logExhaustedMessageHistory(false)
 				.logStackTrace(false)
-				.logRetryAttempted(false);
+				.logRetryAttempted(false)
+				.to("jms:" + functionalBOQ.getQueueName());
 		
 		from("jms:" + qopp001.getQueueName() +
 				"?transacted=true" +
@@ -86,9 +90,6 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.end()
 				.setProperty(PROPERTY_JOURNALPOST_ID, simple("${body.arkivKode}", String.class))
 				.log("Qopp001 har mottatt og validert forespørsel med journalpostId= ${property." + PROPERTY_JOURNALPOST_ID + "} OK.")
-				.process(exchange ->{
-				
-				})
 				.bean(serviceOrchestrator);
 	}
 }

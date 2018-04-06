@@ -24,12 +24,20 @@ import javax.jms.Queue;
 @Configuration
 @Profile("nais")
 public class JmsConfig {
-
+	
+	public static final String QOPP001_QUEUE = "qopp001";
+	public static final String FUNCTIONAL_BACKOUT_QUEUE = "functionalBOQ";
+	
 	private static final int UTF_8_WITH_PUA = 1208;
-
-	@Bean
+	
+	@Bean(name = QOPP001_QUEUE)
 	public Queue qopp001(@Value("${DOKOPP_OPPRETT_OPPGAVE_QUEUENAME}") String qopp001QueueName) throws JMSException {
 		return new MQQueue(qopp001QueueName);
+	}
+	
+	@Bean(name = FUNCTIONAL_BACKOUT_QUEUE)
+	public Queue functionalBOQ(@Value("${DOKOPP_FUNKSJONELL_BOQ_QUEUENAME}") String functionalBOQName) throws JMSException {
+		return new MQQueue(functionalBOQName);
 	}
 	
 	@Bean
@@ -38,7 +46,7 @@ public class JmsConfig {
 												  final SrvAppserverProperties srvAppserverProperties) throws JMSException {
 		return createConnectionFactory(mqGatewayAlias, mqChannelAlias, srvAppserverProperties);
 	}
-
+	
 	private UserCredentialsConnectionFactoryAdapter createConnectionFactory(final MqGatewayAlias mqGatewayAlias,
 																			final MqChannelAlias mqChannelAlias,
 																			final SrvAppserverProperties srvAppserverProperties) throws JMSException {
