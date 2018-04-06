@@ -41,7 +41,7 @@ public class ServiceOrchestrator {
 	}
 	
 	@Handler
-	private void orchestrate(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId, OpprettOppgave opprettOppgave) {
+	public void orchestrate(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId, OpprettOppgave opprettOppgave) {
 		validateOppgaveTypeAndArkivsystem(opprettOppgave);
 		
 		HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo = tjoark122HentJournalpostInfo.hentJournalpostInfo(journalpostId);

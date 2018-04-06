@@ -45,14 +45,18 @@ import java.io.InputStream;
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
 public class Qopp01IT {
-
+	
 	private static final String CALLID = "callId";
-
+	
 	@Inject
 	private JmsTemplate jmsTemplate;
+	
 	@Inject
 	private Queue qopp001;
-
+	
+	@Inject
+	private Queue functionalBOQ;
+	
 	@BeforeClass
 	public static void beforeClass() {
 		TestCertificates.setupTemporaryTrustStore("no/nav/modig/testcertificates/truststore.jts", "changeit");
@@ -61,7 +65,7 @@ public class Qopp01IT {
 		System.setProperty("SRVDOKOPP_CERT_KEYSTORE", file.getAbsolutePath());
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
 	}
-
+	
 	@Ignore
 	@Test
 	public void shouldOppretteOppgaveGosys() throws Exception {
@@ -69,14 +73,14 @@ public class Qopp01IT {
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_happy.xml")));
-
+		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
-
+		
 		//TODO uncomment when impl ready
 		await().atMost(5, SECONDS).until(() -> findAll(postRequestedFor(urlEqualTo("/arkiverdokumentmottak"))).size() == 1);
 //		verify(postRequestedFor(urlEqualTo("/arkiverdokumentmottak")).withRequestBody(matchingXPath("//journalpostIdListe", equalTo("100000"))));
 	}
-
+	
 	@Ignore
 	@Test
 	public void shouldNotOppretteOppgaveWithSaksnummerWhenFagomradeNotGosys() throws Exception {
@@ -84,13 +88,13 @@ public class Qopp01IT {
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_pensjon.xml")));
-
+		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
-
+		
 		await().atMost(5, SECONDS).until(() -> findAll(postRequestedFor(urlEqualTo("/behandleoppgave"))).size() == 1);
 //		verify(postRequestedFor(urlEqualTo("/arkiverdokumentmottak")).withRequestBody(matchingXPath("//journalpostIdListe", equalTo("100000"))));
 	}
-
+	
 	private void sendStringMessage(Queue queue, final String message, String callId) {
 		jmsTemplate.send(queue, session -> {
 			TextMessage msg = new ActiveMQTextMessage();
@@ -99,7 +103,7 @@ public class Qopp01IT {
 			return msg;
 		});
 	}
-
+	
 	private String classpathToString(String classpathResource) throws IOException {
 		InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
 		String message = IOUtils.toString(inputStream, UTF_8);

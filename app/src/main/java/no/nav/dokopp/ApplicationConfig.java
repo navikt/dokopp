@@ -16,6 +16,7 @@ import no.nav.dokopp.config.fasit.ServiceuserAlias;
 import no.nav.dokopp.config.props.SrvAppserverProperties;
 import no.nav.dokopp.nais.NaisContract;
 import no.nav.dokopp.nais.checks.BehandleOppgaveV1Check;
+import no.nav.dokopp.nais.checks.FunctionalBoqCheck;
 import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
 import no.nav.dokopp.nais.checks.Tjoark110Check;
 import no.nav.dokopp.nais.checks.Tjoark122Check;
@@ -62,6 +63,7 @@ import org.springframework.jms.annotation.EnableJms;
 		Tjoark122Check.class,
 		BehandleOppgaveV1Check.class,
 		Qopp001QueueCheck.class,
+		FunctionalBoqCheck.class,
 		ApplicationReadyListener.class,
 		Qopp001Route.class
 })
