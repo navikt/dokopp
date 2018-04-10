@@ -25,7 +25,6 @@ import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveGosys;
 import no.nav.dokopp.qopp001.service.ServiceOrchestrator;
 import no.nav.dokopp.qopp001.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
-import no.nav.dokopp.util.ValidatorFeilhaandtering;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -58,7 +57,6 @@ import org.springframework.jms.annotation.EnableJms;
 		Tjoark122HentJournalpostInfo.class,
 		OpprettOppgaveGosys.class,
 		ServiceOrchestrator.class,
-		ValidatorFeilhaandtering.class,
 		Tjoark110Check.class,
 		Tjoark122Check.class,
 		BehandleOppgaveV1Check.class,
