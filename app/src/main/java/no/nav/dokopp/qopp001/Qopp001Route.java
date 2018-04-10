@@ -8,7 +8,6 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.processor.validation.SchemaValidationException;
 import org.apache.camel.spring.SpringRouteBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -24,18 +23,6 @@ public class Qopp001Route extends SpringRouteBuilder {
 	public static final String SERVICE_ID = "qopp001";
 	public static final String PROPERTY_JOURNALPOST_ID = "journalpostId";
 	public static final String PROPERTY_ORIGINAL_MESSAGE = "originalMessage";
-	
-	@Value("${DOKOPP_QOPP001_MAXIMUMREDELIVERIES}")
-	private int maximumRedeliveries;
-	
-	@Value("${DOKOPP_QOPP001_MAXIMUMREDELIVERYDELAYMS}")
-	private int maximumRedeliveryDelayMs;
-	
-	@Value("${DOKOPP_QOPP001_REDELIVERYDELAYMS}")
-	private int redeliveryDelayMs;
-	
-	@Value("${DOKOPP_QOPP001_BACKOFFMULTIPLIER}")
-	private int backoffMultiplier;
 	
 	private final Queue qopp001;
 	private final Queue functionalBOQ;
@@ -54,10 +41,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		errorHandler(defaultErrorHandler()
-				.maximumRedeliveries(maximumRedeliveries)
-				.maximumRedeliveryDelay(maximumRedeliveryDelayMs)
-				.redeliveryDelay(redeliveryDelayMs)
-				.backOffMultiplier(backoffMultiplier)
+				.maximumRedeliveries(0)
 				.useExponentialBackOff()
 				.retryAttemptedLogLevel(LoggingLevel.INFO)
 				.logRetryStackTrace(false)
