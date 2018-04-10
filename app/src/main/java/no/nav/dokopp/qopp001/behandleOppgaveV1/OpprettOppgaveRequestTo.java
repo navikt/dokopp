@@ -35,7 +35,7 @@ public class OpprettOppgaveRequestTo {
 		return !isBlank(brukerId) && nonNull(brukertypeKode);
 	}
 
-	boolean isFagomradeGosys() {
+	boolean isFagomradeGosysOrGsak() {
 		return GOSYS_APPIDS.contains(fagomrade);
 	}
 }
