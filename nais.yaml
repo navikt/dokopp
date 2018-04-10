@@ -45,7 +45,3 @@ fasitResources:
       keystore: SRVDOKOPP_CERT_KEYSTORE
       keystorealias: SRVDOKOPP_CERT_KEYSTOREALIAS
       password: SRVDOKOPP_CERT_PASSWORD
-exposed:
-  - alias: DOKOPP_OPPRETT_OPPGAVE_QUEUENAME
-    resourceType: queue
-    name: dokopp_OPPRETT_OPPGAVE

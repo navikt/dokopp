@@ -1,6 +1,7 @@
 package no.nav.dokopp.qopp001.behandleOppgaveV1;
 
 import no.nav.dokopp.exception.AvsluttBehandlingException;
+import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.dokopp.qopp001.domain.BrukerType;
 import no.nav.dokopp.util.XmlGregorianConverter;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
@@ -20,24 +21,25 @@ import java.time.LocalDateTime;
  */
 @Service
 public class OpprettOppgaveGosys {
-
+	
 	private final BehandleOppgaveV1 behandleOppgaveV1;
-
+	
 	@Inject
 	public OpprettOppgaveGosys(BehandleOppgaveV1 behandleOppgaveV1) {
 		this.behandleOppgaveV1 = behandleOppgaveV1;
 	}
-
-	// TODO retry
+	
 	public String opprettOppgave(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		try {
 			WSOpprettOppgaveResponse wsOpprettOppgaveResponse = behandleOppgaveV1.opprettOppgave(mapRequest(opprettOppgaveRequestTo));
 			return wsOpprettOppgaveResponse.getOppgaveId();
 		} catch (WSSikkerhetsbegrensningException e) {
-			throw new AvsluttBehandlingException("OpprettOppgave tilgang avvist for journalpostId=" + opprettOppgaveRequestTo.getJournalpostId(), e);
+			throw new AvsluttBehandlingException("OpprettOppgave tilgang avvist", e);
+		} catch (Exception e){
+			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave, journalpostId=" + opprettOppgaveRequestTo.getJournalpostId(), e);
 		}
 	}
-
+	
 	private WSOpprettOppgaveRequest mapRequest(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		final WSAktor wsAktor = mapAktoer(opprettOppgaveRequestTo);
 		return new WSOpprettOppgaveRequest()
@@ -55,7 +57,7 @@ public class OpprettOppgaveGosys {
 						.withLest(false)
 						.withGjelderBruker(wsAktor));
 	}
-
+	
 	private WSAktor mapAktoer(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		if (opprettOppgaveRequestTo.containsBruker()) {
 			return new WSAktor()
@@ -64,7 +66,7 @@ public class OpprettOppgaveGosys {
 		}
 		return null;
 	}
-
+	
 	private WSAktorType mapAktoerType(BrukerType brukertypeKode) {
 		switch (brukertypeKode) {
 			case PERSON:
@@ -75,9 +77,9 @@ public class OpprettOppgaveGosys {
 				return WSAktorType.UKJENT;
 		}
 	}
-
+	
 	private String mapSaksnummer(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
-		if(opprettOppgaveRequestTo.isFagomradeGosys()) {
+		if (opprettOppgaveRequestTo.isFagomradeGosysOrGsak()) {
 			return opprettOppgaveRequestTo.getSaksnummer();
 		}
 		return null;
