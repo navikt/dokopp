@@ -3,7 +3,6 @@ package no.nav.dokopp.qopp001;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.dokopp.qopp001.service.ServiceOrchestrator;
-import no.nav.dokopp.util.ValidatorFeilhaandtering;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -24,6 +23,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 	
 	public static final String SERVICE_ID = "qopp001";
 	public static final String PROPERTY_JOURNALPOST_ID = "journalpostId";
+	public static final String PROPERTY_ORIGINAL_MESSAGE = "originalMessage";
 	
 	@Value("${DOKOPP_QOPP001_MAXIMUMREDELIVERIES}")
 	private int maximumRedeliveries;
@@ -39,16 +39,13 @@ public class Qopp001Route extends SpringRouteBuilder {
 	
 	private final Queue qopp001;
 	private final Queue functionalBOQ;
-	private final ValidatorFeilhaandtering validatorFeilhaandtering;
 	private final ServiceOrchestrator serviceOrchestrator;
 	
 	@Inject
 	public Qopp001Route(Queue qopp001,
 						Queue functionalBOQ,
-						ValidatorFeilhaandtering validatorFeilhaandtering,
 						ServiceOrchestrator serviceOrchestrator) {
 		this.qopp001 = qopp001;
-		this.validatorFeilhaandtering = validatorFeilhaandtering;
 		this.serviceOrchestrator = serviceOrchestrator;
 		this.functionalBOQ = functionalBOQ;
 	}
@@ -67,13 +64,15 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.logExhaustedMessageBody(true)
 				.loggingLevel(LoggingLevel.ERROR));
 		
-		onException(DokoppFunctionalException.class)
+		onException(DokoppFunctionalException.class, SchemaValidationException.class)
 				.handled(true)
 				.maximumRedeliveries(0)
 				.logExhaustedMessageBody(false)
 				.logExhaustedMessageHistory(false)
 				.logStackTrace(false)
 				.logRetryAttempted(false)
+				.log(LoggingLevel.WARN, "${exception}, journalpostId=" + "${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "}")
+				.setBody(simple("${exchangeProperty." + PROPERTY_ORIGINAL_MESSAGE + "}"))
 				.to("jms:" + functionalBOQ.getQueueName());
 		
 		from("jms:" + qopp001.getQueueName() +
@@ -82,14 +81,11 @@ public class Qopp001Route extends SpringRouteBuilder {
 				"&errorHandlerLogStackTrace=false" +
 				"&errorHandlerLoggingLevel=DEBUG")
 				.routeId(SERVICE_ID)
-				.doTry()
+				.setProperty(PROPERTY_ORIGINAL_MESSAGE, simple("${body}"))
 				.to("validator:xsd/opprett_oppgave.xsd")
 				.unmarshal(new JaxbDataFormat(OpprettOppgave.class.getPackage().getName()))
-				.doCatch(SchemaValidationException.class, Exception.class)
-				.bean(validatorFeilhaandtering)
-				.end()
 				.setProperty(PROPERTY_JOURNALPOST_ID, simple("${body.arkivKode}", String.class))
-				.log("Qopp001 har mottatt og validert forespørsel med journalpostId= ${property." + PROPERTY_JOURNALPOST_ID + "} OK.")
+				.log("qopp001 har mottatt og validert forespørsel med journalpostId= ${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "} OK.")
 				.bean(serviceOrchestrator);
 	}
 }
