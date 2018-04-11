@@ -95,7 +95,7 @@ public class Qopp01IT {
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_happy.xml")));
 		stubFor(post("/behandleoppgave").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("behandleoppgave/opprettOppgave_hapy.xml")));
+				.withBodyFile("behandleoppgave/opprettOppgave_happy.xml")));
 		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 		

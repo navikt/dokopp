@@ -11,6 +11,8 @@ import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktorType;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -29,14 +31,16 @@ public class OpprettOppgaveGosys {
 		this.behandleOppgaveV1 = behandleOppgaveV1;
 	}
 	
+	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
 	public String opprettOppgave(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		try {
 			WSOpprettOppgaveResponse wsOpprettOppgaveResponse = behandleOppgaveV1.opprettOppgave(mapRequest(opprettOppgaveRequestTo));
 			return wsOpprettOppgaveResponse.getOppgaveId();
 		} catch (WSSikkerhetsbegrensningException e) {
 			throw new AvsluttBehandlingException("OpprettOppgave tilgang avvist", e);
-		} catch (Exception e){
-			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave, journalpostId=" + opprettOppgaveRequestTo.getJournalpostId(), e);
+		} catch (Exception e) {
+			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave, journalpostId=" + opprettOppgaveRequestTo
+					.getJournalpostId(), e);
 		}
 	}
 	
