@@ -24,4 +24,10 @@
 	<logger name="no.nav.dokopp" level="INFO" additivity="false">
 		<appender-ref ref="stdout_json"/>
 	</logger>
+
+	<!-- Remove noise due to wrong use of AddressingFeature -->
+	<logger name="org.apache.cxf.ws.addressing.ContextUtils" additivity="false" level="ERROR">
+		<appender-ref ref="stdout_json"/>
+	</logger>
+
 </configuration>
