@@ -70,7 +70,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.to("validator:xsd/opprett_oppgave.xsd")
 				.unmarshal(new JaxbDataFormat(OpprettOppgave.class.getPackage().getName()))
 				.setProperty(PROPERTY_JOURNALPOST_ID, simple("${body.arkivKode}", String.class))
-				.log("qopp001 har mottatt og validert forespørsel med journalpostId= ${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "} OK.")
+				.log(LoggingLevel.INFO,"qopp001 har mottatt og validert forespørsel med journalpostId= ${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "} OK.")
 				.bean(serviceOrchestrator);
 	}
 }
