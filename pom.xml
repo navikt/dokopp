@@ -6,7 +6,7 @@
 
 	<groupId>no.nav.dokopp</groupId>
 	<artifactId>dokopp</artifactId>
-	<version>0.0.21-SNAPSHOT</version>
+	<version>0.0.21</version>
 
 	<name>dokopp</name>
 	<packaging>pom</packaging>
