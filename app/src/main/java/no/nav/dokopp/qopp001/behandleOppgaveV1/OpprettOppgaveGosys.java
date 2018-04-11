@@ -31,7 +31,7 @@ public class OpprettOppgaveGosys {
 		this.behandleOppgaveV1 = behandleOppgaveV1;
 	}
 	
-	@Retryable(value = Exception.class, exclude = AvsluttBehandlingException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
+	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
 	public String opprettOppgave(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		try {
 			WSOpprettOppgaveResponse wsOpprettOppgaveResponse = behandleOppgaveV1.opprettOppgave(mapRequest(opprettOppgaveRequestTo));

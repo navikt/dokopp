@@ -28,7 +28,7 @@ public class Tjoark122HentJournalpostInfo {
 		this.dokumentproduksjonInfoV1 = dokumentproduksjonInfoV1;
 	}
 	
-	@Retryable(value = Exception.class, exclude = {AvsluttBehandlingException.class, UgyldigInputverdiException.class}, maxAttempts = 3, backoff = @Backoff(delay = 500))
+	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
 	public HentJournalpostInfoResponseTo hentJournalpostInfo(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId) {
 		HentJournalpostInfoRequest hentJournalpostInfoRequest = mapRequest(journalpostId);
 		try {
