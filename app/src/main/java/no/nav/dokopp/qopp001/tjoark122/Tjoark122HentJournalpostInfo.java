@@ -1,7 +1,10 @@
 package no.nav.dokopp.qopp001.tjoark122;
 
+import static no.nav.dokopp.config.metrics.PrometheusMetrics.requestLatency;
 import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
+import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
+import io.prometheus.client.Histogram;
 import no.nav.dokopp.exception.AvsluttBehandlingException;
 import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
@@ -31,6 +34,8 @@ public class Tjoark122HentJournalpostInfo {
 	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
 	public HentJournalpostInfoResponseTo hentJournalpostInfo(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId) {
 		HentJournalpostInfoRequest hentJournalpostInfoRequest = mapRequest(journalpostId);
+		Histogram.Timer requestTimer = requestLatency.labels(SERVICE_ID, "Joark::DokumentproduksjonInfoV1:hentJournalpostInfo")
+				.startTimer();
 		try {
 			HentJournalpostInfoResponse hentJournalpostInfoResponse = dokumentproduksjonInfoV1.hentJournalpostInfo(hentJournalpostInfoRequest);
 			return mapResponse(hentJournalpostInfoResponse);
@@ -38,6 +43,8 @@ public class Tjoark122HentJournalpostInfo {
 			throw new AvsluttBehandlingException("journalpost ikke funnet", e);
 		} catch (Exception e) {
 			throw new DokoppTechnicalException("teknisk feil ved kall mot dokumentproduksjonInfoV1:hentJournalpostInfo, journalpostId=" + journalpostId, e);
+		} finally {
+			requestTimer.observeDuration();
 		}
 	}
 	
