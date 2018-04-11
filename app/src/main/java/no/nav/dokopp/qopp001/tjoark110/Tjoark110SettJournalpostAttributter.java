@@ -1,7 +1,9 @@
 package no.nav.dokopp.qopp001.tjoark110;
 
+import static no.nav.dokopp.config.metrics.PrometheusMetrics.requestLatency;
 import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
+import io.prometheus.client.Histogram;
 import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.ArkiverDokumentproduksjonV1;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.meldinger.SettJournalpostAttributterRequest;
@@ -25,11 +27,15 @@ public class Tjoark110SettJournalpostAttributter {
 	
 	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
 	public void settJournalpostAttributter(SettJournalpostAttributterRequestTo settJournalpostAttributterRequestTo) {
+		Histogram.Timer requestTimer = requestLatency.labels(SERVICE_ID, "Joark::ArkiverDokumentproduksjonV1:settJournalpostAttributter")
+				.startTimer();
 		try {
 			arkiverDokumentproduksjonV1.settJournalpostAttributter(mapRequest(settJournalpostAttributterRequestTo));
 		} catch (Exception e) {
 			throw new DokoppTechnicalException("teknisk feil ved kall mot arkiverDokumentproduksjonV1:settJournalpostAttributter, journalpostId=" + settJournalpostAttributterRequestTo
 					.getJournalpostId(), e);
+		} finally {
+			requestTimer.observeDuration();
 		}
 	}
 	

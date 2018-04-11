@@ -1,5 +1,9 @@
 package no.nav.dokopp.qopp001.behandleOppgaveV1;
 
+import static no.nav.dokopp.config.metrics.PrometheusMetrics.requestLatency;
+import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
+
+import io.prometheus.client.Histogram;
 import no.nav.dokopp.exception.AvsluttBehandlingException;
 import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.dokopp.qopp001.domain.BrukerType;
@@ -33,6 +37,7 @@ public class OpprettOppgaveGosys {
 	
 	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
 	public String opprettOppgave(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
+		Histogram.Timer requestTimer = requestLatency.labels(SERVICE_ID, "Gsak::BehandleOppgaveV1:opprettOppgave").startTimer();
 		try {
 			WSOpprettOppgaveResponse wsOpprettOppgaveResponse = behandleOppgaveV1.opprettOppgave(mapRequest(opprettOppgaveRequestTo));
 			return wsOpprettOppgaveResponse.getOppgaveId();
@@ -41,6 +46,8 @@ public class OpprettOppgaveGosys {
 		} catch (Exception e) {
 			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave, journalpostId=" + opprettOppgaveRequestTo
 					.getJournalpostId(), e);
+		} finally {
+			requestTimer.observeDuration();
 		}
 	}
 	

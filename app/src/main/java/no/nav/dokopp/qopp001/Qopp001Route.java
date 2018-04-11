@@ -1,6 +1,7 @@
 package no.nav.dokopp.qopp001;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokopp.config.metrics.PrometheusMetricsRoutePolicy;
 import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.dokopp.qopp001.service.ServiceOrchestrator;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
@@ -64,6 +65,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				"&errorHandlerLogStackTrace=false" +
 				"&errorHandlerLoggingLevel=DEBUG")
 				.routeId(SERVICE_ID)
+				.routePolicy(new PrometheusMetricsRoutePolicy())
 				.setProperty(PROPERTY_ORIGINAL_MESSAGE, simple("${body}"))
 				.to("validator:xsd/opprett_oppgave.xsd")
 				.unmarshal(new JaxbDataFormat(OpprettOppgave.class.getPackage().getName()))
