@@ -5,7 +5,8 @@ import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.ArkiverDokumentproduksjonV1;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.meldinger.SettJournalpostAttributterRequest;
-import org.apache.camel.Handler;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -22,12 +23,13 @@ public class Tjoark110SettJournalpostAttributter {
 		this.arkiverDokumentproduksjonV1 = arkiverDokumentproduksjonV1;
 	}
 	
-	@Handler
+	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
 	public void settJournalpostAttributter(SettJournalpostAttributterRequestTo settJournalpostAttributterRequestTo) {
 		try {
 			arkiverDokumentproduksjonV1.settJournalpostAttributter(mapRequest(settJournalpostAttributterRequestTo));
 		} catch (Exception e) {
-			throw new DokoppTechnicalException("teknisk feil ved kall mot arkiverDokumentproduksjonV1:settJournalpostAttributter, journalpostId=" + settJournalpostAttributterRequestTo.getJournalpostId(), e);
+			throw new DokoppTechnicalException("teknisk feil ved kall mot arkiverDokumentproduksjonV1:settJournalpostAttributter, journalpostId=" + settJournalpostAttributterRequestTo
+					.getJournalpostId(), e);
 		}
 	}
 	
