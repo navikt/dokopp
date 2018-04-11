@@ -41,7 +41,6 @@ public class Qopp001Route extends SpringRouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		errorHandler(defaultErrorHandler()
-				.maximumRedeliveries(0)
 				.useExponentialBackOff()
 				.retryAttemptedLogLevel(LoggingLevel.INFO)
 				.logRetryStackTrace(false)
