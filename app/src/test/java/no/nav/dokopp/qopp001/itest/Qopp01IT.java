@@ -120,7 +120,7 @@ public class Qopp01IT {
 		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 		
-		Thread.sleep(4000);
+		Thread.sleep(5000);
 		String soapXml = Xml.prettyPrint((findAll(postRequestedFor(urlEqualTo("/behandleoppgave")))
 				.get(0)
 				.getBodyAsString()));
