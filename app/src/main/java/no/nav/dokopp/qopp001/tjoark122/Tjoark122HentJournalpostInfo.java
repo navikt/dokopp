@@ -25,13 +25,14 @@ import javax.inject.Inject;
 @Service
 public class Tjoark122HentJournalpostInfo {
 	private final DokumentproduksjonInfoV1 dokumentproduksjonInfoV1;
+	private final static int retries = 3;
 	
 	@Inject
 	public Tjoark122HentJournalpostInfo(DokumentproduksjonInfoV1 dokumentproduksjonInfoV1) {
 		this.dokumentproduksjonInfoV1 = dokumentproduksjonInfoV1;
 	}
 	
-	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
+	@Retryable(value = DokoppTechnicalException.class, maxAttempts = retries, backoff = @Backoff(delay = 500))
 	public HentJournalpostInfoResponseTo hentJournalpostInfo(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId) {
 		HentJournalpostInfoRequest hentJournalpostInfoRequest = mapRequest(journalpostId);
 		Histogram.Timer requestTimer = requestLatency.labels(SERVICE_ID, "Joark::DokumentproduksjonInfoV1:hentJournalpostInfo")
@@ -40,9 +41,9 @@ public class Tjoark122HentJournalpostInfo {
 			HentJournalpostInfoResponse hentJournalpostInfoResponse = dokumentproduksjonInfoV1.hentJournalpostInfo(hentJournalpostInfoRequest);
 			return mapResponse(hentJournalpostInfoResponse);
 		} catch (HentJournalpostInfoJournalpostIkkeFunnet e) {
-			throw new AvsluttBehandlingException("journalpost ikke funnet", e);
+			throw new AvsluttBehandlingException("journalpost ikke funnet. Antall retries=0", e);
 		} catch (Exception e) {
-			throw new DokoppTechnicalException("teknisk feil ved kall mot dokumentproduksjonInfoV1:hentJournalpostInfo, journalpostId=" + journalpostId, e);
+			throw new DokoppTechnicalException("teknisk feil ved kall mot dokumentproduksjonInfoV1:hentJournalpostInfo. Antall retries=" + retries + ", journalpostId=" + journalpostId, e);
 		} finally {
 			requestTimer.observeDuration();
 		}

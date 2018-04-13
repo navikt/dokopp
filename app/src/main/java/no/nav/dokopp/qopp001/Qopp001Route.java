@@ -42,7 +42,6 @@ public class Qopp001Route extends SpringRouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		errorHandler(defaultErrorHandler()
-				.useExponentialBackOff()
 				.retryAttemptedLogLevel(LoggingLevel.INFO)
 				.logRetryStackTrace(false)
 				.logExhaustedMessageBody(true)
@@ -55,7 +54,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.logExhaustedMessageHistory(false)
 				.logStackTrace(false)
 				.logRetryAttempted(false)
-				.log(LoggingLevel.WARN, "${exception}, journalpostId=" + "${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "}")
+				.log(LoggingLevel.WARN, log, "${exception}, journalpostId=" + "${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "}")
 				.setBody(simple("${exchangeProperty." + PROPERTY_ORIGINAL_MESSAGE + "}"))
 				.to("jms:" + functionalBOQ.getQueueName());
 		
