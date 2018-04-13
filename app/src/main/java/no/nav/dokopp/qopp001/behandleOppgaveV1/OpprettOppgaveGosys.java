@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 public class OpprettOppgaveGosys {
 	
 	private final BehandleOppgaveV1 behandleOppgaveV1;
+	private final static int retries = 3;
 	
 	@Inject
 	public OpprettOppgaveGosys(BehandleOppgaveV1 behandleOppgaveV1) {
@@ -42,9 +43,9 @@ public class OpprettOppgaveGosys {
 			WSOpprettOppgaveResponse wsOpprettOppgaveResponse = behandleOppgaveV1.opprettOppgave(mapRequest(opprettOppgaveRequestTo));
 			return wsOpprettOppgaveResponse.getOppgaveId();
 		} catch (WSSikkerhetsbegrensningException e) {
-			throw new AvsluttBehandlingException("OpprettOppgave tilgang avvist", e);
+			throw new AvsluttBehandlingException("OpprettOppgave tilgang avvist. Antall retries=0", e);
 		} catch (Exception e) {
-			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave, journalpostId=" + opprettOppgaveRequestTo
+			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave. Antall retries=" + retries + ", journalpostId=" + opprettOppgaveRequestTo
 					.getJournalpostId(), e);
 		} finally {
 			requestTimer.observeDuration();

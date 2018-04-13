@@ -63,13 +63,13 @@ public class ServiceOrchestrator {
 			throw new UgyldigInputverdiException("input.arkivsystem må være JOARK. Fikk: " + opprettOppgave.getArkivSystem());
 		}
 	}
-	
+	//TODO: Sette korrekte verdier!
 	private OpprettOppgaveRequestTo mapToOpprettOppgaveRequestTo(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo, OpprettOppgave opprettOppgave) {
 		return OpprettOppgaveRequestTo.builder()
-				.oppgavetype(opprettOppgave.getOppgaveType())
+				.oppgavetype("JFR")//opprettOppgave.getOppgaveType())
 				.fagomrade(hentJournalpostInfoResponseTo.getFagomrade())
-				.prioritetkode("")
-				.beskrivelse("")
+				.prioritetkode("LAV")
+				.beskrivelse("TestBeskrivelseDokopp")
 				.journalFEnhet(hentJournalpostInfoResponseTo.getJournalfEnhet())
 				.journalpostId(opprettOppgave.getArkivKode())
 				.brukerId(hentJournalpostInfoResponseTo.getBrukerId())
