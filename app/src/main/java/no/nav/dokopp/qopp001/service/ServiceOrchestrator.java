@@ -26,11 +26,11 @@ import javax.inject.Inject;
 @Slf4j
 @Service
 public class ServiceOrchestrator {
-	
+
 	private final OpprettOppgaveGosys opprettOppgaveGosys;
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
-	
+
 	@Inject
 	public ServiceOrchestrator(OpprettOppgaveGosys opprettOppgaveGosys,
 							   Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo,
@@ -39,36 +39,34 @@ public class ServiceOrchestrator {
 		this.tjoark122HentJournalpostInfo = tjoark122HentJournalpostInfo;
 		this.tjoark110SettJournalpostAttributter = tjoark110SettJournalpostAttributter;
 	}
-	
+
 	@Handler
 	public void orchestrate(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId, OpprettOppgave opprettOppgave) {
 		validateOppgaveTypeAndArkivsystem(opprettOppgave);
-		
+
 		HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo = tjoark122HentJournalpostInfo.hentJournalpostInfo(journalpostId);
-		log.info("qopp001 har hentet journalpostInfo fra Joark for forespørsel med journalpostId=" + journalpostId + ".");
-		
+		log.info("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId={}.", journalpostId);
+
 		String oppgaveId = opprettOppgaveGosys.opprettOppgave(mapToOpprettOppgaveRequestTo(hentJournalpostInfoResponseTo, opprettOppgave));
-		log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId=" + oppgaveId + " for forespørsel med journalpostId=" + journalpostId + ".");
-		
+		log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.", oppgaveId, hentJournalpostInfoResponseTo.getFagomrade(), journalpostId);
+
 		tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, 1));
-		log.info("qopp001 har oppdatert journalpost med journalpostId=" + journalpostId + " i Joark.");
+		log.info("qopp001 har oppdatert journalpost med journalpostId={}.", journalpostId);
 	}
-	
+
 	private void validateOppgaveTypeAndArkivsystem(no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave opprettOppgave) {
 		if (!BEHANDLE_RETURPOST.equals(opprettOppgave.getOppgaveType().trim())) {
 			throw new UgyldigInputverdiException("input.oppgavetype må være BEHANDLE_RETURPOST. Fikk: " + opprettOppgave.getOppgaveType());
 		}
-		
+
 		if (!ARKIVSYSTEM_JOARK.equals(opprettOppgave.getArkivSystem().trim())) {
 			throw new UgyldigInputverdiException("input.arkivsystem må være JOARK. Fikk: " + opprettOppgave.getArkivSystem());
 		}
 	}
-	//TODO: Sette korrekte verdier!
+
 	private OpprettOppgaveRequestTo mapToOpprettOppgaveRequestTo(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo, OpprettOppgave opprettOppgave) {
 		return OpprettOppgaveRequestTo.builder()
-				.oppgavetype("JFR")//opprettOppgave.getOppgaveType())
 				.fagomrade(hentJournalpostInfoResponseTo.getFagomrade())
-				.prioritetkode("LAV")
 				.beskrivelse("TestBeskrivelseDokopp")
 				.journalFEnhet(hentJournalpostInfoResponseTo.getJournalfEnhet())
 				.journalpostId(opprettOppgave.getArkivKode())
@@ -77,6 +75,6 @@ public class ServiceOrchestrator {
 				.saksnummer(hentJournalpostInfoResponseTo.getSaksnummer())
 				.build();
 	}
-	
-	
+
+
 }

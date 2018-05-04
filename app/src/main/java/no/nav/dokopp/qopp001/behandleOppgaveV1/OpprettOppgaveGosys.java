@@ -27,7 +27,9 @@ import java.time.LocalDateTime;
  */
 @Service
 public class OpprettOppgaveGosys {
-	
+
+	private static final String GSAK_OPPGAVETYPE_RETURPOST = "RETUR";
+	private static final String GSAK_PRIORITETKODE_LAV = "LAV";
 	private final BehandleOppgaveV1 behandleOppgaveV1;
 	private final static int retries = 3;
 	
@@ -58,9 +60,9 @@ public class OpprettOppgaveGosys {
 				//TODO hva er dette
 				.withOpprettetAvEnhetId(9999)
 				.withWsOppgave(new WSOppgave()
-						.withOppgavetypeKode(opprettOppgaveRequestTo.getOppgavetype())
+						.withOppgavetypeKode(GSAK_OPPGAVETYPE_RETURPOST + "_" + opprettOppgaveRequestTo.getFagomrade())
 						.withFagomradeKode(opprettOppgaveRequestTo.getFagomrade())
-						.withPrioritetKode(opprettOppgaveRequestTo.getPrioritetkode())
+						.withPrioritetKode(GSAK_PRIORITETKODE_LAV)
 						.withBeskrivelse(opprettOppgaveRequestTo.getBeskrivelse())
 						.withAnsvarligEnhetId(opprettOppgaveRequestTo.getJournalFEnhet())
 						.withDokumentId(opprettOppgaveRequestTo.getJournalpostId())

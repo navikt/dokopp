@@ -21,9 +21,7 @@ public class OpprettOppgaveRequestTo {
 	private static final String GSAK = "FS19";
 	private static final List<String> GOSYS_APPIDS = Arrays.asList(GOSYS, GSAK);
 
-	private final String oppgavetype;
 	private final String fagomrade;
-	private final String prioritetkode;
 	private final String beskrivelse;
 	private final String journalFEnhet;
 	private final String journalpostId;
