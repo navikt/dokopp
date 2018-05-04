@@ -41,10 +41,10 @@ public class OpprettOppgaveGosysTest {
 	private static final int ENHETS_ID = 9999;
 	
 	@Mock
-	BehandleOppgaveV1 behandleOppgaveV1;
+	private BehandleOppgaveV1 behandleOppgaveV1;
 	
 	@InjectMocks
-	OpprettOppgaveGosys opprettOppgaveGosys;
+	private OpprettOppgaveGosys opprettOppgaveGosys;
 	
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -92,18 +92,16 @@ public class OpprettOppgaveGosysTest {
 				.journalpostId(JOURNALPOST_ID)
 				.journalFEnhet(JOURNALF_ENHET)
 				.beskrivelse(BESKRIVELSE)
-				.prioritetkode(PRIORITETKODE)
 				.fagomrade(fagomraade)
-				.oppgavetype(OPPGAVETYPE)
 				.brukertypeKode(BRUKER_TYPE)
 				.build();
 	}
 	
 	private void assertWSOpprettOppgaveRequest(WSOpprettOppgaveRequest request) {
 		assertThat(request.getOpprettetAvEnhetId(), is(ENHETS_ID));
-		assertThat(request.getWsOppgave().getOppgavetypeKode(), is(OPPGAVETYPE));
+		assertThat(request.getWsOppgave().getOppgavetypeKode(), is("RETUR_" + FAGOMRAADE));
 		assertThat(request.getWsOppgave().getFagomradeKode(), is(FAGOMRAADE));
-		assertThat(request.getWsOppgave().getPrioritetKode(), is(PRIORITETKODE));
+		assertThat(request.getWsOppgave().getPrioritetKode(), is("LAV"));
 		assertThat(request.getWsOppgave().getBeskrivelse(), is(BESKRIVELSE));
 		assertThat(request.getWsOppgave().getAnsvarligEnhetId(), is(JOURNALF_ENHET));
 		assertThat(request.getWsOppgave().getDokumentId(), is(JOURNALPOST_ID));
