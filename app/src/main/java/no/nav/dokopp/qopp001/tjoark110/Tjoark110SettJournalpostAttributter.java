@@ -19,21 +19,21 @@ import javax.inject.Inject;
 @Service
 public class Tjoark110SettJournalpostAttributter {
 	private final ArkiverDokumentproduksjonV1 arkiverDokumentproduksjonV1;
-	private final static int retries = 3;
+	private final static int RETRIES = 3;
 	
 	@Inject
 	public Tjoark110SettJournalpostAttributter(ArkiverDokumentproduksjonV1 arkiverDokumentproduksjonV1) {
 		this.arkiverDokumentproduksjonV1 = arkiverDokumentproduksjonV1;
 	}
 	
-	@Retryable(value = DokoppTechnicalException.class, maxAttempts = retries, backoff = @Backoff(delay = 500))
+	@Retryable(value = DokoppTechnicalException.class, maxAttempts = RETRIES, backoff = @Backoff(delay = 500))
 	public void settJournalpostAttributter(SettJournalpostAttributterRequestTo settJournalpostAttributterRequestTo) {
 		Histogram.Timer requestTimer = requestLatency.labels(SERVICE_ID, "Joark::ArkiverDokumentproduksjonV1:settJournalpostAttributter")
 				.startTimer();
 		try {
 			arkiverDokumentproduksjonV1.settJournalpostAttributter(mapRequest(settJournalpostAttributterRequestTo));
 		} catch (Exception e) {
-			throw new DokoppTechnicalException("teknisk feil ved kall mot arkiverDokumentproduksjonV1:settJournalpostAttributter. Antall retries=" + retries + ", journalpostId=" + settJournalpostAttributterRequestTo
+			throw new DokoppTechnicalException("teknisk feil ved kall mot arkiverDokumentproduksjonV1:settJournalpostAttributter. Antall retries=" + RETRIES + ", journalpostId=" + settJournalpostAttributterRequestTo
 					.getJournalpostId(), e);
 		} finally {
 			requestTimer.observeDuration();

@@ -27,6 +27,7 @@ import javax.inject.Inject;
 @Service
 public class ServiceOrchestrator {
 
+	private static final String OPPGAVEBESKRIVELSE = "Behandle returpost";
 	private final OpprettOppgaveGosys opprettOppgaveGosys;
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
@@ -54,7 +55,7 @@ public class ServiceOrchestrator {
 		log.info("qopp001 har oppdatert journalpost med journalpostId={}.", journalpostId);
 	}
 
-	private void validateOppgaveTypeAndArkivsystem(no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave opprettOppgave) {
+	private void validateOppgaveTypeAndArkivsystem(OpprettOppgave opprettOppgave) {
 		if (!BEHANDLE_RETURPOST.equals(opprettOppgave.getOppgaveType().trim())) {
 			throw new UgyldigInputverdiException("input.oppgavetype må være BEHANDLE_RETURPOST. Fikk: " + opprettOppgave.getOppgaveType());
 		}
@@ -67,7 +68,7 @@ public class ServiceOrchestrator {
 	private OpprettOppgaveRequestTo mapToOpprettOppgaveRequestTo(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo, OpprettOppgave opprettOppgave) {
 		return OpprettOppgaveRequestTo.builder()
 				.fagomrade(hentJournalpostInfoResponseTo.getFagomrade())
-				.beskrivelse("TestBeskrivelseDokopp")
+				.beskrivelse(OPPGAVEBESKRIVELSE)
 				.journalFEnhet(hentJournalpostInfoResponseTo.getJournalfEnhet())
 				.journalpostId(opprettOppgave.getArkivKode())
 				.brukerId(hentJournalpostInfoResponseTo.getBrukerId())
