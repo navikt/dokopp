@@ -30,15 +30,16 @@ public class OpprettOppgaveGosys {
 
 	private static final String GSAK_OPPGAVETYPE_RETURPOST = "RETUR";
 	private static final String GSAK_PRIORITETKODE_LAV = "LAV";
+	public static final int OPPRETTET_AV_ENHET = 9999;
 	private final BehandleOppgaveV1 behandleOppgaveV1;
-	private final static int retries = 3;
+	private final static int RETRIES = 3;
 	
 	@Inject
 	public OpprettOppgaveGosys(BehandleOppgaveV1 behandleOppgaveV1) {
 		this.behandleOppgaveV1 = behandleOppgaveV1;
 	}
 	
-	@Retryable(value = DokoppTechnicalException.class, maxAttempts = 3, backoff = @Backoff(delay = 500))
+	@Retryable(value = DokoppTechnicalException.class, maxAttempts = RETRIES, backoff = @Backoff(delay = 500))
 	public String opprettOppgave(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		Histogram.Timer requestTimer = requestLatency.labels(SERVICE_ID, "Gsak::BehandleOppgaveV1:opprettOppgave").startTimer();
 		try {
@@ -47,7 +48,7 @@ public class OpprettOppgaveGosys {
 		} catch (WSSikkerhetsbegrensningException e) {
 			throw new AvsluttBehandlingException("OpprettOppgave tilgang avvist. Antall retries=0", e);
 		} catch (Exception e) {
-			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave. Antall retries=" + retries + ", journalpostId=" + opprettOppgaveRequestTo
+			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave. Antall retries=" + RETRIES + ", journalpostId=" + opprettOppgaveRequestTo
 					.getJournalpostId(), e);
 		} finally {
 			requestTimer.observeDuration();
@@ -57,9 +58,9 @@ public class OpprettOppgaveGosys {
 	private WSOpprettOppgaveRequest mapRequest(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
 		final WSAktor wsAktor = mapAktoer(opprettOppgaveRequestTo);
 		return new WSOpprettOppgaveRequest()
-				//TODO hva er dette
-				.withOpprettetAvEnhetId(9999)
+				.withOpprettetAvEnhetId(OPPRETTET_AV_ENHET)
 				.withWsOppgave(new WSOppgave()
+						// OppgaveTypeKode er eks RETUR_FOR, RETUR_PEN osv.
 						.withOppgavetypeKode(GSAK_OPPGAVETYPE_RETURPOST + "_" + opprettOppgaveRequestTo.getFagomrade())
 						.withFagomradeKode(opprettOppgaveRequestTo.getFagomrade())
 						.withPrioritetKode(GSAK_PRIORITETKODE_LAV)
