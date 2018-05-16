@@ -30,7 +30,8 @@ public class OpprettOppgaveGosys {
 
 	private static final String GSAK_OPPGAVETYPE_RETURPOST = "RETUR";
 	private static final String GSAK_PRIORITETKODE_LAV = "LAV";
-	public static final int OPPRETTET_AV_ENHET = 9999;
+	private static final int OPPRETTET_AV_ENHET = 9999;
+	private static final int ANTALL_DAGER_AKTIV = 14;
 	private final BehandleOppgaveV1 behandleOppgaveV1;
 	private final static int RETRIES = 3;
 	
@@ -69,6 +70,7 @@ public class OpprettOppgaveGosys {
 						.withDokumentId(opprettOppgaveRequestTo.getJournalpostId())
 						.withSaksnummer(mapSaksnummer(opprettOppgaveRequestTo))
 						.withAktivFra(XmlGregorianConverter.toXmlGregorianCalendar(LocalDateTime.now()))
+						.withAktivTil(XmlGregorianConverter.toXmlGregorianCalendar(LocalDateTime.now().plusDays(ANTALL_DAGER_AKTIV)))
 						.withLest(false)
 						.withGjelderBruker(wsAktor));
 	}

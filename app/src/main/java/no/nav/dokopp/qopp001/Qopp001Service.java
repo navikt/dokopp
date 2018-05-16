@@ -1,4 +1,4 @@
-package no.nav.dokopp.qopp001.service;
+package no.nav.dokopp.qopp001;
 
 import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
 import static no.nav.dokopp.qopp001.domain.DomainConstants.ARKIVSYSTEM_JOARK;
@@ -25,24 +25,25 @@ import javax.inject.Inject;
  */
 @Slf4j
 @Service
-public class ServiceOrchestrator {
+public class Qopp001Service {
 
-	private static final String OPPGAVEBESKRIVELSE = "Behandle returpost";
+	private static final String OPPGAVEBESKRIVELSE = "Returpost";
+	private static final int ANTALL_RETUR = 1;
 	private final OpprettOppgaveGosys opprettOppgaveGosys;
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
 
 	@Inject
-	public ServiceOrchestrator(OpprettOppgaveGosys opprettOppgaveGosys,
-							   Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo,
-							   Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter) {
+	public Qopp001Service(OpprettOppgaveGosys opprettOppgaveGosys,
+						  Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo,
+						  Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter) {
 		this.opprettOppgaveGosys = opprettOppgaveGosys;
 		this.tjoark122HentJournalpostInfo = tjoark122HentJournalpostInfo;
 		this.tjoark110SettJournalpostAttributter = tjoark110SettJournalpostAttributter;
 	}
 
 	@Handler
-	public void orchestrate(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId, OpprettOppgave opprettOppgave) {
+	public void qopp001(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId, OpprettOppgave opprettOppgave) {
 		validateOppgaveTypeAndArkivsystem(opprettOppgave);
 
 		HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo = tjoark122HentJournalpostInfo.hentJournalpostInfo(journalpostId);
@@ -51,8 +52,8 @@ public class ServiceOrchestrator {
 		String oppgaveId = opprettOppgaveGosys.opprettOppgave(mapToOpprettOppgaveRequestTo(hentJournalpostInfoResponseTo, opprettOppgave));
 		log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.", oppgaveId, hentJournalpostInfoResponseTo.getFagomrade(), journalpostId);
 
-		tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, 1));
-		log.info("qopp001 har oppdatert journalpost med journalpostId={}.", journalpostId);
+		tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, ANTALL_RETUR));
+		log.info("qopp001 har flagget journalpost med journalpostId={} som returpost.", journalpostId);
 	}
 
 	private void validateOppgaveTypeAndArkivsystem(OpprettOppgave opprettOppgave) {
