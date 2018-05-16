@@ -21,8 +21,8 @@ import no.nav.dokopp.nais.checks.Qopp001QueueCheck;
 import no.nav.dokopp.nais.checks.Tjoark110Check;
 import no.nav.dokopp.nais.checks.Tjoark122Check;
 import no.nav.dokopp.qopp001.Qopp001Route;
+import no.nav.dokopp.qopp001.Qopp001Service;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveGosys;
-import no.nav.dokopp.qopp001.service.ServiceOrchestrator;
 import no.nav.dokopp.qopp001.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.tjoark122.Tjoark122HentJournalpostInfo;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -57,7 +57,7 @@ import org.springframework.retry.annotation.EnableRetry;
 		Tjoark110SettJournalpostAttributter.class,
 		Tjoark122HentJournalpostInfo.class,
 		OpprettOppgaveGosys.class,
-		ServiceOrchestrator.class,
+		Qopp001Service.class,
 		Tjoark110Check.class,
 		Tjoark122Check.class,
 		BehandleOppgaveV1Check.class,
