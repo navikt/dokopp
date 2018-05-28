@@ -24,9 +24,9 @@ fasitResources:
     resourceType: queueManager
   - alias: dokopp_channel
     resourceType: channel
-  - alias: dokopp_OPPRETT_OPPGAVE
+  - alias: dokopp_QOPP001_OPPRETT_OPPGAVE
     resourceType: queue
-  - alias: dokopp_funksjonell_BOQ
+  - alias: dokopp_QOPP001_FUNKSJONELL_FEIL
     resourceType: queue
   - alias: "virksomhet:BehandleOppgave_v1"
     resourceType: webserviceendpoint
