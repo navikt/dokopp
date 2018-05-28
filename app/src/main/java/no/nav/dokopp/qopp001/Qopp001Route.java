@@ -25,16 +25,16 @@ public class Qopp001Route extends SpringRouteBuilder {
 	public static final String PROPERTY_ORIGINAL_MESSAGE = "originalMessage";
 	
 	private final Queue qopp001;
-	private final Queue functionalBOQ;
+	private final Queue qopp001FunksjonellFeil;
 	private final Qopp001Service qopp001Service;
 	
 	@Inject
 	public Qopp001Route(Queue qopp001,
-						Queue functionalBOQ,
+						Queue qopp001FunksjonellFeil,
 						Qopp001Service qopp001Service) {
 		this.qopp001 = qopp001;
 		this.qopp001Service = qopp001Service;
-		this.functionalBOQ = functionalBOQ;
+		this.qopp001FunksjonellFeil = qopp001FunksjonellFeil;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -55,7 +55,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.logRetryAttempted(false)
 				.log(LoggingLevel.WARN, log, "${exception}, journalpostId=" + "${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "}")
 				.setBody(simple("${exchangeProperty." + PROPERTY_ORIGINAL_MESSAGE + "}"))
-				.to("jms:" + functionalBOQ.getQueueName());
+				.to("jms:" + qopp001FunksjonellFeil.getQueueName());
 		
 		from("jms:" + qopp001.getQueueName() +
 				"?transacted=true" +

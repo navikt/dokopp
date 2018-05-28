@@ -52,7 +52,7 @@ import java.io.InputStream;
 @SpringBootTest(classes = {Application.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
-public class Qopp01IT {
+public class Qopp001IT {
 	
 	private static final String CALLID = "callId";
 	
@@ -66,7 +66,7 @@ public class Qopp01IT {
 	private Queue qopp001;
 	
 	@Inject
-	private Queue functionalBOQ;
+	private Queue qopp001FunksjonellFeil;
 	
 	@Inject
 	private Queue backoutQueue;
@@ -144,7 +144,7 @@ public class Qopp01IT {
 		
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
-					String response = receive(functionalBOQ);
+					String response = receive(qopp001FunksjonellFeil);
 					assertThat(response, is(classpathToString("qopp001/qopp001_valideringFeiler.xml")));
 				});
 	}
@@ -166,7 +166,7 @@ public class Qopp01IT {
 		
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
-					String response = receive(functionalBOQ);
+					String response = receive(qopp001FunksjonellFeil);
 					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
 				});
 	}
@@ -188,7 +188,7 @@ public class Qopp01IT {
 		
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
-					String response = receive(functionalBOQ);
+					String response = receive(qopp001FunksjonellFeil);
 					assertThat(response, is(classpathToString("qopp001/qopp001_journalpostId_notANumber.xml")));
 				});
 	}
@@ -272,7 +272,7 @@ public class Qopp01IT {
 		
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
-					String response = receive(functionalBOQ);
+					String response = receive(qopp001FunksjonellFeil);
 					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
 				});
 	}
@@ -294,7 +294,7 @@ public class Qopp01IT {
 		
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
-					String response = receive(functionalBOQ);
+					String response = receive(qopp001FunksjonellFeil);
 					assertThat(response, is(classpathToString("qopp001/qopp001_illegalOppgavetype.xml")));
 				});
 	}
@@ -316,7 +316,7 @@ public class Qopp01IT {
 		
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
-					String response = receive(functionalBOQ);
+					String response = receive(qopp001FunksjonellFeil);
 					assertThat(response, is(classpathToString("qopp001/qopp001_illegalArkivsystem.xml")));
 				});
 	}

@@ -18,23 +18,23 @@ public class FunctionalBoqCheck extends AbstractSelftest {
 	private static final String FASIT_NAME = "dokopp";
 	private static final String INTERNAL_ID = "QOPP001";
 
-	private final Queue functionalBoq;
+	private final Queue qopp001FunksjonellFeil;
 	private final JmsTemplate jmsTemplate;
 
 	@Inject
-	public FunctionalBoqCheck(Queue functionalBOQ,
+	public FunctionalBoqCheck(Queue qopp001FunksjonellFeil,
 							  JmsTemplate jmsTemplate) throws JMSException {
-		super(Ping.Type.Queue, FASIT_NAME, functionalBOQ.getQueueName(), INTERNAL_ID);
-		this.functionalBoq = functionalBOQ;
+		super(Ping.Type.Queue, FASIT_NAME, qopp001FunksjonellFeil.getQueueName(), INTERNAL_ID);
+		this.qopp001FunksjonellFeil = qopp001FunksjonellFeil;
 		this.jmsTemplate = jmsTemplate;
 	}
 
 	@Override
 	protected void doCheck() {
 		try {
-			checkQueue(functionalBoq);
+			checkQueue(qopp001FunksjonellFeil);
 		} catch (Exception e) {
-			throw new ApplicationNotReadyException("JMS Queue Browser failed to get queue: " + functionalBoq, e);
+			throw new ApplicationNotReadyException("JMS Queue Browser failed to get queue: " + qopp001FunksjonellFeil, e);
 		}
 	}
 

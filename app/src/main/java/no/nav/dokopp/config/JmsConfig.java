@@ -28,13 +28,13 @@ public class JmsConfig {
 	private static final int UTF_8_WITH_PUA = 1208;
 	
 	@Bean
-	public Queue qopp001(@Value("${DOKOPP_OPPRETT_OPPGAVE_QUEUENAME}") String qopp001QueueName) throws JMSException {
+	public Queue qopp001(@Value("${DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME}") String qopp001QueueName) throws JMSException {
 		return new MQQueue(qopp001QueueName);
 	}
 	
 	@Bean
-	public Queue functionalBOQ(@Value("${DOKOPP_FUNKSJONELL_BOQ_QUEUENAME}") String functionalBOQName) throws JMSException {
-		return new MQQueue(functionalBOQName);
+	public Queue qopp001FunksjonellFeil(@Value("${DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME}") String qopp001FunksjonellFeil) throws JMSException {
+		return new MQQueue(qopp001FunksjonellFeil);
 	}
 	
 	@Bean
