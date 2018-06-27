@@ -32,8 +32,6 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: ArkiverDokumentproduksjon_v1
     resourceType: webserviceendpoint
-  - alias: DokumentproduksjonInfo_v1
-    resourceType: webserviceendpoint
   - alias: srvdokopp
     resourceType: credential
     propertyMap:
