@@ -30,8 +30,6 @@ fasitResources:
     resourceType: queue
   - alias: "virksomhet:BehandleOppgave_v1"
     resourceType: webserviceendpoint
-  - alias: ArkiverDokumentproduksjon_v1
-    resourceType: webserviceendpoint
   - alias: srvdokopp
     resourceType: credential
     propertyMap:
