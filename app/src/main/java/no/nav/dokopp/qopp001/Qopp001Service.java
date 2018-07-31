@@ -5,6 +5,7 @@ import static no.nav.dokopp.qopp001.domain.DomainConstants.ARKIVSYSTEM_JOARK;
 import static no.nav.dokopp.qopp001.domain.DomainConstants.BEHANDLE_RETURPOST;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveGosys;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveRequestTo;
@@ -49,11 +50,15 @@ public class Qopp001Service {
 		HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo = tjoark122HentJournalpostInfo.hentJournalpostInfo(journalpostId);
 		log.info("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId={}.", journalpostId);
 
-		String oppgaveId = opprettOppgaveGosys.opprettOppgave(mapToOpprettOppgaveRequestTo(hentJournalpostInfoResponseTo, opprettOppgave));
-		log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.", oppgaveId, hentJournalpostInfoResponseTo.getFagomrade(), journalpostId);
+		if (hentJournalpostInfoResponseTo.isAlleredeRegistrertReturpost()) {
+			throw new ReturpostAlleredeFlaggetException("qopp001 har oppdaget at returpost allerede er flagget som antallRetur=" + hentJournalpostInfoResponseTo.getAntallRetur() + ". Oppretter ikke oppgave i Gosys");
+		} else {
+			String oppgaveId = opprettOppgaveGosys.opprettOppgave(mapToOpprettOppgaveRequestTo(hentJournalpostInfoResponseTo, opprettOppgave));
+			log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.", oppgaveId, hentJournalpostInfoResponseTo.getFagomrade(), journalpostId);
 
-		tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, ANTALL_RETUR));
-		log.info("qopp001 har flagget journalpost med journalpostId={} som returpost.", journalpostId);
+			tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, ANTALL_RETUR));
+			log.info("qopp001 har flagget journalpost med journalpostId={} som returpost.", journalpostId);
+		}
 	}
 
 	private void validateOppgaveTypeAndArkivsystem(OpprettOppgave opprettOppgave) {
