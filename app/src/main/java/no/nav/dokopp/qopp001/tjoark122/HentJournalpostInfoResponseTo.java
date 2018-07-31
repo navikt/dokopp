@@ -18,6 +18,6 @@ public class HentJournalpostInfoResponseTo {
 	private Integer antallRetur;
 
 	public boolean isAlleredeRegistrertReturpost() {
-		return antallRetur == null || antallRetur > 0;
+		return antallRetur != null && antallRetur > 0;
 	}
 }
