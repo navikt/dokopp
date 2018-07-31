@@ -2,6 +2,7 @@ package no.nav.dokopp.qopp001.itest;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingXPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -320,7 +321,26 @@ public class Qopp001IT {
 					assertThat(response, is(classpathToString("qopp001/qopp001_illegalArkivsystem.xml")));
 				});
 	}
-	
+
+	@Test
+	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturpostReturnedFromTjoark122() throws Exception {
+		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark122/tjoark122_returpostflagget.xml")));
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+
+		await().atMost(10, SECONDS)
+				.untilAsserted(() -> {
+					String response = receive(qopp001FunksjonellFeil);
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+				});
+
+		verify(postRequestedFor(urlEqualTo("/dokumentproduksjoninfo"))
+				.withRequestBody(matchingXPath("//journalpostId/text()", equalTo(JOURNALPOST_ID))));
+		verify(exactly(0), postRequestedFor(urlEqualTo("/behandleoppgave")));
+		verify(exactly(0), postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
+	}
+
 	private void sendStringMessage(Queue queue, final String message, String callId) {
 		jmsTemplate.send(queue, session -> {
 			TextMessage msg = new ActiveMQTextMessage();
