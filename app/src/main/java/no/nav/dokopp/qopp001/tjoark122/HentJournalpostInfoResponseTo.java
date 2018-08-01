@@ -15,4 +15,9 @@ public class HentJournalpostInfoResponseTo {
 	private String saksnummer;
 	private String fagsystem;
 	private String brukertype;
+	private Integer antallRetur;
+
+	public boolean isAlleredeRegistrertReturpost() {
+		return antallRetur != null && antallRetur > 0;
+	}
 }

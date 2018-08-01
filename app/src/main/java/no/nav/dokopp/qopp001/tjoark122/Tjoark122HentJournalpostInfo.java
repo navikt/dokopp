@@ -65,6 +65,7 @@ public class Tjoark122HentJournalpostInfo {
 				.brukertype(hentJournalpostInfoResponse.getBrukerType())
 				.saksnummer(hentJournalpostInfoResponse.getSaksNummer())
 				.fagsystem(hentJournalpostInfoResponse.getFagsystem())
+				.antallRetur(hentJournalpostInfoResponse.getAntallRetur())
 				.build();
 	}
 }
