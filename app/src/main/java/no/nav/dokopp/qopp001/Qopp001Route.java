@@ -2,6 +2,7 @@ package no.nav.dokopp.qopp001;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.metrics.PrometheusMetricsRoutePolicy;
+import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.LoggingLevel;
@@ -56,7 +57,14 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.log(LoggingLevel.WARN, log, "${exception}, journalpostId=" + "${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "}")
 				.setBody(simple("${exchangeProperty." + PROPERTY_ORIGINAL_MESSAGE + "}"))
 				.to("jms:" + qopp001FunksjonellFeil.getQueueName());
-		
+
+		onException(AvsluttBehandlingOgKastMeldingException.class)
+				.handled(true)
+				.maximumRedeliveries(0)
+				.logExhaustedMessageBody(false)
+				.logExhaustedMessageHistory(false)
+				.log(LoggingLevel.WARN, log, "Avslutter behandling og kaster melding. ${exception}");
+
 		from("jms:" + qopp001.getQueueName() +
 				"?transacted=true" +
 				"&cacheLevelName=CACHE_CONSUMER" +

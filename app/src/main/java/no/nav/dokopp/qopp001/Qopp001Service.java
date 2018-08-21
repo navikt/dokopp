@@ -3,8 +3,10 @@ package no.nav.dokopp.qopp001;
 import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
 import static no.nav.dokopp.qopp001.domain.DomainConstants.ARKIVSYSTEM_JOARK;
 import static no.nav.dokopp.qopp001.domain.DomainConstants.BEHANDLE_RETURPOST;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.dokopp.qopp001.behandleOppgaveV1.OpprettOppgaveGosys;
@@ -62,12 +64,13 @@ public class Qopp001Service {
 	}
 
 	private void validateOppgaveTypeAndArkivsystem(OpprettOppgave opprettOppgave) {
-		if (!BEHANDLE_RETURPOST.equals(opprettOppgave.getOppgaveType().trim())) {
-			throw new UgyldigInputverdiException("input.oppgavetype må være BEHANDLE_RETURPOST. Fikk: " + opprettOppgave.getOppgaveType());
+		if (!BEHANDLE_RETURPOST.equals(opprettOppgave.getOppgaveType())) {
+			throw new UgyldigInputverdiException("oppgaveType må være BEHANDLE_RETURPOST. oppgaveType=" + opprettOppgave.getOppgaveType());
 		}
 
-		if (!ARKIVSYSTEM_JOARK.equals(opprettOppgave.getArkivSystem().trim())) {
-			throw new UgyldigInputverdiException("input.arkivsystem må være JOARK. Fikk: " + opprettOppgave.getArkivSystem());
+		if (!ARKIVSYSTEM_JOARK.equals(opprettOppgave.getArkivSystem()) || isBlank(opprettOppgave.getArkivKode())) {
+			throw new AvsluttBehandlingOgKastMeldingException("arkivSystem må være JOARK og arkivKode må være satt. arkivSystem=" + opprettOppgave.getArkivSystem() +
+					", arkivKode=" + opprettOppgave.getArkivKode());
 		}
 	}
 

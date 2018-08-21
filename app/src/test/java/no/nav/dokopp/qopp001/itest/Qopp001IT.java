@@ -300,28 +300,6 @@ public class Qopp001IT {
 					assertThat(response, is(classpathToString("qopp001/qopp001_illegalOppgavetype.xml")));
 				});
 	}
-	
-	/**
-	 * HVIS operasjonen kalles uten at alle påkrevde inputparametere er oppgitt SÅ skal det returneres en feil
-	 * HVIS oppgavetype er feil -  legg i kø for funksjonelle feil (med hele meldingen)
-	 */
-	@Test
-	public void shouldThrowUgyldigInputverdiExceptionIllegaArkivsystem() throws Exception {
-		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
-		stubFor(post("/behandleoppgave").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("behandleoppgave/opprettOppgave_happy.xml")));
-		
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_illegalArkivsystem.xml"), CALLID);
-		
-		await().atMost(10, SECONDS)
-				.untilAsserted(() -> {
-					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_illegalArkivsystem.xml")));
-				});
-	}
 
 	@Test
 	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturpostReturnedFromTjoark122() throws Exception {
