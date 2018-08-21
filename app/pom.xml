@@ -100,9 +100,8 @@
 			<artifactId>cxf-spring-boot-starter-jaxws</artifactId>
 			<version>${cxf.version}</version>
 		</dependency>
-		<!--&lt;!&ndash; IBM MQ 8 Series is backwards compatible with older versions.-->
-		<!--Please see http://www-01.ibm.com/support/docview.wss?uid=swg21312967-->
-		<!--&ndash;&gt;-->
+		<!-- IBM MQ 8 Series is backwards compatible with older versions.-->
+		<!-- Please see http://www-01.ibm.com/support/docview.wss?uid=swg21312967-->
 		<dependency>
 			<groupId>com.ibm.mq</groupId>
 			<artifactId>com.ibm.mq.allclient</artifactId>
@@ -170,7 +169,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
