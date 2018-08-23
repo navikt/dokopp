@@ -1,5 +1,7 @@
 package no.nav.dokopp.nais;
 
+import static no.nav.dokopp.config.metrics.PrometheusMetrics.isReady;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class NaisContract {
 
-	public static final String APPLICATION_ALIVE = "Application is alive!";
-	public static final String APPLICATION_READY = "Application is ready for traffic!";
+	private static final String APPLICATION_ALIVE = "Application is alive!";
+	private static final String APPLICATION_READY = "Application is ready for traffic!";
 
 	@GetMapping("/isAlive")
 	public String isAlive() {
@@ -27,6 +29,7 @@ public class NaisContract {
 	@ResponseBody
 	@RequestMapping(value = "/isReady", produces = MediaType.TEXT_PLAIN_VALUE)
 	public ResponseEntity isReady() {
+		isReady.set(1);
 		return new ResponseEntity<>(APPLICATION_READY, HttpStatus.OK);
 	}
 }
