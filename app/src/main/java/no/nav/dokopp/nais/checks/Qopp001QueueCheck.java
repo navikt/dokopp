@@ -1,8 +1,9 @@
 package no.nav.dokopp.nais.checks;
 
-import no.nav.dokopp.nais.selftest.AbstractSelftest;
+import no.nav.dokopp.nais.selftest.AbstractDependencyCheck;
 import no.nav.dokopp.nais.selftest.ApplicationNotReadyException;
-import no.nav.dokopp.nais.selftest.Ping;
+import no.nav.dokopp.nais.selftest.DependencyType;
+import no.nav.dokopp.nais.selftest.Importance;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +15,7 @@ import javax.jms.Queue;
  * @author Joakim Bjørnstad, Jbit AS
  */
 @Component
-public class Qopp001QueueCheck extends AbstractSelftest {
-	private static final String FASIT_NAME = "dokopp";
-	private static final String INTERNAL_ID = "QOPP001";
+public class Qopp001QueueCheck extends AbstractDependencyCheck {
 
 	private final Queue qopp001;
 	private final JmsTemplate jmsTemplate;
@@ -24,7 +23,7 @@ public class Qopp001QueueCheck extends AbstractSelftest {
 	@Inject
 	public Qopp001QueueCheck(Queue qopp001,
 							 JmsTemplate jmsTemplate) throws JMSException {
-		super(Ping.Type.Queue, FASIT_NAME, qopp001.getQueueName(), INTERNAL_ID);
+		super(DependencyType.QUEUE, "Qopp001QueueFeil", qopp001.getQueueName(), Importance.CRITICAL);
 		this.qopp001 = qopp001;
 		this.jmsTemplate = jmsTemplate;
 	}
