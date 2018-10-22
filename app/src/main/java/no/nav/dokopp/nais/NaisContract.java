@@ -1,5 +1,7 @@
 package no.nav.dokopp.nais;
 
+import static no.nav.dokopp.config.metrics.PrometheusMetrics.isReady;
+
 import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -37,8 +38,6 @@ public class NaisContract {
 	private final String appName;
 	private final String version;
 	private final List<AbstractDependencyCheck> dependencyCheckList;
-
-	private AtomicInteger app_status = new AtomicInteger();
 
 	@Inject
 	public NaisContract(List<AbstractDependencyCheck> dependencyCheckList, @Value("dokopp") String appName, @Value("${APP_VERSION:0}") String version) {
@@ -64,11 +63,10 @@ public class NaisContract {
 		if (isAnyVitalDependencyUnhealthy(results.stream()
 				.map(DependencyCheckResult::getResult)
 				.collect(Collectors.toList()))) {
-			app_status.set(0);
+			isReady.dec();
 			return new ResponseEntity<>(APPLICATION_NOT_READY, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		app_status.set(1);
-
+		isReady.set(1.0);
 		return new ResponseEntity<>(APPLICATION_READY, HttpStatus.OK);
 	}
 
