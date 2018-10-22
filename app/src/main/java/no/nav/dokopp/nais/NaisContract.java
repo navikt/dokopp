@@ -63,7 +63,7 @@ public class NaisContract {
 		if (isAnyVitalDependencyUnhealthy(results.stream()
 				.map(DependencyCheckResult::getResult)
 				.collect(Collectors.toList()))) {
-			isReady.dec();
+			isReady.set(-1.0);
 			return new ResponseEntity<>(APPLICATION_NOT_READY, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		isReady.set(1.0);
