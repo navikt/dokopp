@@ -15,7 +15,7 @@ import javax.inject.Inject;
  */
 @Component
 public class BehandleOppgaveV1Check extends AbstractDependencyCheck {
-	private static final String BEHANDLEOPPGAVE_V1 = "BehandleOppgave_v3";
+	private static final String BEHANDLEOPPGAVE_V1 = "BehandleOppgave_v1";
 	private final BehandleOppgaveV1 behandleOppgaveV1;
 
 	@Inject
