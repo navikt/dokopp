@@ -11,6 +11,7 @@ import no.nav.dokopp.nais.selftest.Importance;
 import no.nav.dokopp.nais.selftest.Result;
 import no.nav.dokopp.nais.selftest.SelftestResult;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
+@Import(
+		PrettyPrintWebMvcConfiguration.class)
 @Slf4j
 @RestController
 public class NaisContract {
