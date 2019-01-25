@@ -42,6 +42,8 @@ public class Tjoark122HentJournalpostInfo {
 			return mapResponse(hentJournalpostInfoResponse);
 		} catch (HentJournalpostInfoJournalpostIkkeFunnet e) {
 			throw new AvsluttBehandlingException("journalpost ikke funnet. Antall retries=0", e);
+		} catch(NullPointerException e) {
+			throw new AvsluttBehandlingException("HentJournalpostInfoResponse hadde data med ugyldig nullverdi.", e);
 		} catch (Exception e) {
 			throw new DokoppTechnicalException("teknisk feil ved kall mot dokumentproduksjonInfoV1:hentJournalpostInfo. Antall retries=" + retries + ", journalpostId=" + journalpostId, e);
 		} finally {
@@ -61,7 +63,7 @@ public class Tjoark122HentJournalpostInfo {
 		return HentJournalpostInfoResponseTo.builder()
 				.journalfEnhet(hentJournalpostInfoResponse.getJournalfEnhet())
 				.fagomrade(hentJournalpostInfoResponse.getFagomrade())
-				.brukerId(hentJournalpostInfoResponse.getBrukerId())
+				.brukerId(hentJournalpostInfoResponse.getBrukerId().trim())
 				.brukertype(hentJournalpostInfoResponse.getBrukerType())
 				.saksnummer(hentJournalpostInfoResponse.getSaksNummer())
 				.fagsystem(hentJournalpostInfoResponse.getFagsystem())
