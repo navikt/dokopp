@@ -1,3 +1,4 @@
+team: teamdokumenthandtering
 image: "docker.adeo.no:5000/dok/dokopp"
 replicas:
   min: 1
