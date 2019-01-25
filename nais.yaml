@@ -1,5 +1,5 @@
 team: teamdokumenthandtering
-image: "docker.adeo.no:5000/dok/dokopp"
+image: "repo.adeo.no:5443/dok/dokopp"
 replicas:
   min: 1
   max: 2
