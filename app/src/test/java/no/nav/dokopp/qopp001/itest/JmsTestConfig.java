@@ -20,12 +20,12 @@ import javax.jms.Queue;
 public class JmsTestConfig {
 	
 	@Bean
-	public Queue qopp001(@Value("${DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME}") String qopp001QueueName) {
+	public Queue qopp001(@Value("${dokopp.qopp001.opprett.oppgave.queuename}") String qopp001QueueName) {
 		return new ActiveMQQueue(qopp001QueueName);
 	}
 	
 	@Bean
-	public Queue qopp001FunksjonellFeil(@Value("${DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME}") String qopp001FunksjonellFeil) {
+	public Queue qopp001FunksjonellFeil(@Value("${dokopp.qopp001.funksjonell.feil.queuename}") String qopp001FunksjonellFeil) {
 		return new ActiveMQQueue(qopp001FunksjonellFeil);
 	}
 	

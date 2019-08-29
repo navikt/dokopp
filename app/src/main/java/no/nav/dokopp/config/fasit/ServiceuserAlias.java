@@ -17,7 +17,7 @@ import javax.annotation.PostConstruct;
 @Getter
 @Setter
 @ToString
-@ConfigurationProperties("SERVICEUSER")
+@ConfigurationProperties("serviceuser")
 @Validated
 public class ServiceuserAlias {
 	@NotEmpty

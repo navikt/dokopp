@@ -18,13 +18,6 @@ public class PrometheusMetrics {
 
 	private static final String DOK_NAMESPACE = "dok";
 
-	// Health checks
-	public static final Gauge isReady = Gauge.build()
-			.namespace(DOK_NAMESPACE)
-			.name("app_is_ready")
-			.help("App is ready to receive traffic")
-			.register();
-
 	public static final Gauge dependencyPingable = Gauge.build()
 			.namespace(DOK_NAMESPACE)
 			.name("dependency_ping")
