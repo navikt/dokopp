@@ -15,7 +15,7 @@ import javax.validation.constraints.Min;
 @Getter
 @Setter
 @ToString
-@ConfigurationProperties("ARKIVERDOKUMENTPRODUKSJON_V1")
+@ConfigurationProperties("arkiverdokumentproduksjon.v1")
 @Validated
 public class ArkiverDokumentproduksjonV1Alias {
 	@NotEmpty

@@ -15,7 +15,7 @@ import javax.validation.constraints.Min;
 @Getter
 @Setter
 @ToString
-@ConfigurationProperties("DOKUMENTPRODUKSJONINFO_V1")
+@ConfigurationProperties("dokumentproduksjoninfo.v1")
 @Validated
 public class DokumentproduksjonInfoV1Alias {
 	@NotEmpty
