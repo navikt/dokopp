@@ -15,7 +15,7 @@ healthcheck:
     initialDelay: 30
 prometheus:
   enabled: true
-  path: /prometheus
+  path: /actuator/prometheus
 resources:
   limits:
     cpu: 1000m

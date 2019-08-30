@@ -1,7 +1,8 @@
 package no.nav.dokopp.qopp001;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokopp.config.metrics.PrometheusMetricsRoutePolicy;
+import no.nav.dokopp.config.metrics.MicrometerRoutePolicy;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
@@ -28,14 +29,17 @@ public class Qopp001Route extends SpringRouteBuilder {
 	private final Queue qopp001;
 	private final Queue qopp001FunksjonellFeil;
 	private final Qopp001Service qopp001Service;
+	private final MeterRegistry meterRegistry;
 	
 	@Inject
 	public Qopp001Route(Queue qopp001,
 						Queue qopp001FunksjonellFeil,
-						Qopp001Service qopp001Service) {
+						Qopp001Service qopp001Service,
+						MeterRegistry meterRegistry) {
 		this.qopp001 = qopp001;
 		this.qopp001Service = qopp001Service;
 		this.qopp001FunksjonellFeil = qopp001FunksjonellFeil;
+		this.meterRegistry = meterRegistry;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -71,7 +75,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				"&errorHandlerLogStackTrace=false" +
 				"&errorHandlerLoggingLevel=DEBUG")
 				.routeId(SERVICE_ID)
-				.routePolicy(new PrometheusMetricsRoutePolicy())
+				.routePolicy(new MicrometerRoutePolicy(meterRegistry))
 				.setProperty(PROPERTY_ORIGINAL_MESSAGE, simple("${body}"))
 				.to("validator:xsd/opprett_oppgave.xsd")
 				.unmarshal(new JaxbDataFormat(OpprettOppgave.class.getPackage().getName()))
