@@ -28,6 +28,10 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.retry</groupId>
 			<artifactId>spring-retry</artifactId>
 		</dependency>
@@ -52,44 +56,23 @@
 			<version>${saxon.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.prometheus</groupId>
-			<artifactId>simpleclient</artifactId>
-			<version>${prometheus.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.prometheus</groupId>
-			<artifactId>simpleclient_hotspot</artifactId>
-			<version>${prometheus.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.prometheus</groupId>
-			<artifactId>simpleclient_servlet</artifactId>
-			<version>${prometheus.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.prometheus</groupId>
-			<artifactId>simpleclient_pushgateway</artifactId>
-			<version>${prometheus.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.prometheus</groupId>
-			<artifactId>simpleclient_spring_boot</artifactId>
-			<version>${prometheus.version}</version>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jms_1.1_spec</artifactId>
-			<version>${geronimo.version}</version>
+			<version>${javax.jms-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>jta</artifactId>
-			<version>${transaction.version}</version>
+			<version>${javax.transaction.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
-			<version>${inject.version}</version>
+			<version>${javax.inject.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -99,6 +82,10 @@
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-spring-boot-starter-jaxws</artifactId>
 			<version>${cxf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<!-- IBM MQ 8 Series is backwards compatible with older versions.-->
 		<!-- Please see http://www-01.ibm.com/support/docview.wss?uid=swg21312967-->
@@ -156,6 +143,11 @@
 		</dependency>
 		<!--selftest-->
 		<dependency>
+			<groupId>io.reactivex.rxjava2</groupId>
+			<artifactId>rxjava</artifactId>
+			<version>${rxjava.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-circuitbreaker</artifactId>
 			<version>${resilience4j.version}</version>
@@ -182,7 +174,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-spring-boot</artifactId>
+			<artifactId>resilience4j-spring-boot2</artifactId>
 			<version>${resilience4j.version}</version>
 		</dependency>
 		<!--Logging-->
@@ -252,4 +244,15 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<finalName>app</finalName>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

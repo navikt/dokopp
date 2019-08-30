@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.nav.dokopp.exception.AvsluttBehandlingException;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.DokumentproduksjonInfoV1;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.meldinger.HentJournalpostInfoRequest;
@@ -29,7 +30,7 @@ public class Tjoark122HentJournalpostInfoTest {
 	private static final String FAGOMRADE = "STO";
 	private static final int ANTALL_RETUR = 0;
 	private final DokumentproduksjonInfoV1 dokumentproduksjonInfoV1Mock = Mockito.mock(DokumentproduksjonInfoV1.class);
-	private final Tjoark122HentJournalpostInfo tjoark122 = new Tjoark122HentJournalpostInfo(dokumentproduksjonInfoV1Mock);
+	private final Tjoark122HentJournalpostInfo tjoark122 = new Tjoark122HentJournalpostInfo(dokumentproduksjonInfoV1Mock, new SimpleMeterRegistry());
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -51,7 +52,7 @@ public class Tjoark122HentJournalpostInfoTest {
 	@Test
 	public void shouldMapResponseWhenBrukerIdHasTrailingWhitespace() {
 		when(dokumentproduksjonInfoV1Mock.hentJournalpostInfo(any(HentJournalpostInfoRequest.class))).thenReturn(createResponse()
-		.withBrukerId("999999999 "));
+				.withBrukerId("999999999 "));
 		HentJournalpostInfoResponseTo responseTo = tjoark122.hentJournalpostInfo("1");
 		assertThat(responseTo.getBrukerId(), is("999999999"));
 	}

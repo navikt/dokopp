@@ -1,10 +1,13 @@
 package no.nav.dokopp.qopp001.tjoark122;
 
-import static no.nav.dokopp.config.metrics.PrometheusMetrics.requestLatency;
+import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
+import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
+import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
 import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
 import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
-import io.prometheus.client.Histogram;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import no.nav.dokopp.exception.AvsluttBehandlingException;
 import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
@@ -25,18 +28,19 @@ import javax.inject.Inject;
 @Service
 public class Tjoark122HentJournalpostInfo {
 	private final DokumentproduksjonInfoV1 dokumentproduksjonInfoV1;
+	private final MeterRegistry meterRegistry;
 	private final static int retries = 3;
 	
 	@Inject
-	public Tjoark122HentJournalpostInfo(DokumentproduksjonInfoV1 dokumentproduksjonInfoV1) {
+	public Tjoark122HentJournalpostInfo(DokumentproduksjonInfoV1 dokumentproduksjonInfoV1, MeterRegistry meterRegistry) {
 		this.dokumentproduksjonInfoV1 = dokumentproduksjonInfoV1;
+		this.meterRegistry = meterRegistry;
 	}
 	
 	@Retryable(value = DokoppTechnicalException.class, maxAttempts = retries, backoff = @Backoff(delay = 500))
 	public HentJournalpostInfoResponseTo hentJournalpostInfo(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId) {
 		HentJournalpostInfoRequest hentJournalpostInfoRequest = mapRequest(journalpostId);
-		Histogram.Timer requestTimer = requestLatency.labels(SERVICE_ID, "Joark::DokumentproduksjonInfoV1:hentJournalpostInfo")
-				.startTimer();
+		Timer.Sample sample = Timer.start(meterRegistry);
 		try {
 			HentJournalpostInfoResponse hentJournalpostInfoResponse = dokumentproduksjonInfoV1.hentJournalpostInfo(hentJournalpostInfoRequest);
 			return mapResponse(hentJournalpostInfoResponse);
@@ -47,7 +51,9 @@ public class Tjoark122HentJournalpostInfo {
 		} catch (Exception e) {
 			throw new DokoppTechnicalException("teknisk feil ved kall mot dokumentproduksjonInfoV1:hentJournalpostInfo. Antall retries=" + retries + ", journalpostId=" + journalpostId, e);
 		} finally {
-			requestTimer.observeDuration();
+			sample.stop(REQUEST_LATENCY_TIMER_BUILDER.tags(LABEL_PROCESS, SERVICE_ID,
+					LABEL_PROCESS_CALLED, "Joark::DokumentproduksjonInfoV1:hentJournalpostInfo")
+					.register(meterRegistry));
 		}
 	}
 	
