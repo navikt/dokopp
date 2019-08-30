@@ -15,7 +15,7 @@ import javax.validation.constraints.Min;
 @Getter
 @Setter
 @ToString
-@ConfigurationProperties("MQGATEWAY01")
+@ConfigurationProperties("mqgateway01")
 @Validated
 public class MqGatewayAlias {
 	@NotEmpty

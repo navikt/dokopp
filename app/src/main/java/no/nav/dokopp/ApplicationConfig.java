@@ -1,7 +1,5 @@
 package no.nav.dokopp;
 
-import io.prometheus.client.spring.boot.EnablePrometheusEndpoint;
-import io.prometheus.client.spring.boot.EnableSpringBootMetricsCollector;
 import no.nav.dokopp.config.TomcatConfig;
 import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1EndpointConfig;
 import no.nav.dokopp.config.cxf.BehandleOppgaveV1EndpointConfig;
@@ -36,8 +34,6 @@ import org.springframework.retry.annotation.EnableRetry;
  */
 @EnableRetry
 @EnableJms
-@EnablePrometheusEndpoint
-@EnableSpringBootMetricsCollector
 @EnableConfigurationProperties({
 		SrvAppserverProperties.class,
 		MqChannelAlias.class,
@@ -63,7 +59,6 @@ import org.springframework.retry.annotation.EnableRetry;
 		BehandleOppgaveV1Check.class,
 		Qopp001QueueCheck.class,
 		FunctionalBoqCheck.class,
-		ApplicationReadyListener.class,
 		Qopp001Route.class
 })
 @Configuration

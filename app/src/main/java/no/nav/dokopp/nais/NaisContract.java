@@ -1,7 +1,7 @@
 package no.nav.dokopp.nais;
 
-import static no.nav.dokopp.config.metrics.PrometheusMetrics.isReady;
-
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -37,18 +38,22 @@ public class NaisContract {
 	private static final String APPLICATION_ALIVE = "Application is alive!";
 	private static final String APPLICATION_READY = "Application is ready for traffic!";
 	private static final String APPLICATION_NOT_READY = "Application is not ready for traffic :-(";
+	private static AtomicInteger isReady = new AtomicInteger(1);
 
 	private final String appName;
 	private final String version;
 	private final List<AbstractDependencyCheck> dependencyCheckList;
 
 	@Inject
-	public NaisContract(List<AbstractDependencyCheck> dependencyCheckList, @Value("dokopp") String appName, @Value("${APP_VERSION:0}") String version) {
+	public NaisContract(List<AbstractDependencyCheck> dependencyCheckList,
+						@Value("dokopp") String appName,
+						@Value("${APP_VERSION:0}") String version,
+						MeterRegistry meterRegistry) {
 		this.dependencyCheckList = new ArrayList<>(dependencyCheckList);
 		this.appName = appName;
 		this.version = version;
+		Gauge.builder("dok_app_is_ready", isReady, AtomicInteger::get).register(meterRegistry);
 	}
-
 
 	@GetMapping("/isAlive")
 	public String isAlive() {
@@ -66,10 +71,10 @@ public class NaisContract {
 		if (isAnyVitalDependencyUnhealthy(results.stream()
 				.map(DependencyCheckResult::getResult)
 				.collect(Collectors.toList()))) {
-			isReady.set(-1.0);
+			isReady.set(-1);
 			return new ResponseEntity<>(APPLICATION_NOT_READY, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		isReady.set(1.0);
+		isReady.set(1);
 		return new ResponseEntity<>(APPLICATION_READY, HttpStatus.OK);
 	}
 

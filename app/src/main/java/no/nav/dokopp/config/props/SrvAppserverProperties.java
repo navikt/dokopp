@@ -17,7 +17,7 @@ import javax.annotation.PostConstruct;
 @Getter
 @Setter
 @ToString
-@ConfigurationProperties("SRVAPPSERVER")
+@ConfigurationProperties("srvappserver")
 @Validated
 public class SrvAppserverProperties {
 	@NotEmpty

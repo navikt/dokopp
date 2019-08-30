@@ -1,7 +1,5 @@
 package no.nav.dokopp.nais.selftest;
 
-import static no.nav.dokopp.config.metrics.PrometheusMetrics.dependencyPingable;
-
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiter;
@@ -54,9 +52,7 @@ public abstract class AbstractDependencyCheck {
 		CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(dependencyName);
 		Callable<DependencyCheckResult> chainedCallable = CircuitBreaker.decorateCallable(circuitBreaker, timeRestrictedCall);
 		return Try.ofCallable(chainedCallable)
-				.onSuccess(success -> dependencyPingable.labels(dependencyName).set(1))
 				.onFailure(throwable -> {
-					dependencyPingable.labels(dependencyName).dec();
 					log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", getName(), getType(), getAddress(), throwable);
 				})
 				.recover(throwable -> DependencyCheckResult.builder()

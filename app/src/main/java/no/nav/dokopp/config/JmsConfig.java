@@ -28,12 +28,12 @@ public class JmsConfig {
 	private static final int UTF_8_WITH_PUA = 1208;
 	
 	@Bean
-	public Queue qopp001(@Value("${DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME}") String qopp001QueueName) throws JMSException {
+	public Queue qopp001(@Value("${dokopp.qopp001.opprett.oppgave.queuename}") String qopp001QueueName) throws JMSException {
 		return new MQQueue(qopp001QueueName);
 	}
 	
 	@Bean
-	public Queue qopp001FunksjonellFeil(@Value("${DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME}") String qopp001FunksjonellFeil) throws JMSException {
+	public Queue qopp001FunksjonellFeil(@Value("${dokopp.qopp001.funksjonell.feil.queuename}") String qopp001FunksjonellFeil) throws JMSException {
 		return new MQQueue(qopp001FunksjonellFeil);
 	}
 	
