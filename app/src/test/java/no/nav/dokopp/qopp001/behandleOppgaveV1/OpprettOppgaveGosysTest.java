@@ -7,6 +7,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.nav.dokopp.qopp001.domain.BrukerType;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
@@ -14,16 +15,12 @@ import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveR
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mockito;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class OpprettOppgaveGosysTest {
 	
 	private static final String SAKSNUMMER = "123456";
@@ -40,15 +37,12 @@ public class OpprettOppgaveGosysTest {
 	private static final BrukerType BRUKER_TYPE = BrukerType.PERSON;
 	private static final int ENHETS_ID = 9999;
 	
-	@Mock
-	private BehandleOppgaveV1 behandleOppgaveV1;
-	
-	@InjectMocks
-	private OpprettOppgaveGosys opprettOppgaveGosys;
+	private BehandleOppgaveV1 behandleOppgaveV1 = Mockito.mock(BehandleOppgaveV1.class);
+	private OpprettOppgaveGosys opprettOppgaveGosys = new OpprettOppgaveGosys(behandleOppgaveV1, new SimpleMeterRegistry());
 	
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
-	
+
 	@Test
 	public void shouldOpprettOppgaveGosys() throws Exception {
 		when(behandleOppgaveV1.opprettOppgave(any(WSOpprettOppgaveRequest.class))).thenReturn(new WSOpprettOppgaveResponse().withOppgaveId(OPPGAVE_ID));

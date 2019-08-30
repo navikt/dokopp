@@ -1,9 +1,12 @@
 package no.nav.dokopp.qopp001.behandleOppgaveV1;
 
-import static no.nav.dokopp.config.metrics.PrometheusMetrics.requestLatency;
+import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
+import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
+import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
 import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
-import io.prometheus.client.Histogram;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import no.nav.dokopp.exception.AvsluttBehandlingException;
 import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.dokopp.qopp001.domain.BrukerType;
@@ -33,16 +36,18 @@ public class OpprettOppgaveGosys {
 	private static final int OPPRETTET_AV_ENHET = 9999;
 	private static final int ANTALL_DAGER_AKTIV = 14;
 	private final BehandleOppgaveV1 behandleOppgaveV1;
+	private final MeterRegistry meterRegistry;
 	private final static int RETRIES = 3;
 	
 	@Inject
-	public OpprettOppgaveGosys(BehandleOppgaveV1 behandleOppgaveV1) {
+	public OpprettOppgaveGosys(BehandleOppgaveV1 behandleOppgaveV1, MeterRegistry meterRegistry) {
 		this.behandleOppgaveV1 = behandleOppgaveV1;
+		this.meterRegistry = meterRegistry;
 	}
 	
 	@Retryable(value = DokoppTechnicalException.class, maxAttempts = RETRIES, backoff = @Backoff(delay = 500))
 	public String opprettOppgave(OpprettOppgaveRequestTo opprettOppgaveRequestTo) {
-		Histogram.Timer requestTimer = requestLatency.labels(SERVICE_ID, "Gsak::BehandleOppgaveV1:opprettOppgave").startTimer();
+		Timer.Sample sample = Timer.start(meterRegistry);
 		try {
 			WSOpprettOppgaveResponse wsOpprettOppgaveResponse = behandleOppgaveV1.opprettOppgave(mapRequest(opprettOppgaveRequestTo));
 			return wsOpprettOppgaveResponse.getOppgaveId();
@@ -52,7 +57,9 @@ public class OpprettOppgaveGosys {
 			throw new DokoppTechnicalException("teknisk feil ved kall mot behandleOppgaveV1:opprettOppgave. Antall retries=" + RETRIES + ", journalpostId=" + opprettOppgaveRequestTo
 					.getJournalpostId(), e);
 		} finally {
-			requestTimer.observeDuration();
+			sample.stop(REQUEST_LATENCY_TIMER_BUILDER.tags(LABEL_PROCESS, SERVICE_ID,
+					LABEL_PROCESS_CALLED, "Gsak::BehandleOppgaveV1:opprettOppgave")
+					.register(meterRegistry));
 		}
 	}
 	

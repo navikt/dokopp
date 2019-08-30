@@ -3,7 +3,7 @@ package no.nav.dokopp.config.metrics;
 /**
  * @author Jakob A. Libak, NAV.
  */
-public class PrometheusLabels {
+public class MetricLabels {
 
 	public static final String TYPE_TECHNICAL_EXCEPTION = "technical";
 	public static final String TYPE_FUNCTIONAL_EXCEPTION = "functional";
@@ -13,7 +13,6 @@ public class PrometheusLabels {
 	public static final String LABEL_PROCESS_CALLED = "process_called";
 	public static final String LABEL_ERROR_TYPE = "error_type";
 	public static final String LABEL_EXCEPTION_NAME = "exception_name";
-	public static final String LABEL_NAME = "name";
 
 	public static final String EVENT_RECEIVED = "Kall mottatt";
 	public static final String EVENT_PROCESSED = "Kall ok behandlet";
