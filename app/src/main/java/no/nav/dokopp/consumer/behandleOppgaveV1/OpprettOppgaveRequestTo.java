@@ -1,4 +1,4 @@
-package no.nav.dokopp.qopp001.behandleOppgaveV1;
+package no.nav.dokopp.consumer.behandleOppgaveV1;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;

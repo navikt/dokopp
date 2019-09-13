@@ -1,4 +1,4 @@
-package no.nav.dokopp.qopp001.behandleOppgaveV1;
+package no.nav.dokopp.consumer.behandleOppgaveV1;
 
 import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
 import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;

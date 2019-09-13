@@ -1,4 +1,4 @@
-package no.nav.dokopp.qopp001.tjoark110;
+package no.nav.dokopp.consumer.tjoark110;
 
 import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
 import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
