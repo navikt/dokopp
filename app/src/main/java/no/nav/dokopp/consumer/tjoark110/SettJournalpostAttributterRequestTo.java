@@ -1,4 +1,4 @@
-package no.nav.dokopp.qopp001.tjoark110;
+package no.nav.dokopp.consumer.tjoark110;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

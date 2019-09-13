@@ -1,9 +1,9 @@
-package no.nav.dokopp.qopp001.behandleOppgaveV1;
+package no.nav.dokopp.consumer.behandleOppgaveV1;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
