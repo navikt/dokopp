@@ -1,7 +1,7 @@
 package no.nav.dokopp.qopp001;
 
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
-import no.nav.dokopp.qopp001.domain.DomainConstants;
+import no.nav.dokopp.constants.DomainConstants;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,7 +15,7 @@ public class Qopp001ServiceTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private final Qopp001Service qopp001Service = new Qopp001Service(null, null, null);
+	private final Qopp001Service qopp001Service = new Qopp001Service(null, null, null, null);
 
 	@Test
 	public void shouldThrowAvsluttBehandlingOgKastMeldingExceptionWhenUgyldigArkivSystem() {

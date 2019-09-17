@@ -1,9 +1,0 @@
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
-	<soapenv:Body>
-		<a:opprettOppgaveResponse xmlns:a="http://nav.no/tjeneste/virksomhet/behandleoppgave/v1">
-			<response>
-				<oppgaveId>1234</oppgaveId>
-			</response>
-		</a:opprettOppgaveResponse>
-	</soapenv:Body>
-</soapenv:Envelope>
