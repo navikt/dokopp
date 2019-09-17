@@ -1,21 +1,19 @@
 package no.nav.dokopp.qopp001;
 
+import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
+import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
 import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
-import static no.nav.dokopp.qopp001.domain.DomainConstants.ARKIVSYSTEM_JOARK;
-import static no.nav.dokopp.qopp001.domain.DomainConstants.BEHANDLE_RETURPOST;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
-import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
-import no.nav.dokopp.exception.UgyldigInputverdiException;
-import no.nav.dokopp.consumer.behandleOppgaveV1.OpprettOppgaveGosys;
-import no.nav.dokopp.consumer.behandleOppgaveV1.OpprettOppgaveRequestTo;
-import no.nav.dokopp.qopp001.domain.BrukerType;
+import no.nav.dokopp.consumer.oppgave.Oppgave;
 import no.nav.dokopp.consumer.tjoark110.SettJournalpostAttributterRequestTo;
 import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.consumer.tjoark122.HentJournalpostInfoResponseTo;
 import no.nav.dokopp.consumer.tjoark122.Tjoark122HentJournalpostInfo;
+import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
+import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
+import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Handler;
@@ -30,17 +28,19 @@ import javax.inject.Inject;
 @Service
 public class Qopp001Service {
 
-	private static final String OPPGAVEBESKRIVELSE = "Returpost";
 	private static final int ANTALL_RETUR = 1;
-	private final OpprettOppgaveGosys opprettOppgaveGosys;
+	private final Oppgave oppgave;
+	private final OpprettOppgaveMapper opprettOppgaveMapper;
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
 
 	@Inject
-	public Qopp001Service(OpprettOppgaveGosys opprettOppgaveGosys,
+	public Qopp001Service(Oppgave oppgave,
+						  OpprettOppgaveMapper opprettOppgaveMapper,
 						  Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo,
 						  Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter) {
-		this.opprettOppgaveGosys = opprettOppgaveGosys;
+		this.oppgave = oppgave;
+		this.opprettOppgaveMapper = opprettOppgaveMapper;
 		this.tjoark122HentJournalpostInfo = tjoark122HentJournalpostInfo;
 		this.tjoark110SettJournalpostAttributter = tjoark110SettJournalpostAttributter;
 	}
@@ -55,7 +55,7 @@ public class Qopp001Service {
 		if (hentJournalpostInfoResponseTo.isAlleredeRegistrertReturpost()) {
 			throw new ReturpostAlleredeFlaggetException("qopp001 har oppdaget at returpost allerede er flagget som antallRetur=" + hentJournalpostInfoResponseTo.getAntallRetur() + ". Oppretter ikke oppgave i Gosys");
 		} else {
-			String oppgaveId = opprettOppgaveGosys.opprettOppgave(mapToOpprettOppgaveRequestTo(hentJournalpostInfoResponseTo, opprettOppgave));
+			Integer oppgaveId = oppgave.opprettOppgave(opprettOppgaveMapper.map(hentJournalpostInfoResponseTo, opprettOppgave));
 			log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.", oppgaveId, hentJournalpostInfoResponseTo.getFagomrade(), journalpostId);
 
 			tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, ANTALL_RETUR));
@@ -73,18 +73,5 @@ public class Qopp001Service {
 					", arkivKode=" + opprettOppgave.getArkivKode());
 		}
 	}
-
-	private OpprettOppgaveRequestTo mapToOpprettOppgaveRequestTo(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo, OpprettOppgave opprettOppgave) {
-		return OpprettOppgaveRequestTo.builder()
-				.fagomrade(hentJournalpostInfoResponseTo.getFagomrade())
-				.beskrivelse(OPPGAVEBESKRIVELSE)
-				.journalFEnhet(hentJournalpostInfoResponseTo.getJournalfEnhet())
-				.journalpostId(opprettOppgave.getArkivKode())
-				.brukerId(hentJournalpostInfoResponseTo.getBrukerId())
-				.brukertypeKode(BrukerType.valueOf(hentJournalpostInfoResponseTo.getBrukertype()))
-				.saksnummer(hentJournalpostInfoResponseTo.getSaksnummer())
-				.build();
-	}
-
 
 }
