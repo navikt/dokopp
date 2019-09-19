@@ -5,15 +5,14 @@ import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
 import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
 import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
 import static no.nav.dokopp.constants.DomainConstants.BEARER_PREFIX;
-import static no.nav.dokopp.constants.MdcConstants.NAV_CALL_ID;
-import static no.nav.dokopp.constants.MdcConstants.NAV_CONSUMER_ID;
-import static no.nav.dokopp.constants.MdcConstants.X_CORRELATION_ID;
+import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
+import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
+import static no.nav.dokopp.constants.HeaderConstants.X_CORRELATION_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import no.nav.dokopp.constants.MdcConstants;
 import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.OpprettOppgaveTechnicalException;
@@ -81,8 +80,8 @@ public class OppgaveConsumer implements Oppgave {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + stsRestConsumer.getOidcToken());
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
-		headers.add(NAV_CALL_ID, MDC.get(MdcConstants.NAV_CALL_ID));
-		headers.add(X_CORRELATION_ID, MDC.get(MdcConstants.NAV_CALL_ID));
+		headers.add(NAV_CALL_ID, MDC.get(NAV_CALL_ID));
+		headers.add(X_CORRELATION_ID, MDC.get(NAV_CALL_ID));
 		return headers;
 	}
 }

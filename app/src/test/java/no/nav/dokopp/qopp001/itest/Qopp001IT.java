@@ -124,9 +124,12 @@ public class Qopp001IT {
 				.withBodyFile("oppgaver/opprettOppgave_happy.json")));
 		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
-		
-		
-		Thread.sleep(5000);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			// vent på siste API-kall før videre verifisering
+			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
+		});
+
 		verify(postRequestedFor(urlEqualTo("/dokumentproduksjoninfo"))
 				.withRequestBody(matchingXPath("//journalpostId/text()", equalTo(JOURNALPOST_ID))));
 		verify(1, getRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
@@ -156,10 +159,11 @@ public class Qopp001IT {
 				.withBodyFile("oppgaver/opprettOppgave_pensjon.json")));
 		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
-		
-		Thread.sleep(5000);
-		verify(postRequestedFor(urlEqualTo("/oppgaver"))
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(postRequestedFor(urlEqualTo("/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == null)]")));
+		});
 	}
 
 	@Test
@@ -175,10 +179,11 @@ public class Qopp001IT {
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		Thread.sleep(5000);
-		verify(postRequestedFor(urlEqualTo("/oppgaver"))
-				.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
-				.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]")));
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(postRequestedFor(urlEqualTo("/oppgaver"))
+					.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
+					.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]")));
+		});
 	}
 
 	@Test
