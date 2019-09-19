@@ -115,11 +115,16 @@
 			<artifactId>modig-security-loginmodule</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- tjenester -->
+		<!--Caching-->
 		<dependency>
-			<groupId>no.nav.sbl.dialogarena</groupId>
-			<artifactId>behandleoppgave-v1-tjenestespesifikasjon</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
+		<!-- tjenester -->
 		<dependency>
 			<groupId>no.nav.tjenester.brevogarkiv</groupId>
 			<artifactId>arkiverdokumentproduksjon-tjenestespesifikasjon</artifactId>
