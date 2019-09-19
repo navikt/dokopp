@@ -4,11 +4,11 @@
 			<response>
 				<journalStatus>J</journalStatus>
 				<journalfEnhet>2990</journalfEnhet>
-				<fagomrade>IAR</fagomrade>
-				<brukerId>***gammelt_fnr***</brukerId>
-				<brukerType>PERSON</brukerType>
+				<fagomrade>HJE</fagomrade>
+				<brukerId>123456789</brukerId>
+				<brukerType>ORGANISASJON</brukerType>
 				<saksNummer>1</saksNummer>
-				<fagsystem>PEN</fagsystem>
+				<fagsystem>FS22</fagsystem>
 			</response>
 		</a:hentJournalpostInfoResponse>
 	</soapenv:Body>

@@ -1,0 +1,19 @@
+{
+  "id": 1234,
+  "tildeltEnhetsnr": "2990",
+  "opprettetAvEnhetsnr": "9999",
+  "journalpostId": "123456",
+  "aktoerId": "***gammelt_fnr***78",
+  "beskrivelse": "Returpost",
+  "tema": "HJE",
+  "oppgavetype": "RETUR",
+  "versjon": 1,
+  "fristFerdigstillelse": "2019-09-30",
+  "aktivDato": "2019-09-16",
+  "opprettetTidspunkt": "2019-09-16T10:09:08.314+02:00",
+  "opprettetAv": "srvdokopp",
+  "prioritet": "LAV",
+  "saksreferanse": "1",
+  "status": "OPPRETTET",
+  "metadata": {}
+}

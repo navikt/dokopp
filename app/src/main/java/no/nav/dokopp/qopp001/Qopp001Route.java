@@ -77,6 +77,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.routeId(SERVICE_ID)
 				.routePolicy(new MicrometerRoutePolicy(meterRegistry))
 				.setProperty(PROPERTY_ORIGINAL_MESSAGE, simple("${body}"))
+				.process(new IdsProcessor())
 				.to("validator:xsd/opprett_oppgave.xsd")
 				.unmarshal(new JaxbDataFormat(OpprettOppgave.class.getPackage().getName()))
 				.setProperty(PROPERTY_JOURNALPOST_ID, simple("${body.arkivKode}", String.class))
