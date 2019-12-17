@@ -33,7 +33,7 @@ public class OpprettOppgaveMapper {
 
 	private final Aktoerregister aktoerregister;
 
-	public OpprettOppgaveMapper (Aktoerregister aktoerregister) {
+	public OpprettOppgaveMapper(Aktoerregister aktoerregister) {
 		this.aktoerregister = aktoerregister;
 	}
 
@@ -51,8 +51,12 @@ public class OpprettOppgaveMapper {
 				.prioritet(GSAK_PRIORITETKODE_LAV)
 				.saksreferanse(mapSaksreferanse(hentJournalpostInfoResponseTo))
 				.tema(hentJournalpostInfoResponseTo.getFagomrade())
-				.tildeltEnhetsnr(hentJournalpostInfoResponseTo.getJournalfEnhet())
+				.tildeltEnhetsnr(hentJournalfEnhet(hentJournalpostInfoResponseTo))
 				.build();
+	}
+
+	private String hentJournalfEnhet(HentJournalpostInfoResponseTo responseTo) {
+		return responseTo.getJournalfEnhet() != "9999" ? responseTo.getJournalfEnhet() : "";
 	}
 
 	private Map<String, String> mapBruker(String brukerId, String brukertype) {

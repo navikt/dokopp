@@ -73,6 +73,24 @@ public class OpprettOppgaveMapperTest {
 	}
 
 	@Test
+	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrBlankWhenJournalfEnhetEr9999(){
+		when(aktoerregister.hentAktoerIdForFnr(anyString())).thenThrow(
+				new RuntimeException("Skal ikke kalle aktoerregister for orgnr."));
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithEnhet9999(),
+				createOpprettOppgave());
+		assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrBlank(request);
+	}
+
+	@Test
+	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrWithJournalfEnhetWhenNot9999(){
+		when(aktoerregister.hentAktoerIdForFnr(anyString())).thenThrow(
+				new RuntimeException("Skal ikke kalle aktoerregister for orgnr."));
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithOrganisasjon(),
+				createOpprettOppgave());
+		assertOpprettOppgaveRequestWithOrganisasjon(request);
+	}
+
+	@Test
 	public void shouldThrowUkjentBrukertypeException() {
 		expectedException.expect(UkjentBrukertypeException.class);
 		expectedException.expectMessage("Ukjent brukertype er ikke støttet.");
@@ -125,6 +143,17 @@ public class OpprettOppgaveMapperTest {
 				.build();
 	}
 
+	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithEnhet9999() {
+		return HentJournalpostInfoResponseTo.builder()
+				.brukerId(ORGNR)
+				.brukertype(BrukerType.ORGANISASJON.name())
+				.fagomrade(FAGOMRAADE_IAR)
+				.fagsystem(FAGSYSTEM_GOSYS)
+				.journalfEnhet(ENHETS_ID)
+				.saksnummer(SAKSNUMMER)
+				.build();
+	}
+
 	private void assertOpprettOppgaveRequestWithPersonAndPensjon(OpprettOppgaveRequest request) {
 		assertThat(request.getAktoerId(), is(AKTOER_ID));
 		assertNull(request.getOrgnr());
@@ -141,12 +170,38 @@ public class OpprettOppgaveMapperTest {
 		assertOpprettOppgaveRequest(request);
 	}
 
+	private void assertOpprettOppgaveRequestWithTildeltEnhetsnrBlank(OpprettOppgaveRequest request) {
+		assertNull(request.getAktoerId());
+		assertThat(request.getOrgnr(), is(ORGNR));
+		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
+		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertOpprettOppgaveRequest(request);
+	}
 	private void assertOpprettOppgaveRequestWithOrganisasjon(OpprettOppgaveRequest request) {
 		assertNull(request.getAktoerId());
 		assertThat(request.getOrgnr(), is(ORGNR));
 		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
 		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
 		assertOpprettOppgaveRequest(request);
+	}
+
+	private void assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrBlank(OpprettOppgaveRequest request) {
+		assertNull(request.getAktoerId());
+		assertThat(request.getOrgnr(), is(ORGNR));
+		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
+		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertOpprettOppgaveRequestWithEnhetNrBlank(request);
+	}
+
+	private void assertOpprettOppgaveRequestWithEnhetNrBlank(OpprettOppgaveRequest request) {
+		assertThat(request.getTildeltEnhetsnr(), is(""));
+		assertThat(request.getOpprettetAvEnhetsnr(), is(ENHETS_ID));
+		assertThat(request.getJournalpostId(), is(JOURNALPOST_ID));
+		assertThat(request.getBeskrivelse(), is(OPPGAVEBESKRIVELSE));
+		assertThat(request.getOppgavetype(), is(OPPGAVETYPE_RETURPOST));
+		assertThat(request.getFristFerdigstillelse(), is(LocalDate.now().plusDays(ANTALL_DAGER_AKTIV).toString()));
+		assertThat(request.getAktivDato(), is(LocalDate.now().toString()));
+		assertThat(request.getPrioritet(), is(PRIORITETKODE_LAV));
 	}
 
 	private void assertOpprettOppgaveRequest(OpprettOppgaveRequest request) {
