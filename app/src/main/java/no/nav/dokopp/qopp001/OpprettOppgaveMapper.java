@@ -56,7 +56,7 @@ public class OpprettOppgaveMapper {
 	}
 
 	private String hentJournalfEnhet(HentJournalpostInfoResponseTo responseTo) {
-		return responseTo.getJournalfEnhet() != "9999" ? responseTo.getJournalfEnhet() : "";
+		return responseTo.getJournalfEnhet().equals(OPPRETTET_AV_ENHET) ? null :responseTo.getJournalfEnhet();
 	}
 
 	private Map<String, String> mapBruker(String brukerId, String brukertype) {
