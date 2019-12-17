@@ -1,5 +1,6 @@
 package no.nav.dokopp.qopp001;
 
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -73,7 +74,7 @@ public class OpprettOppgaveMapperTest {
 	}
 
 	@Test
-	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrBlankWhenJournalfEnhetEr9999(){
+	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrNullWhenJournalfEnhetEr9999(){
 		when(aktoerregister.hentAktoerIdForFnr(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle aktoerregister for orgnr."));
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithEnhet9999(),
@@ -170,13 +171,6 @@ public class OpprettOppgaveMapperTest {
 		assertOpprettOppgaveRequest(request);
 	}
 
-	private void assertOpprettOppgaveRequestWithTildeltEnhetsnrBlank(OpprettOppgaveRequest request) {
-		assertNull(request.getAktoerId());
-		assertThat(request.getOrgnr(), is(ORGNR));
-		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
-		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
-		assertOpprettOppgaveRequest(request);
-	}
 	private void assertOpprettOppgaveRequestWithOrganisasjon(OpprettOppgaveRequest request) {
 		assertNull(request.getAktoerId());
 		assertThat(request.getOrgnr(), is(ORGNR));
@@ -194,7 +188,7 @@ public class OpprettOppgaveMapperTest {
 	}
 
 	private void assertOpprettOppgaveRequestWithEnhetNrBlank(OpprettOppgaveRequest request) {
-		assertThat(request.getTildeltEnhetsnr(), is(""));
+		assertThat(request.getTildeltEnhetsnr(), nullValue());
 		assertThat(request.getOpprettetAvEnhetsnr(), is(ENHETS_ID));
 		assertThat(request.getJournalpostId(), is(JOURNALPOST_ID));
 		assertThat(request.getBeskrivelse(), is(OPPGAVEBESKRIVELSE));
