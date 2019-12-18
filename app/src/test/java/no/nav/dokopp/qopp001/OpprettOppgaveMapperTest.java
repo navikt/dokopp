@@ -1,5 +1,6 @@
 package no.nav.dokopp.qopp001;
 
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -73,6 +74,33 @@ public class OpprettOppgaveMapperTest {
 	}
 
 	@Test
+	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrNullWhenJournalfEnhetEr9999(){
+		when(aktoerregister.hentAktoerIdForFnr(anyString())).thenThrow(
+				new RuntimeException("Skal ikke kalle aktoerregister for orgnr."));
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithEnhet9999(),
+				createOpprettOppgave());
+		assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrNull(request);
+	}
+
+	@Test
+	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrWithJournalfEnhetWhenNot9999(){
+		when(aktoerregister.hentAktoerIdForFnr(anyString())).thenThrow(
+				new RuntimeException("Skal ikke kalle aktoerregister for orgnr."));
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithOrganisasjon(),
+				createOpprettOppgave());
+		assertOpprettOppgaveRequestWithOrganisasjon(request);
+	}
+
+	@Test
+	public void shouldOpprettetOppgaveSetTildeltEnhetsnrNullWhenJournalfEnhetIsNull(){
+		when(aktoerregister.hentAktoerIdForFnr(anyString())).thenThrow(
+				new RuntimeException("Skal ikke kalle aktoerregister for orgnr."));
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithJournalEnhetNull(),
+				createOpprettOppgave());
+		assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrNull(request);
+	}
+
+	@Test
 	public void shouldThrowUkjentBrukertypeException() {
 		expectedException.expect(UkjentBrukertypeException.class);
 		expectedException.expectMessage("Ukjent brukertype er ikke støttet.");
@@ -114,6 +142,17 @@ public class OpprettOppgaveMapperTest {
 				.build();
 	}
 
+	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithJournalEnhetNull() {
+		return HentJournalpostInfoResponseTo.builder()
+				.brukerId(ORGNR)
+				.brukertype(BrukerType.ORGANISASJON.name())
+				.fagomrade(FAGOMRAADE_IAR)
+				.fagsystem(FAGSYSTEM_GOSYS)
+				.journalfEnhet(null)
+				.saksnummer(SAKSNUMMER)
+				.build();
+	}
+
 	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithUkjent() {
 		return HentJournalpostInfoResponseTo.builder()
 				.brukerId(FNR)
@@ -121,6 +160,17 @@ public class OpprettOppgaveMapperTest {
 				.fagomrade(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
+				.saksnummer(SAKSNUMMER)
+				.build();
+	}
+
+	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithEnhet9999() {
+		return HentJournalpostInfoResponseTo.builder()
+				.brukerId(ORGNR)
+				.brukertype(BrukerType.ORGANISASJON.name())
+				.fagomrade(FAGOMRAADE_IAR)
+				.fagsystem(FAGSYSTEM_GOSYS)
+				.journalfEnhet(ENHETS_ID)
 				.saksnummer(SAKSNUMMER)
 				.build();
 	}
@@ -147,6 +197,25 @@ public class OpprettOppgaveMapperTest {
 		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
 		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
 		assertOpprettOppgaveRequest(request);
+	}
+
+	private void assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrNull(OpprettOppgaveRequest request) {
+		assertNull(request.getAktoerId());
+		assertThat(request.getOrgnr(), is(ORGNR));
+		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
+		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertOpprettOppgaveRequestWithEnhetNrNull(request);
+	}
+
+	private void assertOpprettOppgaveRequestWithEnhetNrNull(OpprettOppgaveRequest request) {
+		assertThat(request.getTildeltEnhetsnr(), nullValue());
+		assertThat(request.getOpprettetAvEnhetsnr(), is(ENHETS_ID));
+		assertThat(request.getJournalpostId(), is(JOURNALPOST_ID));
+		assertThat(request.getBeskrivelse(), is(OPPGAVEBESKRIVELSE));
+		assertThat(request.getOppgavetype(), is(OPPGAVETYPE_RETURPOST));
+		assertThat(request.getFristFerdigstillelse(), is(LocalDate.now().plusDays(ANTALL_DAGER_AKTIV).toString()));
+		assertThat(request.getAktivDato(), is(LocalDate.now().toString()));
+		assertThat(request.getPrioritet(), is(PRIORITETKODE_LAV));
 	}
 
 	private void assertOpprettOppgaveRequest(OpprettOppgaveRequest request) {
