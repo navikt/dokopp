@@ -90,10 +90,6 @@ public class Qopp001IT {
 	
 	@BeforeClass
 	public static void beforeClass() {
-		TestCertificates.setupTemporaryTrustStore("no/nav/modig/testcertificates/truststore.jts", "changeit");
-		File file = FileUtils.putInTempFile(TestCertificates.class.getClassLoader()
-				.getResourceAsStream("no/nav/modig/testcertificates/keystore.jks"));
-		System.setProperty("srvdokopp.cert.keystore", file.getAbsolutePath());
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
 	}
 
