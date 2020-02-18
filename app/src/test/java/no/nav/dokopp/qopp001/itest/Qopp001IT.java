@@ -67,7 +67,7 @@ public class Qopp001IT {
 	private static final String JOURNALPOST_ID = "123456";
 	private static final String ENHETS_ID = "9999";
 	private static final String SAKS_REFERANSE = "1";
-	private static final String AKTOER_ID = "***gammelt_fnr***78";
+	private static final String AKTOER_ID = "1000012345678";
 	private static final String ORGNR = "123456789";
 	
 	@Inject

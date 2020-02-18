@@ -55,5 +55,3 @@ spec:
     paths:
       - kvPath: {{ SRVDOKOPP }}
         mountPath: /var/run/secrets/nais.io/srvdokopp
-      - kvPath: {{ SRVDOKOPPCERT }}
-        mountPath: /var/run/secrets/nais.io/certificate/srvdokopp

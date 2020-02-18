@@ -9,7 +9,6 @@
 	"AKTOERREGISTER_API_V1_URL": "https://app-q1.adeo.no/aktoerregister/api/v1",
 	"SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
 	"SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
-	"SRVDOKOPPCERT": "/certificate/data/dev/srvdokopp",
 	"NAMESPACE": "q1",
 	"INGRESSES": [
 		"https://dokopp-q1.nais.preprod.local"

@@ -25,21 +25,21 @@ Noen secrets må settes - se https://fasit.adeo.no/instances/4417627
 
 # Systembruker
 export SRVDOKOPP_USERNAME=srvdokopp
-export SRVDOKOPP_***REMOVED***>
+export SRVDOKOPP_PASSWORD=<pw>
 
 ```
 
 Kjøre appen med mvn spring boot plugin. Truststore finnes f.eks i modig-testcertificates testdependency eller på Fasit som `nav_truststore` alias. 
 
 ```
-mvn spring-boot:run -Drun.profiles=t8 -Drun.jvmArguments="-Djavax.net.ssl.trustStore=/path/til/truststore.jks -Djavax.net.ssl.trustStore***REMOVED***>"
+mvn spring-boot:run -Drun.profiles=t8 -Drun.jvmArguments="-Djavax.net.ssl.trustStore=/path/til/truststore.jks -Djavax.net.ssl.trustStorePassword=<truststorepw>"
 ```
 
 ## Hvordan kjøre lokalt med IntelliJ
 
 Start `Application.java` som en Spring Boot/Java Application. På denne måten kan man kjøre lokalt og få full debug-støtte. 
 
-VM Options: `-Djavax.net.ssl.trustStore=/path/til/truststore.jks -Djavax.net.ssl.trustStore***REMOVED***>`
+VM Options: `-Djavax.net.ssl.trustStore=/path/til/truststore.jks -Djavax.net.ssl.trustStorePassword=<truststorepw>`
 
 Active profiles: `t8`.
 
