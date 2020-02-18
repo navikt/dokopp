@@ -1,0 +1,16 @@
+{
+	"MQGATEWAY01_NAME": "MQXLSC01",
+	"MQGATEWAY01_HOSTNAME": "b27apvl170.preprod.local",
+	"MQGATEWAY01_PORT": "1413",
+	"DOKOPP_CHANNEL_NAME": "Q2_DOKOPP",
+	"DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
+	"DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
+	"OPPGAVE_OPPGAVER_URL": "https://oppgave-q2.nais.preprod.local/api/v1/oppgaver",
+	"AKTOERREGISTER_API_V1_URL": "https://app-q2.adeo.no/aktoerregister/api/v1",
+	"SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
+	"SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
+	"NAMESPACE": "q2",
+	"INGRESSES": [
+		"https://dokopp-q2.nais.preprod.local"
+	]
+}

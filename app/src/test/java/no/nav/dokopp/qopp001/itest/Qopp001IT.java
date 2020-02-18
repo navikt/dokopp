@@ -67,7 +67,7 @@ public class Qopp001IT {
 	private static final String JOURNALPOST_ID = "123456";
 	private static final String ENHETS_ID = "9999";
 	private static final String SAKS_REFERANSE = "1";
-	private static final String AKTOER_ID = "***gammelt_fnr***78";
+	private static final String AKTOER_ID = "1000012345678";
 	private static final String ORGNR = "123456789";
 	
 	@Inject
@@ -90,10 +90,6 @@ public class Qopp001IT {
 	
 	@BeforeClass
 	public static void beforeClass() {
-		TestCertificates.setupTemporaryTrustStore("no/nav/modig/testcertificates/truststore.jts", "changeit");
-		File file = FileUtils.putInTempFile(TestCertificates.class.getClassLoader()
-				.getResourceAsStream("no/nav/modig/testcertificates/keystore.jks"));
-		System.setProperty("srvdokopp.cert.keystore", file.getAbsolutePath());
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
 	}
 

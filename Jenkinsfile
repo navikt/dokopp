@@ -1,5 +1,5 @@
-naisPipeline {
+naiseratorPipeline {
     applicationName = "dokopp"
-    dockerfileDir = "./app"
-    deployEnvironmentT = "t8"
+    dockerfileDir = "."
+    deployEnvironmentQ = "q1,q2"
 }

@@ -16,15 +16,15 @@ public class DokoppConfigSetter {
 
 	protected static final String PROPSOURCE = "dokmotaltinnconfig_applicationProperties";
 	public static final String TRUSTSTORE = "javax.net.ssl.trustStore";
-	public static final String TRUSTSTORE***REMOVED***";
-	public static final String APP_TRUSTSTORE_***REMOVED***";
+	public static final String TRUSTSTOREPASSWORD = "javax.net.ssl.trustStorePassword";
+	public static final String APP_TRUSTSTORE_PASSWORD = "APP_TRUSTSTORE_PASSWORD";
 
 	public void configureSsl() {
 		if(System.getProperty(TRUSTSTORE) == null) {
 			System.setProperty(TRUSTSTORE, "/var/run/secrets/naisd.io/app_truststore_keystore");
 		}
-		if(System.getProperty(TRUSTSTORE***REMOVED***) {
-			if(System.getenv(APP_TRUSTSTORE_***REMOVED***) {
+		if(System.getProperty(TRUSTSTOREPASSWORD) == null) {
+			if(System.getenv(APP_TRUSTSTORE_PASSWORD) == null) {
 				throw new IllegalStateException("ENV APP_TRUSTSTORE_PASSWORD was not supplied");
 			}
 			System.setProperty(TRUSTSTOREPASSWORD, System.getenv(APP_TRUSTSTORE_PASSWORD));

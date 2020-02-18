@@ -1,0 +1,57 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: dokopp
+  namespace: {{ NAMESPACE }}
+  labels:
+    team: teamdokumenthandtering
+spec:
+  env:
+    - name: MQGATEWAY01_HOSTNAME
+      value: {{ MQGATEWAY01_HOSTNAME }}
+    - name: MQGATEWAY01_PORT
+      value: "{{ MQGATEWAY01_PORT }}"
+    - name: MQGATEWAY01_NAME
+      value: {{ MQGATEWAY01_NAME }}
+    - name: DOKOPP_CHANNEL_NAME
+      value: {{ DOKOPP_CHANNEL_NAME }}
+    - name: DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME
+      value: {{ DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME }}
+    - name: DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME
+      value: {{ DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME }}
+    - name: OPPGAVE_OPPGAVER_URL
+      value: {{ OPPGAVE_OPPGAVER_URL }}
+    - name: AKTOERREGISTER_API_V1_URL
+      value: {{ AKTOERREGISTER_API_V1_URL }}
+    - name: SECURITY_TOKEN_SERVICE_TOKEN_URL
+      value: {{ SECURITY_TOKEN_SERVICE_TOKEN_URL }}
+  image: {{ image }}
+  ingresses:
+        {{#each INGRESSES}}
+          - {{this }}
+        {{/each}}
+  liveness:
+    path: /isAlive
+    port: 8080
+    initialDelay: 30
+    failureThreshold: 10
+  port: 8080
+  prometheus:
+    enabled: true
+    path: /actuator/prometheus
+  readiness:
+    path: /isReady
+    port: 8080
+    initialDelay: 30
+  replicas:
+    min: 1
+    max: 2
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: 1000m
+  vault:
+    enabled: true
+    paths:
+      - kvPath: {{ SRVDOKOPP }}
+        mountPath: /var/run/secrets/nais.io/srvdokopp

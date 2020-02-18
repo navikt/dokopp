@@ -26,7 +26,7 @@ public class SrvAppserverProperties {
 
 	@PostConstruct
 	public void postConstruct() {
-		if (***REMOVED***) {
+		if (password == null) {
 			password = "";
 		}
 	}

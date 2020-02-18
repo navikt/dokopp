@@ -23,7 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class Tjoark122HentJournalpostInfoTest {
 	private static final String JOURNALFOERENDE_ENHET = "9999";
-	private static final String FNR = "***gammelt_fnr***";
+	private static final String FNR = "11111111111";
 	private static final String PERSON = "PERSON";
 	private static final String SAKSNUMMER = "1";
 	private static final String FAGSYSTEM = "OB36";

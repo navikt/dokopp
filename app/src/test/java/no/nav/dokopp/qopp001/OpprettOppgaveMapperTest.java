@@ -24,8 +24,8 @@ import java.time.LocalDate;
 public class OpprettOppgaveMapperTest {
 
 	private static final String SAKSNUMMER = "123456";
-	private static final String FNR = "***gammelt_fnr***";
-	private static final String AKTOER_ID = "***gammelt_fnr***";
+	private static final String FNR = "12345678901";
+	private static final String AKTOER_ID = "10000047896";
 	private static final String ORGNR = "123456789";
 	private static final String JOURNALPOST_ID = "36875";
 	private static final String JOURNALF_ENHET = "1234";
