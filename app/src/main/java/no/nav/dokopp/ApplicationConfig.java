@@ -7,7 +7,6 @@ import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
 import no.nav.dokopp.config.fasit.DokumentproduksjonInfoV1Alias;
 import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
-import no.nav.dokopp.config.fasit.NavAppCertAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
 import no.nav.dokopp.config.props.SrvAppserverProperties;
 import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
@@ -37,7 +36,6 @@ import org.springframework.retry.annotation.EnableRetry;
 		ServiceuserAlias.class,
 		ArkiverDokumentproduksjonV1Alias.class,
 		DokumentproduksjonInfoV1Alias.class,
-		NavAppCertAlias.class
 })
 @Import({
 		TomcatConfig.class,
