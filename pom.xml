@@ -51,15 +51,15 @@
 		<opprettoppgave-tjenestespesifikasjon-v1.version>1.1.1</opprettoppgave-tjenestespesifikasjon-v1.version>
 		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>3.2.0</arkiverdokumentproduksjon-tjenestespesifikasjon.version>
 		<commons-io.version>2.4</commons-io.version>
-		<logstash-logback-encode.version>5.3</logstash-logback-encode.version>
+		<logstash-logback-encode.version>6.3</logstash-logback-encode.version>
 		<!-- Se https://issues.apache.org/jira/browse/HTTPCLIENT-1997 for bug i httpclient 4.5.9 -->
 		<httpclient.version>4.5.8</httpclient.version>
-		<camel.version>2.24.0</camel.version>
-		<resilience4j.version>0.17.0</resilience4j.version>
+		<camel.version>2.25.1</camel.version>
+		<resilience4j.version>1.2.0</resilience4j.version>
 		<rxjava.version>2.2.9</rxjava.version>
 		<!-- Take care when updating any of these. modig-security depends on CXF versions that might be incompatible. -->
 		<modig-security.version>3.0.6</modig-security.version>
-		<cxf.version>3.3.3</cxf.version>
+		<cxf.version>3.4.0</cxf.version>
 		<saaj-impl.version>1.5.1</saaj-impl.version>
 		<!-- Test dependencies -->
 		<activemq.version>5.15.0</activemq.version>
