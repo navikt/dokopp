@@ -111,10 +111,10 @@ public class Qopp001IT {
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_happy.xml")));
 		stubGetSecurityToken();
-		stubFor(get("/aktoerregister/identer?gjeldende=true&identgruppe=AktoerId").willReturn(aResponse()
+		stubFor(post("/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
-				.withBodyFile("aktoerregister/aktoerregister-happy.json")));
+				.withBodyFile("pdl/pdl-happy.json")));
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprettOppgave_happy.json")));
@@ -129,7 +129,7 @@ public class Qopp001IT {
 		verify(postRequestedFor(urlEqualTo("/dokumentproduksjoninfo"))
 				.withRequestBody(matchingXPath("//journalpostId/text()", equalTo(JOURNALPOST_ID))));
 		verify(1, getRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-		verify(1, getRequestedFor(urlEqualTo("/aktoerregister/identer?gjeldende=true&identgruppe=AktoerId")));
+		verify(1, postRequestedFor(urlEqualTo("/graphql")));
 		verify(postRequestedFor(urlEqualTo("/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == '" + SAKS_REFERANSE + "')]"))
@@ -146,10 +146,10 @@ public class Qopp001IT {
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_pensjon.xml")));
 		stubGetSecurityToken();
-		stubFor(get("/aktoerregister/identer?gjeldende=true&identgruppe=AktoerId").willReturn(aResponse()
+		stubFor(post("/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
-				.withBodyFile("aktoerregister/aktoerregister-happy.json")));
+				.withBodyFile("pdl/pdl-happy.json")));
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprettOppgave_pensjon.json")));
@@ -271,10 +271,10 @@ public class Qopp001IT {
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_happy.xml")));
 		stubGetSecurityToken();
-		stubFor(get("/aktoerregister/identer?gjeldende=true&identgruppe=AktoerId").willReturn(aResponse()
+		stubFor(post("/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
-				.withBodyFile("aktoerregister/aktoerregister-happy.json")));
+				.withBodyFile("pdl/pdl-happy.json")));
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprettOppgave_happy.json")));
@@ -298,10 +298,10 @@ public class Qopp001IT {
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_happy.xml")));
 		stubGetSecurityToken();
-		stubFor(get("/aktoerregister/identer?gjeldende=true&identgruppe=AktoerId").willReturn(aResponse()
+		stubFor(post("/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
-				.withBodyFile("aktoerregister/aktoerregister-happy.json")));
+				.withBodyFile("pdl/pdl-happy.json")));
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
@@ -323,10 +323,10 @@ public class Qopp001IT {
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_happy.xml")));
 		stubGetSecurityToken();
-		stubFor(get("/aktoerregister/identer?gjeldende=true&identgruppe=AktoerId").willReturn(aResponse()
+		stubFor(post("/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
-				.withBodyFile("aktoerregister/aktoerregister-happy.json")));
+				.withBodyFile("pdl/pdl-happy.json")));
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
 		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
@@ -378,7 +378,7 @@ public class Qopp001IT {
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_happy.xml")));
 		stubGetSecurityToken();
-		stubFor(get("/aktoerregister/identer?gjeldende=true&identgruppe=AktoerId").willReturn(
+		stubFor(post("/graphql").willReturn(
 				aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
@@ -395,7 +395,7 @@ public class Qopp001IT {
 		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark122/tjoark122_happy.xml")));
 		stubGetSecurityToken();
-		stubFor(get("/aktoerregister/identer?gjeldende=true&identgruppe=AktoerId").willReturn(
+		stubFor(post("/graphql").willReturn(
 				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);

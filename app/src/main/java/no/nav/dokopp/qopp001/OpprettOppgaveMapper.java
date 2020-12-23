@@ -1,6 +1,6 @@
 package no.nav.dokopp.qopp001;
 
-import no.nav.dokopp.consumer.aktoerregister.Aktoerregister;
+import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.tjoark122.HentJournalpostInfoResponseTo;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
@@ -31,10 +31,10 @@ public class OpprettOppgaveMapper {
 	private static final String GSAK = "FS19";
 	private static final List<String> GOSYS_APPIDS = Arrays.asList(GOSYS, GSAK);
 
-	private final Aktoerregister aktoerregister;
+	private final PdlGraphQLConsumer pdlGraphQLConsumer;
 
-	public OpprettOppgaveMapper(Aktoerregister aktoerregister) {
-		this.aktoerregister = aktoerregister;
+	public OpprettOppgaveMapper(PdlGraphQLConsumer pdlGraphQLConsumer) {
+		this.pdlGraphQLConsumer = pdlGraphQLConsumer;
 	}
 
 	public OpprettOppgaveRequest map(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo, OpprettOppgave opprettOppgave) {
@@ -68,7 +68,7 @@ public class OpprettOppgaveMapper {
 		BrukerType brukertypeKode = BrukerType.valueOf(brukertype);
 		switch (brukertypeKode) {
 			case PERSON:
-				brukerMap.put(AKTOER_ID, aktoerregister.hentAktoerIdForFnr(brukerId));
+				brukerMap.put(AKTOER_ID, pdlGraphQLConsumer.hentAktoerIdForPersonnummer(brukerId));
 				break;
 			case ORGANISASJON:
 				brukerMap.put(ORGNR, brukerId);
