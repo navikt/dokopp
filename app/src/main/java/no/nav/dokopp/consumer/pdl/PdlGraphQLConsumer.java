@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.props.PdlProperties;
 import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
+import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
 import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
@@ -65,10 +66,12 @@ public class PdlGraphQLConsumer {
             if (pdlHentIdenterResponse.getErrors() == null || pdlHentIdenterResponse.getErrors().isEmpty()) {
                 return getAktorIdFromResponse(pdlHentIdenterResponse);
             } else {
-                throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra pdl." + pdlHentIdenterResponse.getErrors());
+                throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra PDL." + pdlHentIdenterResponse.getErrors());
             }
         } catch (HttpClientErrorException e) {
-            throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra pdl.", e);
+            throw new PdlHentAktoerIdForFnrFunctionalException("Funksjonell feil ved kall mot PDL.", e);
+        } catch (HttpServerErrorException e) {
+            throw new PdlHentAktoerIdForFnrTechnicalException("Teknisk feil ved kall mot PDL.", e);
         }
     }
 
@@ -82,7 +85,7 @@ public class PdlGraphQLConsumer {
                         .map(PdlHentIdenterResponse.PdlIdentTo::getIdent)
                         .findFirst())
                 .orElseThrow(()-> {
-                    throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra pdl. Respons fra PDL inneholdt ikke gjeldende aktørid");
+                    throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra PDL. Respons fra PDL inneholdt ikke gjeldende aktørid");
                 });
     }
 

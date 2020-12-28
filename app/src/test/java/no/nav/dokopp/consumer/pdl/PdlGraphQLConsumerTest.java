@@ -3,6 +3,7 @@ package no.nav.dokopp.consumer.pdl;
 import no.nav.dokopp.config.props.PdlProperties;
 import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
+import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -12,6 +13,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -120,6 +122,28 @@ public class PdlGraphQLConsumerTest {
         );
 
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        pdlGraphQLConsumer.hentAktoerIdForPersonnummer("123");
+
+        verify(restTemplate).exchange(
+                argThat(new RequestEntityMatcher(
+                        "123",
+                        CALL_ID,
+                        TOKEN,
+                        new URI(pdlProperties.getPdlurl())
+                )),
+                eq(PdlHentIdenterResponse.class)
+        );
+    }
+
+    @Test(expected = PdlHentAktoerIdForFnrTechnicalException.class)
+    public void shouldThrowTechnicalExceptionIfResponseHas5xxStatusCode() throws URISyntaxException {
+        PdlHentIdenterResponse pdlHentIdenterResponse = createPdlResponse(
+                null,
+                createIdent("1000012345678", false, IdentType.AKTORID)
+        );
+
+        when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         pdlGraphQLConsumer.hentAktoerIdForPersonnummer("123");
 
