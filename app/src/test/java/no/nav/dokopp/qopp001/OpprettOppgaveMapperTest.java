@@ -47,7 +47,7 @@ public class OpprettOppgaveMapperTest {
 
 	@Test
 	public void shouldOpprettOppgaveGosys() {
-		when(pdlGraphQLConsumer.hentAktoerIdForPersonnummer(FNR)).thenReturn(AKTOER_ID);
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithPersonAndPensjon(),
 				createOpprettOppgave());
 
@@ -56,7 +56,7 @@ public class OpprettOppgaveMapperTest {
 
 	@Test
 	public void shouldOpprettOppgaveWithSaksnummerWhenFagomraadeIsGosys() {
-		when(pdlGraphQLConsumer.hentAktoerIdForPersonnummer(FNR)).thenReturn(AKTOER_ID);
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithPersonAndGosys(),
 				createOpprettOppgave());
 
@@ -65,7 +65,7 @@ public class OpprettOppgaveMapperTest {
 
 	@Test
 	public void shouldOpprettOppgaveWithOrgnr() {
-		when(pdlGraphQLConsumer.hentAktoerIdForPersonnummer(anyString())).thenThrow(
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithOrganisasjon(),
 				createOpprettOppgave());
@@ -75,7 +75,7 @@ public class OpprettOppgaveMapperTest {
 
 	@Test
 	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrNullWhenJournalfEnhetEr9999(){
-		when(pdlGraphQLConsumer.hentAktoerIdForPersonnummer(anyString())).thenThrow(
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithEnhet9999(),
 				createOpprettOppgave());
@@ -84,7 +84,7 @@ public class OpprettOppgaveMapperTest {
 
 	@Test
 	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrWithJournalfEnhetWhenNot9999(){
-		when(pdlGraphQLConsumer.hentAktoerIdForPersonnummer(anyString())).thenThrow(
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithOrganisasjon(),
 				createOpprettOppgave());
@@ -93,7 +93,7 @@ public class OpprettOppgaveMapperTest {
 
 	@Test
 	public void shouldOpprettetOppgaveSetTildeltEnhetsnrNullWhenJournalfEnhetIsNull(){
-		when(pdlGraphQLConsumer.hentAktoerIdForPersonnummer(anyString())).thenThrow(
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithJournalEnhetNull(),
 				createOpprettOppgave());
@@ -104,7 +104,7 @@ public class OpprettOppgaveMapperTest {
 	public void shouldThrowUkjentBrukertypeException() {
 		expectedException.expect(UkjentBrukertypeException.class);
 		expectedException.expectMessage("Ukjent brukertype er ikke støttet.");
-		when(pdlGraphQLConsumer.hentAktoerIdForPersonnummer(anyString())).thenThrow(
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for ukjent brukertype."));
 		opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettOppgave());
 	}

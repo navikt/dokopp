@@ -78,7 +78,7 @@ public class PdlGraphQLConsumerTest {
 
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenReturn(new ResponseEntity<>(pdlHentIdenterResponse, HttpStatus.OK));
 
-        String returnValue = pdlGraphQLConsumer.hentAktoerIdForPersonnummer("123");
+        String returnValue = pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
 
         assertThat(returnValue, is("1000012345678"));
         verify(restTemplate).exchange(
@@ -101,7 +101,7 @@ public class PdlGraphQLConsumerTest {
 
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenReturn(new ResponseEntity<>(pdlHentIdenterResponse, HttpStatus.OK));
 
-        pdlGraphQLConsumer.hentAktoerIdForPersonnummer("123");
+        pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
 
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(
@@ -123,7 +123,7 @@ public class PdlGraphQLConsumerTest {
 
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
-        pdlGraphQLConsumer.hentAktoerIdForPersonnummer("123");
+        pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
 
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(
@@ -145,7 +145,7 @@ public class PdlGraphQLConsumerTest {
 
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        pdlGraphQLConsumer.hentAktoerIdForPersonnummer("123");
+        pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
 
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(
@@ -169,7 +169,7 @@ public class PdlGraphQLConsumerTest {
 
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenReturn(new ResponseEntity<>(pdlHentIdenterResponse, HttpStatus.OK));
 
-        pdlGraphQLConsumer.hentAktoerIdForPersonnummer("123");
+        pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
 
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(

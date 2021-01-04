@@ -51,7 +51,7 @@ public class PdlGraphQLConsumer {
     }
 
     @Retryable(include = HttpServerErrorException.class)
-    public String hentAktoerIdForPersonnummer(final String personnummer) {
+    public String hentAktoerIdForFolkeregisterident(final String personnummer) {
         try {
             final UriComponents uri = UriComponentsBuilder.fromHttpUrl(pdlUrl).build();
             final String serviceuserToken = "Bearer " + stsConsumer.getOidcToken();

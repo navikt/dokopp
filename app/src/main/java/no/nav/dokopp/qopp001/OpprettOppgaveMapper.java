@@ -68,7 +68,7 @@ public class OpprettOppgaveMapper {
 		BrukerType brukertypeKode = BrukerType.valueOf(brukertype);
 		switch (brukertypeKode) {
 			case PERSON:
-				brukerMap.put(AKTOER_ID, pdlGraphQLConsumer.hentAktoerIdForPersonnummer(brukerId));
+				brukerMap.put(AKTOER_ID, pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId));
 				break;
 			case ORGANISASJON:
 				brukerMap.put(ORGNR, brukerId);
