@@ -99,8 +99,8 @@ public class PdlGraphQLConsumer {
                         "      ident\n" +
                         "      historisk\n" +
                         "      gruppe\n" +
-                        "    }\n"+"" +
-                        "  }\n" +"" +
+                        "    }\n" +
+                        "  }\n" +
                         "}\n")
                 .variables(variables)
                 .build();
