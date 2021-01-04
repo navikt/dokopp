@@ -47,7 +47,7 @@ public class PdlGraphQLConsumer {
                 .setReadTimeout(Duration.ofSeconds(20))
                 .build();
         this.stsConsumer = stsConsumer;
-        this.pdlUrl = pdlProperties.getPdlurl();
+        this.pdlUrl = pdlProperties.getUrl();
     }
 
     @Retryable(include = HttpServerErrorException.class)

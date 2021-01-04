@@ -13,7 +13,7 @@ spec:
       value: "{{ MQGATEWAY01_PORT }}"
     - name: MQGATEWAY01_NAME
       value: {{ MQGATEWAY01_NAME }}
-    - name: PDL_PDLURL
+    - name: PDL_URL
       value: "{{PDL_URL}}"
     - name: DOKOPP_CHANNEL_NAME
       value: {{ DOKOPP_CHANNEL_NAME }}

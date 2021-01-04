@@ -13,5 +13,5 @@ import javax.validation.constraints.NotEmpty;
 @Validated
 public class PdlProperties {
     @NotEmpty
-    private String pdlurl;
+    private String url;
 }

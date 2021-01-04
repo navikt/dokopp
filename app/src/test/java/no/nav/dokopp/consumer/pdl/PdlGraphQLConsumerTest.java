@@ -54,7 +54,7 @@ public class PdlGraphQLConsumerTest {
         when(stsRestConsumer.getOidcToken()).thenReturn(TOKEN);
 
         pdlProperties = new PdlProperties();
-        pdlProperties.setPdlurl("http://localhost");
+        pdlProperties.setUrl("http://localhost");
         pdlGraphQLConsumer = new PdlGraphQLConsumer(restTemplateBuilder, stsRestConsumer, pdlProperties);
     }
 
@@ -86,7 +86,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getPdlurl())
+                        new URI(pdlProperties.getUrl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
@@ -108,7 +108,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getPdlurl())
+                        new URI(pdlProperties.getUrl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
@@ -130,7 +130,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getPdlurl())
+                        new URI(pdlProperties.getUrl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
@@ -152,7 +152,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getPdlurl())
+                        new URI(pdlProperties.getUrl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
@@ -176,7 +176,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getPdlurl())
+                        new URI(pdlProperties.getUrl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
