@@ -13,6 +13,8 @@ spec:
       value: "{{ MQGATEWAY01_PORT }}"
     - name: MQGATEWAY01_NAME
       value: {{ MQGATEWAY01_NAME }}
+    - name: PDL_URL
+      value: "{{PDL_URL}}"
     - name: DOKOPP_CHANNEL_NAME
       value: {{ DOKOPP_CHANNEL_NAME }}
     - name: DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME
@@ -21,8 +23,6 @@ spec:
       value: {{ DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME }}
     - name: OPPGAVE_OPPGAVER_URL
       value: {{ OPPGAVE_OPPGAVER_URL }}
-    - name: AKTOERREGISTER_API_V1_URL
-      value: {{ AKTOERREGISTER_API_V1_URL }}
     - name: SECURITY_TOKEN_SERVICE_TOKEN_URL
       value: {{ SECURITY_TOKEN_SERVICE_TOKEN_URL }}
   image: {{ image }}
