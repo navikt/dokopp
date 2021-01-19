@@ -59,7 +59,7 @@
 		<rxjava.version>2.2.9</rxjava.version>
 		<!-- Take care when updating any of these. modig-security depends on CXF versions that might be incompatible. -->
 		<modig-security.version>3.0.6</modig-security.version>
-		<cxf.version>3.4.0</cxf.version>
+		<cxf.version>3.4.2</cxf.version>
 		<saaj-impl.version>1.5.1</saaj-impl.version>
 		<!-- Test dependencies -->
 		<activemq.version>5.15.0</activemq.version>
