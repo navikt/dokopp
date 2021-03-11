@@ -56,8 +56,8 @@ public class Qopp001Service {
 		if (hentJournalpostInfoResponseTo.isAlleredeRegistrertReturpost()) {
 			throw new ReturpostAlleredeFlaggetException("qopp001 har oppdaget at returpost allerede er flagget som antallRetur=" + hentJournalpostInfoResponseTo.getAntallRetur() + ". Oppretter ikke oppgave i Gosys");
 		} else {
-			if (FAGOMRAADE_STO.equals(hentJournalpostInfoResponseTo.getFagomrade())) {
-				log.info("qopp001 har ikke opprettet oppgave i Gosys da fagområde={} for returpost med journalpostId={}.", hentJournalpostInfoResponseTo.getFagomrade(), journalpostId);
+			if (FAGOMRAADE_STO.equalsIgnoreCase(hentJournalpostInfoResponseTo.getFagomrade())) {
+				log.info("qopp001 lager ikke oppgave i Gosys for journalpostId={} da den er returpost fra fagområde={} og ikke vil bli behandlet.",  journalpostId, hentJournalpostInfoResponseTo.getFagomrade());
 			} else {
 				Integer oppgaveId = oppgave.opprettOppgave(opprettOppgaveMapper.map(hentJournalpostInfoResponseTo, opprettOppgave));
 				log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.", oppgaveId, hentJournalpostInfoResponseTo.getFagomrade(), journalpostId);

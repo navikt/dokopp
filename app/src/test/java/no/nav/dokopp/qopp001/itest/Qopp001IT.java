@@ -206,7 +206,7 @@ public class Qopp001IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			assertThat(listAppender.list.size(), is(3));
 			assertThat(listAppender.list.get(0).getFormattedMessage(), is("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId=123456."));
-			assertThat(listAppender.list.get(1).getFormattedMessage(), is("qopp001 har ikke opprettet oppgave i Gosys da fagområde=STO for returpost med journalpostId=123456."));
+			assertThat(listAppender.list.get(1).getFormattedMessage(), is("qopp001 lager ikke oppgave i Gosys for journalpostId=123456 da den er returpost fra fagområde=STO og ikke vil bli behandlet."));
 			assertThat(listAppender.list.get(2).getFormattedMessage(), is("qopp001 har flagget journalpost med journalpostId=123456 som returpost."));
 		});
 	}
