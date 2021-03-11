@@ -21,7 +21,11 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import no.nav.dokopp.Application;
+import no.nav.dokopp.qopp001.Qopp001Service;
 import no.nav.modig.core.test.FileUtils;
 import no.nav.modig.testcertificates.TestCertificates;
 import org.apache.activemq.command.ActiveMQTextMessage;
@@ -34,6 +38,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -51,6 +56,7 @@ import javax.xml.bind.JAXBElement;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -179,6 +185,29 @@ public class Qopp001IT {
 			verify(postRequestedFor(urlEqualTo("/oppgaver"))
 					.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
 					.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]")));
+		});
+	}
+
+	@Test
+	public void shouldNotOppretteOppgaveWithFagomraadeSTO() throws Exception {
+		Logger fooLogger = (Logger) LoggerFactory.getLogger(Qopp001Service.class);
+		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+		listAppender.start();
+		fooLogger.addAppender(listAppender);
+
+		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark110/tjoark110_happy.xml")));
+		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark122/tjoark122_fagomraade_STO.xml")));
+		stubGetSecurityToken();
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			assertThat(listAppender.list.size(), is(3));
+			assertThat(listAppender.list.get(0).getFormattedMessage(), is("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId=123456."));
+			assertThat(listAppender.list.get(1).getFormattedMessage(), is("qopp001 har ikke opprettet oppgave i Gosys da fagområde=STO for returpost med journalpostId=123456."));
+			assertThat(listAppender.list.get(2).getFormattedMessage(), is("qopp001 har flagget journalpost med journalpostId=123456 som returpost."));
 		});
 	}
 
