@@ -1,0 +1,15 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+	<soapenv:Body>
+		<a:hentJournalpostInfoResponse xmlns:a="http://nav.no/tjeneste/domene/brevogarkiv/dokumentproduksjoninfo/v1/">
+			<response>
+				<journalStatus>J</journalStatus>
+				<journalfEnhet>2990</journalfEnhet>
+				<fagomrade>STO</fagomrade>
+				<brukerId>11111111111</brukerId>
+				<brukerType>PERSON</brukerType>
+				<saksNummer>1</saksNummer>
+				<fagsystem>FS22</fagsystem>
+			</response>
+		</a:hentJournalpostInfoResponse>
+	</soapenv:Body>
+</soapenv:Envelope>
