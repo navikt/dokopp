@@ -1,33 +1,10 @@
 package no.nav.dokopp.qopp001.itest;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
-import static com.github.tomakehurst.wiremock.client.WireMock.matchingXPath;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
-import static no.nav.modig.common.MDCOperations.MDC_CALL_ID;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import no.nav.dokopp.Application;
 import no.nav.dokopp.qopp001.Qopp001Service;
-import no.nav.modig.core.test.FileUtils;
-import no.nav.modig.testcertificates.TestCertificates;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
@@ -53,10 +30,29 @@ import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
+import static com.github.tomakehurst.wiremock.client.WireMock.matchingXPath;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
+import static no.nav.modig.common.MDCOperations.MDC_CALL_ID;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -208,6 +204,7 @@ public class Qopp001IT {
 			assertThat(listAppender.list.get(0).getFormattedMessage(), is("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId=123456."));
 			assertThat(listAppender.list.get(1).getFormattedMessage(), is("qopp001 lager ikke oppgave i Gosys for journalpostId=123456 da den er returpost fra fagområde=STO og ikke vil bli behandlet."));
 			assertThat(listAppender.list.get(2).getFormattedMessage(), is("qopp001 har flagget journalpost med journalpostId=123456 som returpost."));
+			verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")));
 		});
 	}
 
