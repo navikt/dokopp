@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.metrics.MicrometerRoutePolicy;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.DokoppFunctionalException;
+import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -21,16 +22,16 @@ import javax.jms.Queue;
 @Slf4j
 @Component
 public class Qopp001Route extends SpringRouteBuilder {
-	
+
 	public static final String SERVICE_ID = "QOPP001";
 	public static final String PROPERTY_JOURNALPOST_ID = "journalpostId";
 	public static final String PROPERTY_ORIGINAL_MESSAGE = "originalMessage";
-	
+
 	private final Queue qopp001;
 	private final Queue qopp001FunksjonellFeil;
 	private final Qopp001Service qopp001Service;
 	private final MeterRegistry meterRegistry;
-	
+
 	@Inject
 	public Qopp001Route(Queue qopp001,
 						Queue qopp001FunksjonellFeil,
@@ -41,7 +42,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 		this.qopp001FunksjonellFeil = qopp001FunksjonellFeil;
 		this.meterRegistry = meterRegistry;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void configure() throws Exception {
@@ -50,7 +51,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.logRetryStackTrace(false)
 				.logExhaustedMessageBody(true)
 				.loggingLevel(LoggingLevel.ERROR));
-		
+
 		onException(DokoppFunctionalException.class, SchemaValidationException.class)
 				.handled(true)
 				.maximumRedeliveries(0)
@@ -62,7 +63,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.setBody(simple("${exchangeProperty." + PROPERTY_ORIGINAL_MESSAGE + "}"))
 				.to("jms:" + qopp001FunksjonellFeil.getQueueName());
 
-		onException(AvsluttBehandlingOgKastMeldingException.class)
+		onException(AvsluttBehandlingOgKastMeldingException.class, ReturpostAlleredeFlaggetException.class)
 				.handled(true)
 				.maximumRedeliveries(0)
 				.logExhaustedMessageBody(false)
@@ -81,7 +82,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 				.to("validator:xsd/opprett_oppgave.xsd")
 				.unmarshal(new JaxbDataFormat(OpprettOppgave.class.getPackage().getName()))
 				.setProperty(PROPERTY_JOURNALPOST_ID, simple("${body.arkivKode}", String.class))
-				.log(LoggingLevel.INFO, log,"qopp001 har mottatt og validert forespørsel med journalpostId=${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "} OK.")
+				.log(LoggingLevel.INFO, log, "qopp001 har mottatt og validert forespørsel med journalpostId=${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "} OK.")
 				.bean(qopp001Service);
 	}
 }
