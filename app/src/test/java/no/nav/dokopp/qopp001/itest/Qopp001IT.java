@@ -4,6 +4,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import no.nav.dokopp.Application;
+import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
+import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.dokopp.qopp001.Qopp001Service;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
@@ -387,14 +389,8 @@ public class Qopp001IT {
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		await().atMost(10, SECONDS)
-				.untilAsserted(() -> {
-					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
-				});
+		await().atMost(10, SECONDS);
 
-		verify(postRequestedFor(urlEqualTo("/dokumentproduksjoninfo"))
-				.withRequestBody(matchingXPath("//journalpostId/text()", equalTo(JOURNALPOST_ID))));
 		verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")));
 		verify(exactly(0), postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 	}
