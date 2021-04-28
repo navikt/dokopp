@@ -1,10 +1,5 @@
 package no.nav.dokopp.qopp001;
 
-import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
-import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
-import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.consumer.oppgave.Oppgave;
 import no.nav.dokopp.consumer.tjoark110.SettJournalpostAttributterRequestTo;
@@ -20,6 +15,11 @@ import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+
+import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
+import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
+import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -57,7 +57,7 @@ public class Qopp001Service {
 			throw new ReturpostAlleredeFlaggetException("qopp001 har oppdaget at returpost allerede er flagget som antallRetur=" + hentJournalpostInfoResponseTo.getAntallRetur() + ". Oppretter ikke oppgave i Gosys");
 		} else {
 			if (FAGOMRAADE_STO.equalsIgnoreCase(hentJournalpostInfoResponseTo.getFagomrade())) {
-				log.info("qopp001 lager ikke oppgave i Gosys for journalpostId={} da den er returpost fra fagområde={} og ikke vil bli behandlet.",  journalpostId, hentJournalpostInfoResponseTo.getFagomrade());
+				log.info("qopp001 lager ikke oppgave i Gosys for journalpostId={} da den er returpost fra fagområde={} og ikke vil bli behandlet.", journalpostId, hentJournalpostInfoResponseTo.getFagomrade());
 			} else {
 				Integer oppgaveId = oppgave.opprettOppgave(opprettOppgaveMapper.map(hentJournalpostInfoResponseTo, opprettOppgave));
 				log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.", oppgaveId, hentJournalpostInfoResponseTo.getFagomrade(), journalpostId);
