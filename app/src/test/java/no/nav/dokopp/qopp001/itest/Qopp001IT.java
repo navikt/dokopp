@@ -389,9 +389,10 @@ public class Qopp001IT {
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		await().atMost(10, SECONDS);
-
-		verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")));
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+						verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")));
+				}
+		);
 		verify(exactly(0), postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 	}
 
