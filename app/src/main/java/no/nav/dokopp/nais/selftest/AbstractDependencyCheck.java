@@ -18,6 +18,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
+import static no.nav.dokopp.nais.selftest.Importance.CRITICAL;
+import static no.nav.dokopp.nais.selftest.Result.ERROR;
+import static no.nav.dokopp.nais.selftest.Result.OK;
+import static no.nav.dokopp.nais.selftest.Result.WARNING;
+
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.
  */
@@ -26,76 +31,72 @@ import java.util.function.Supplier;
 @Getter
 public abstract class AbstractDependencyCheck {
 
-	protected final DependencyType type;
-	protected final Importance importance;
-	protected String name;
-	protected String address;
-	private final CircuitBreakerRegistry circuitBreakerRegistry;
-	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
-	private final TimeLimiterConfig timeLimiterConfig = TimeLimiterConfig.custom().timeoutDuration(Duration.ofMillis(2800)).cancelRunningFuture(true).build();
-	private final TimeLimiter timeLimiter = TimeLimiter.of(timeLimiterConfig);
+    protected final DependencyType type;
+    protected final Importance importance;
+    protected String name;
+    protected String address;
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final TimeLimiterConfig timeLimiterConfig = TimeLimiterConfig.custom().timeoutDuration(Duration.ofMillis(2800)).cancelRunningFuture(true).build();
+    private final TimeLimiter timeLimiter = TimeLimiter.of(timeLimiterConfig);
 
-	public AbstractDependencyCheck(DependencyType type, String name, String address, Importance importance) {
-		this.type = type;
-		this.name = name;
-		this.address = address;
-		this.importance = importance;
-		this.circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults();
-	}
+    public AbstractDependencyCheck(DependencyType type, String name, String address, Importance importance) {
+        this.type = type;
+        this.name = name;
+        this.address = address;
+        this.importance = importance;
+        this.circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults();
+    }
 
-	protected abstract void doCheck();
+    protected abstract void doCheck();
 
-	public Try<DependencyCheckResult> check() {
-		final String dependencyName = this.name;
-		Supplier<Future<DependencyCheckResult>> futureSupplier = () -> executor.submit(getCheckCallable());
-		Callable<DependencyCheckResult> timeRestrictedCall = TimeLimiter.decorateFutureSupplier(timeLimiter, futureSupplier);
-		CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(dependencyName);
-		Callable<DependencyCheckResult> chainedCallable = CircuitBreaker.decorateCallable(circuitBreaker, timeRestrictedCall);
-		return Try.ofCallable(chainedCallable)
-				.onFailure(throwable -> {
-					log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", getName(), getType(), getAddress(), throwable);
-				})
-				.recover(throwable -> DependencyCheckResult.builder()
-						.endpoint(getName())
-						.address(getAddress())
-						.type(getType())
-						.importance(getImportance())
-						.result(getImportance().equals(Importance.CRITICAL) ? Result.ERROR : Result.WARNING)
-						.errorMessage("Call to dependency=" + getName() + " timed out or circuitbreaker tripped: " + getErrorMessageFromThrowable(throwable))
-						.throwable(throwable)
-						.build()
-				);
+    public Try<DependencyCheckResult> check() {
+        final String dependencyName = this.name;
+        Supplier<Future<DependencyCheckResult>> futureSupplier = () -> executor.submit(getCheckCallable());
+        Callable<DependencyCheckResult> timeRestrictedCall = TimeLimiter.decorateFutureSupplier(timeLimiter, futureSupplier);
+        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(dependencyName);
+        Callable<DependencyCheckResult> chainedCallable = CircuitBreaker.decorateCallable(circuitBreaker, timeRestrictedCall);
+        return Try.ofCallable(chainedCallable)
+                .onFailure(throwable -> log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", getName(), getType(), getAddress(), throwable))
+                .recover(throwable -> DependencyCheckResult.builder()
+                        .endpoint(getName())
+                        .address(getAddress())
+                        .type(getType())
+                        .importance(getImportance())
+                        .result(getImportance().equals(CRITICAL) ? ERROR : WARNING)
+                        .errorMessage("Call to dependency=" + getName() + " timed out or circuitbreaker tripped: " + getErrorMessageFromThrowable(throwable))
+                        .throwable(throwable)
+                        .build()
+                );
 
-	}
+    }
 
-	public Callable<DependencyCheckResult> getCheckCallable() {
-		return () -> {
-			DependencyCheckResult.DependencyCheckResultBuilder builder = DependencyCheckResult.builder()
-					.type(getType())
-					.endpoint(getName())
-					.importance(getImportance())
-					.address(getAddress());
+    public Callable<DependencyCheckResult> getCheckCallable() {
+        return () -> {
+            DependencyCheckResult.DependencyCheckResultBuilder builder = DependencyCheckResult.builder()
+                    .type(getType())
+                    .endpoint(getName())
+                    .importance(getImportance())
+                    .address(getAddress());
 
-			Instant start = Instant.now();
-			doCheck();
-			Instant end = Instant.now();
-			Long responseTime = Duration.between(start, end).toMillis();
-			return builder.result(Result.OK).responseTime(String.valueOf(responseTime) + "ms").build();
-		};
-	}
+            Instant start = Instant.now();
+            doCheck();
+            Instant end = Instant.now();
+            Long responseTime = Duration.between(start, end).toMillis();
+            return builder.result(OK).responseTime(String.valueOf(responseTime) + "ms").build();
+        };
+    }
 
-	protected String getErrorMessageFromThrowable(Throwable e) {
-		if (e instanceof TimeoutException) {
-			return "Call to dependency timed out by circuitbreaker";
-		}
-		return e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
-	}
+    protected String getErrorMessageFromThrowable(Throwable e) {
+        if (e instanceof TimeoutException) {
+            return "Call to dependency timed out by circuitbreaker";
+        }
+        return e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
+    }
 
-	protected String getErrorMessage(Exception e) {
-
-		String message = e.getMessage().trim();
-		String causeMessage = e.getCause() == null ? "" : (": " + e.getCause().getMessage() + (e.getCause().getCause() == null ? "" : " - " + e.getCause().getCause().getMessage()));
-		return message + causeMessage;
-	}
-
+    protected String getErrorMessage(Exception e) {
+        String message = e.getMessage().trim();
+        String causeMessage = e.getCause() == null ? "" : (": " + e.getCause().getMessage() + (e.getCause().getCause() == null ? "" : " - " + e.getCause().getCause().getMessage()));
+        return message + causeMessage;
+    }
 }

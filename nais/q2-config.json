@@ -1,6 +1,6 @@
 {
-	"MQGATEWAY01_NAME": "MQXLSC01",
-	"MQGATEWAY01_HOSTNAME": "b27apvl170.preprod.local",
+	"MQGATEWAY01_NAME": "MQLS01",
+	"MQGATEWAY01_HOSTNAME": "b27apvl219.preprod.local",
 	"MQGATEWAY01_PORT": "1413",
 	"PDL_URL": "https://pdl-api.dev.adeo.no/graphql",
 	"DOKOPP_CHANNEL_NAME": "Q2_DOKOPP",
