@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.7.RELEASE</version>
+		<version>2.4.5</version>
 	</parent>
 	<groupId>no.nav.dokopp</groupId>
 	<artifactId>dokopp</artifactId>
@@ -35,11 +35,10 @@
 
 	<properties>
 		<start-class>no.nav.dokopp.Application</start-class>
-		<project.scm.id>stash</project.scm.id>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
-		<wmq.version>9.1.3.0</wmq.version>
-		<lombok.version>1.18.8</lombok.version>
+		<wmq.version>9.2.2.0</wmq.version>
+		<lombok.version>1.18.20</lombok.version>
 		<saxon.version>9.0</saxon.version>
 		<javax.jms-api.version>1.1.1</javax.jms-api.version>
 		<javax.transaction.version>1.1</javax.transaction.version>
@@ -47,19 +46,22 @@
 		<jakarta.jaxws-api.version>2.3.2</jakarta.jaxws-api.version>
 		<jakarta.activation.version>1.2.1</jakarta.activation.version>
 		<modig-log-common.version>1.1.3</modig-log-common.version>
-		<dokumentproduksjoninfo-tjenestespesifikasjon.version>2.1.1</dokumentproduksjoninfo-tjenestespesifikasjon.version>
+		<dokumentproduksjoninfo-tjenestespesifikasjon.version>2.1.1
+		</dokumentproduksjoninfo-tjenestespesifikasjon.version>
 		<opprettoppgave-tjenestespesifikasjon-v1.version>1.1.1</opprettoppgave-tjenestespesifikasjon-v1.version>
-		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>3.2.0</arkiverdokumentproduksjon-tjenestespesifikasjon.version>
-		<commons-io.version>2.4</commons-io.version>
-		<logstash-logback-encode.version>6.3</logstash-logback-encode.version>
+		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>3.2.0
+		</arkiverdokumentproduksjon-tjenestespesifikasjon.version>
+		<commons-io.version>2.8.0</commons-io.version>
+		<logstash-logback-encode.version>6.6</logstash-logback-encode.version>
 		<!-- Se https://issues.apache.org/jira/browse/HTTPCLIENT-1997 for bug i httpclient 4.5.9 -->
 		<httpclient.version>4.5.8</httpclient.version>
-		<camel.version>2.25.1</camel.version>
-		<resilience4j.version>1.2.0</resilience4j.version>
-		<rxjava.version>2.2.20</rxjava.version>
+		<camel.version>3.10.0</camel.version>
+		<resilience4j.version>1.6.1</resilience4j.version>
+		<rxjava.version>2.2.21</rxjava.version>
+		<spring-cloud.version>3.0.3</spring-cloud.version>
 		<!-- Take care when updating any of these. modig-security depends on CXF versions that might be incompatible. -->
 		<modig-security.version>3.0.6</modig-security.version>
-		<cxf.version>3.4.2</cxf.version>
+		<cxf.version>3.4.4</cxf.version>
 		<saaj-impl.version>1.5.1</saaj-impl.version>
 		<!-- Test dependencies -->
 		<activemq.version>5.15.0</activemq.version>
@@ -73,7 +75,7 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.apache.camel</groupId>
+				<groupId>org.apache.camel.springboot</groupId>
 				<artifactId>camel-spring-boot-starter</artifactId>
 				<version>${camel.version}</version>
 			</dependency>
@@ -131,6 +133,11 @@
 				<groupId>com.sun.xml.messaging.saaj</groupId>
 				<artifactId>saaj-impl</artifactId>
 				<version>${saaj-impl.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-jms-pool</artifactId>
+				<version>${activemq.version}</version>
 			</dependency>
 			<!-- IBM MQ 8 Series is backwards compatible with older versions.-->
 			<!-- Please see http://www-01.ibm.com/support/docview.wss?uid=swg21312967-->
@@ -326,7 +333,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-contract-wiremock</artifactId>
-				<version>1.2.1.RELEASE</version>
+				<version>${spring-cloud.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>

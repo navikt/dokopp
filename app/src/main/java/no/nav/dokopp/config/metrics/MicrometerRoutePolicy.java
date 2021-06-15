@@ -20,8 +20,8 @@ import io.micrometer.core.instrument.Timer;
 import no.nav.dokopp.exception.DokoppFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Route;
-import org.apache.camel.processor.validation.SchemaValidationException;
 import org.apache.camel.support.RoutePolicySupport;
+import org.apache.camel.support.processor.validation.SchemaValidationException;
 
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.

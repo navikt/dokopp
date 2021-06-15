@@ -9,7 +9,6 @@ import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
 import no.nav.dokopp.config.props.PdlProperties;
-import no.nav.dokopp.config.props.SrvAppserverProperties;
 import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.consumer.tjoark122.Tjoark122HentJournalpostInfo;
 import no.nav.dokopp.nais.NaisContract;
@@ -31,7 +30,6 @@ import org.springframework.retry.annotation.EnableRetry;
 @EnableRetry
 @EnableJms
 @EnableConfigurationProperties({
-		SrvAppserverProperties.class,
 		PdlProperties.class,
 		MqChannelAlias.class,
 		MqGatewayAlias.class,

@@ -27,9 +27,9 @@ spec:
       value: {{ SECURITY_TOKEN_SERVICE_TOKEN_URL }}
   image: {{ image }}
   ingresses:
-        {{#each INGRESSES}}
-          - {{this }}
-        {{/each}}
+    {{#each INGRESSES}}
+       - {{this }}
+      {{/each}}
   liveness:
     path: /isAlive
     port: 8080

@@ -7,12 +7,10 @@ import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.nais.selftest.AbstractDependencyCheck;
 import no.nav.dokopp.nais.selftest.DependencyCheckResult;
-import no.nav.dokopp.nais.selftest.Importance;
 import no.nav.dokopp.nais.selftest.Result;
 import no.nav.dokopp.nais.selftest.SelftestResult;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +24,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static no.nav.dokopp.nais.selftest.Importance.CRITICAL;
+import static no.nav.dokopp.nais.selftest.Result.ERROR;
+import static no.nav.dokopp.nais.selftest.Result.WARNING;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
@@ -38,7 +42,7 @@ public class NaisContract {
 	private static final String APPLICATION_ALIVE = "Application is alive!";
 	private static final String APPLICATION_READY = "Application is ready for traffic!";
 	private static final String APPLICATION_NOT_READY = "Application is not ready for traffic :-(";
-	private static AtomicInteger isReady = new AtomicInteger(1);
+	private static final AtomicInteger isReady = new AtomicInteger(1);
 
 	private final String appName;
 	private final String version;
@@ -72,10 +76,10 @@ public class NaisContract {
 				.map(DependencyCheckResult::getResult)
 				.collect(Collectors.toList()))) {
 			isReady.set(-1);
-			return new ResponseEntity<>(APPLICATION_NOT_READY, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(APPLICATION_NOT_READY, INTERNAL_SERVER_ERROR);
 		}
 		isReady.set(1);
-		return new ResponseEntity<>(APPLICATION_READY, HttpStatus.OK);
+		return new ResponseEntity<>(APPLICATION_READY, OK);
 	}
 
 	@GetMapping("/internal/selftest")
@@ -91,25 +95,22 @@ public class NaisContract {
 				.build();
 	}
 
-
 	private boolean isAnyVitalDependencyUnhealthy(List<Result> results) {
-		return results.stream().anyMatch((result) -> result.equals(Result.ERROR));
+		return results.stream().anyMatch(result -> result.equals(ERROR));
 	}
 
 	private Result getOverallSelftestResult(List<DependencyCheckResult> results) {
-		if (results.stream().anyMatch((result) -> result.getResult().equals(Result.ERROR))) {
-			return Result.ERROR;
-		} else if (results.stream().anyMatch((result) -> result.getResult().equals(Result.WARNING))) {
-			return Result.WARNING;
+		if (results.stream().anyMatch(result -> result.getResult().equals(ERROR))) {
+			return ERROR;
+		} else if (results.stream().anyMatch(result -> result.getResult().equals(WARNING))) {
+			return WARNING;
 		}
-
 		return Result.OK;
 	}
 
 	private void checkCriticalDependencies(List<DependencyCheckResult> results) {
-
 		Flowable.fromIterable(dependencyCheckList)
-				.filter(dependency -> dependency.getImportance().equals(Importance.CRITICAL))
+				.filter(dependency -> dependency.getImportance().equals(CRITICAL))
 				.parallel()
 				.runOn(Schedulers.io())
 				.map(payload -> payload.check().get())
@@ -124,5 +125,4 @@ public class NaisContract {
 				.map(payload -> payload.check().get())
 				.sequential().blockingSubscribe(results::add);
 	}
-
 }

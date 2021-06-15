@@ -3,7 +3,6 @@ package no.nav.dokopp.config;
 import org.apache.catalina.Context;
 import org.apache.catalina.realm.JAASRealm;
 import org.springframework.boot.web.embedded.tomcat.ConfigurableTomcatWebServerFactory;
-import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -28,6 +27,6 @@ public class TomcatConfig implements WebServerFactoryCustomizer<ConfigurableTomc
 
 	@Override
 	public void customize(ConfigurableTomcatWebServerFactory factory) {
-		factory.addContextCustomizers((TomcatContextCustomizer) this::navSamlJaasRealm);
+		factory.addContextCustomizers(this::navSamlJaasRealm);
 	}
 }

@@ -18,6 +18,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
+import static no.nav.dokopp.nais.selftest.Importance.CRITICAL;
+import static no.nav.dokopp.nais.selftest.Result.ERROR;
+import static no.nav.dokopp.nais.selftest.Result.OK;
+import static no.nav.dokopp.nais.selftest.Result.WARNING;
+
 /**
  * @author Ugur Alpay Cenar, Visma Consulting.
  */
@@ -52,15 +57,13 @@ public abstract class AbstractDependencyCheck {
 		CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(dependencyName);
 		Callable<DependencyCheckResult> chainedCallable = CircuitBreaker.decorateCallable(circuitBreaker, timeRestrictedCall);
 		return Try.ofCallable(chainedCallable)
-				.onFailure(throwable -> {
-					log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", getName(), getType(), getAddress(), throwable);
-				})
+				.onFailure(throwable -> log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", getName(), getType(), getAddress(), throwable))
 				.recover(throwable -> DependencyCheckResult.builder()
 						.endpoint(getName())
 						.address(getAddress())
 						.type(getType())
 						.importance(getImportance())
-						.result(getImportance().equals(Importance.CRITICAL) ? Result.ERROR : Result.WARNING)
+						.result(getImportance().equals(CRITICAL) ? ERROR : WARNING)
 						.errorMessage("Call to dependency=" + getName() + " timed out or circuitbreaker tripped: " + getErrorMessageFromThrowable(throwable))
 						.throwable(throwable)
 						.build()
@@ -80,7 +83,7 @@ public abstract class AbstractDependencyCheck {
 			doCheck();
 			Instant end = Instant.now();
 			Long responseTime = Duration.between(start, end).toMillis();
-			return builder.result(Result.OK).responseTime(String.valueOf(responseTime) + "ms").build();
+			return builder.result(OK).responseTime(String.valueOf(responseTime) + "ms").build();
 		};
 	}
 
@@ -92,10 +95,8 @@ public abstract class AbstractDependencyCheck {
 	}
 
 	protected String getErrorMessage(Exception e) {
-
 		String message = e.getMessage().trim();
 		String causeMessage = e.getCause() == null ? "" : (": " + e.getCause().getMessage() + (e.getCause().getCause() == null ? "" : " - " + e.getCause().getCause().getMessage()));
 		return message + causeMessage;
 	}
-
 }
