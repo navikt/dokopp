@@ -19,30 +19,30 @@ import javax.jms.Queue;
 @Profile("itest")
 @Configuration
 public class JmsTestConfig {
-	
+
 	@Bean
 	public Queue qopp001(@Value("${dokopp.qopp001.opprett.oppgave.queuename}") String qopp001QueueName) {
 		return new ActiveMQQueue(qopp001QueueName);
 	}
-	
+
 	@Bean
 	public Queue qopp001FunksjonellFeil(@Value("${dokopp.qopp001.funksjonell.feil.queuename}") String qopp001FunksjonellFeil) {
 		return new ActiveMQQueue(qopp001FunksjonellFeil);
 	}
-	
+
 	@Bean
 	public Queue backoutQueue() {
 		return new ActiveMQQueue("ActiveMQ.DLQ");
 	}
-	
+
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public BrokerService broker() throws Exception {
 		BrokerService service = new BrokerService();
 		service.setPersistent(false);
-		
+
 		return service;
 	}
-	
+
 	@Bean
 	public ConnectionFactory activemqConnectionFactory() {
 		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://localhost?create=false");

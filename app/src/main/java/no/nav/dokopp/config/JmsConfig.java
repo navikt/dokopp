@@ -29,45 +29,45 @@ import static com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CM_CLIENT;
 @Profile("nais")
 public class JmsConfig {
 
-    private static final int UTF_8_WITH_PUA = 1208;
+	private static final int UTF_8_WITH_PUA = 1208;
 
-    @Bean
-    public Queue qopp001(@Value("${dokopp.qopp001.opprett.oppgave.queuename}") String qopp001QueueName) throws JMSException {
-        return new MQQueue(qopp001QueueName);
-    }
+	@Bean
+	public Queue qopp001(@Value("${dokopp.qopp001.opprett.oppgave.queuename}") String qopp001QueueName) throws JMSException {
+		return new MQQueue(qopp001QueueName);
+	}
 
-    @Bean
-    public Queue qopp001FunksjonellFeil(@Value("${dokopp.qopp001.funksjonell.feil.queuename}") String qopp001FunksjonellFeil) throws JMSException {
-        return new MQQueue(qopp001FunksjonellFeil);
-    }
+	@Bean
+	public Queue qopp001FunksjonellFeil(@Value("${dokopp.qopp001.funksjonell.feil.queuename}") String qopp001FunksjonellFeil) throws JMSException {
+		return new MQQueue(qopp001FunksjonellFeil);
+	}
 
-    @Bean
-    public ConnectionFactory wmqConnectionFactory(final MqGatewayAlias mqGatewayAlias,
-                                                  final MqChannelAlias mqChannelAlias,
-                                                  final ServiceuserAlias serviceuserAlias) throws JMSException {
-        return createConnectionFactory(mqGatewayAlias, mqChannelAlias, serviceuserAlias);
-    }
+	@Bean
+	public ConnectionFactory wmqConnectionFactory(final MqGatewayAlias mqGatewayAlias,
+												  final MqChannelAlias mqChannelAlias,
+												  final ServiceuserAlias serviceuserAlias) throws JMSException {
+		return createConnectionFactory(mqGatewayAlias, mqChannelAlias, serviceuserAlias);
+	}
 
-    private PooledConnectionFactory createConnectionFactory(final MqGatewayAlias mqGatewayAlias, final MqChannelAlias mqChannelAlias, final ServiceuserAlias serviceuserAlias) throws JMSException {
-        MQConnectionFactory connectionFactory = new MQConnectionFactory();
-        connectionFactory.setHostName(mqGatewayAlias.getHostname());
-        connectionFactory.setPort(mqGatewayAlias.getPort());
-        connectionFactory.setChannel(mqChannelAlias.getName());
-        connectionFactory.setQueueManager(mqGatewayAlias.getName());
-        connectionFactory.setTransportType(WMQ_CM_CLIENT);
-        connectionFactory.setCCSID(UTF_8_WITH_PUA);
-        connectionFactory.setIntProperty(JMS_IBM_ENCODING, MQENC_NATIVE);
-        connectionFactory.setIntProperty(JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA);
-        UserCredentialsConnectionFactoryAdapter adapter = new UserCredentialsConnectionFactoryAdapter();
-        adapter.setTargetConnectionFactory(connectionFactory);
-        adapter.setUsername(serviceuserAlias.getUsername());
-        adapter.setPassword(serviceuserAlias.getPassword());
+	private PooledConnectionFactory createConnectionFactory(final MqGatewayAlias mqGatewayAlias, final MqChannelAlias mqChannelAlias, final ServiceuserAlias serviceuserAlias) throws JMSException {
+		MQConnectionFactory connectionFactory = new MQConnectionFactory();
+		connectionFactory.setHostName(mqGatewayAlias.getHostname());
+		connectionFactory.setPort(mqGatewayAlias.getPort());
+		connectionFactory.setChannel(mqChannelAlias.getName());
+		connectionFactory.setQueueManager(mqGatewayAlias.getName());
+		connectionFactory.setTransportType(WMQ_CM_CLIENT);
+		connectionFactory.setCCSID(UTF_8_WITH_PUA);
+		connectionFactory.setIntProperty(JMS_IBM_ENCODING, MQENC_NATIVE);
+		connectionFactory.setIntProperty(JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA);
+		UserCredentialsConnectionFactoryAdapter adapter = new UserCredentialsConnectionFactoryAdapter();
+		adapter.setTargetConnectionFactory(connectionFactory);
+		adapter.setUsername(serviceuserAlias.getUsername());
+		adapter.setPassword(serviceuserAlias.getPassword());
 
-        PooledConnectionFactory pooledFactory = new PooledConnectionFactory();
-        pooledFactory.setConnectionFactory(adapter);
-        pooledFactory.setMaxConnections(10);
-        pooledFactory.setMaximumActiveSessionPerConnection(10);
+		PooledConnectionFactory pooledFactory = new PooledConnectionFactory();
+		pooledFactory.setConnectionFactory(adapter);
+		pooledFactory.setMaxConnections(10);
+		pooledFactory.setMaximumActiveSessionPerConnection(10);
 
-        return pooledFactory;
-    }
+		return pooledFactory;
+	}
 }

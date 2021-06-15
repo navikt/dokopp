@@ -34,95 +34,95 @@ import static org.springframework.http.HttpStatus.OK;
  * @author Joakim Bjørnstad, Jbit AS
  */
 @Import(
-        PrettyPrintWebMvcConfiguration.class)
+		PrettyPrintWebMvcConfiguration.class)
 @Slf4j
 @RestController
 public class NaisContract {
 
-    private static final String APPLICATION_ALIVE = "Application is alive!";
-    private static final String APPLICATION_READY = "Application is ready for traffic!";
-    private static final String APPLICATION_NOT_READY = "Application is not ready for traffic :-(";
-    private static final AtomicInteger isReady = new AtomicInteger(1);
+	private static final String APPLICATION_ALIVE = "Application is alive!";
+	private static final String APPLICATION_READY = "Application is ready for traffic!";
+	private static final String APPLICATION_NOT_READY = "Application is not ready for traffic :-(";
+	private static final AtomicInteger isReady = new AtomicInteger(1);
 
-    private final String appName;
-    private final String version;
-    private final List<AbstractDependencyCheck> dependencyCheckList;
+	private final String appName;
+	private final String version;
+	private final List<AbstractDependencyCheck> dependencyCheckList;
 
-    @Inject
-    public NaisContract(List<AbstractDependencyCheck> dependencyCheckList,
-                        @Value("dokopp") String appName,
-                        @Value("${APP_VERSION:0}") String version,
-                        MeterRegistry meterRegistry) {
-        this.dependencyCheckList = new ArrayList<>(dependencyCheckList);
-        this.appName = appName;
-        this.version = version;
-        Gauge.builder("dok_app_is_ready", isReady, AtomicInteger::get).register(meterRegistry);
-    }
+	@Inject
+	public NaisContract(List<AbstractDependencyCheck> dependencyCheckList,
+						@Value("dokopp") String appName,
+						@Value("${APP_VERSION:0}") String version,
+						MeterRegistry meterRegistry) {
+		this.dependencyCheckList = new ArrayList<>(dependencyCheckList);
+		this.appName = appName;
+		this.version = version;
+		Gauge.builder("dok_app_is_ready", isReady, AtomicInteger::get).register(meterRegistry);
+	}
 
-    @GetMapping("/isAlive")
-    public String isAlive() {
-        return APPLICATION_ALIVE;
-    }
+	@GetMapping("/isAlive")
+	public String isAlive() {
+		return APPLICATION_ALIVE;
+	}
 
-    @ResponseBody
-    @RequestMapping(value = "/isReady", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity isReady() {
+	@ResponseBody
+	@RequestMapping(value = "/isReady", produces = MediaType.TEXT_PLAIN_VALUE)
+	public ResponseEntity isReady() {
 
-        List<DependencyCheckResult> results = new ArrayList<>();
+		List<DependencyCheckResult> results = new ArrayList<>();
 
-        checkCriticalDependencies(results);
+		checkCriticalDependencies(results);
 
-        if (isAnyVitalDependencyUnhealthy(results.stream()
-                .map(DependencyCheckResult::getResult)
-                .collect(Collectors.toList()))) {
-            isReady.set(-1);
-            return new ResponseEntity<>(APPLICATION_NOT_READY, INTERNAL_SERVER_ERROR);
-        }
-        isReady.set(1);
-        return new ResponseEntity<>(APPLICATION_READY, OK);
-    }
+		if (isAnyVitalDependencyUnhealthy(results.stream()
+				.map(DependencyCheckResult::getResult)
+				.collect(Collectors.toList()))) {
+			isReady.set(-1);
+			return new ResponseEntity<>(APPLICATION_NOT_READY, INTERNAL_SERVER_ERROR);
+		}
+		isReady.set(1);
+		return new ResponseEntity<>(APPLICATION_READY, OK);
+	}
 
-    @GetMapping("/internal/selftest")
-    public @ResponseBody
-    SelftestResult selftest() {
-        List<DependencyCheckResult> results = new ArrayList<>();
-        checkDependencies(results);
-        return SelftestResult.builder()
-                .appName(appName)
-                .version(version)
-                .dependencyCheckResults(results)
-                .result(getOverallSelftestResult(results))
-                .build();
-    }
+	@GetMapping("/internal/selftest")
+	public @ResponseBody
+	SelftestResult selftest() {
+		List<DependencyCheckResult> results = new ArrayList<>();
+		checkDependencies(results);
+		return SelftestResult.builder()
+				.appName(appName)
+				.version(version)
+				.dependencyCheckResults(results)
+				.result(getOverallSelftestResult(results))
+				.build();
+	}
 
-    private boolean isAnyVitalDependencyUnhealthy(List<Result> results) {
-        return results.stream().anyMatch(result -> result.equals(ERROR));
-    }
+	private boolean isAnyVitalDependencyUnhealthy(List<Result> results) {
+		return results.stream().anyMatch(result -> result.equals(ERROR));
+	}
 
-    private Result getOverallSelftestResult(List<DependencyCheckResult> results) {
-        if (results.stream().anyMatch(result -> result.getResult().equals(ERROR))) {
-            return ERROR;
-        } else if (results.stream().anyMatch(result -> result.getResult().equals(WARNING))) {
-            return WARNING;
-        }
-        return Result.OK;
-    }
+	private Result getOverallSelftestResult(List<DependencyCheckResult> results) {
+		if (results.stream().anyMatch(result -> result.getResult().equals(ERROR))) {
+			return ERROR;
+		} else if (results.stream().anyMatch(result -> result.getResult().equals(WARNING))) {
+			return WARNING;
+		}
+		return Result.OK;
+	}
 
-    private void checkCriticalDependencies(List<DependencyCheckResult> results) {
-        Flowable.fromIterable(dependencyCheckList)
-                .filter(dependency -> dependency.getImportance().equals(CRITICAL))
-                .parallel()
-                .runOn(Schedulers.io())
-                .map(payload -> payload.check().get())
-                .sequential().blockingSubscribe(results::add);
-    }
+	private void checkCriticalDependencies(List<DependencyCheckResult> results) {
+		Flowable.fromIterable(dependencyCheckList)
+				.filter(dependency -> dependency.getImportance().equals(CRITICAL))
+				.parallel()
+				.runOn(Schedulers.io())
+				.map(payload -> payload.check().get())
+				.sequential().blockingSubscribe(results::add);
+	}
 
-    private void checkDependencies(List<DependencyCheckResult> results) {
+	private void checkDependencies(List<DependencyCheckResult> results) {
 
-        Flowable.fromIterable(dependencyCheckList)
-                .parallel()
-                .runOn(Schedulers.io())
-                .map(payload -> payload.check().get())
-                .sequential().blockingSubscribe(results::add);
-    }
+		Flowable.fromIterable(dependencyCheckList)
+				.parallel()
+				.runOn(Schedulers.io())
+				.map(payload -> payload.check().get())
+				.sequential().blockingSubscribe(results::add);
+	}
 }

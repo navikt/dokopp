@@ -30,26 +30,26 @@ import org.springframework.retry.annotation.EnableRetry;
 @EnableRetry
 @EnableJms
 @EnableConfigurationProperties({
-        PdlProperties.class,
-        MqChannelAlias.class,
-        MqGatewayAlias.class,
-        ServiceuserAlias.class,
-        ArkiverDokumentproduksjonV1Alias.class,
-        DokumentproduksjonInfoV1Alias.class,
+		PdlProperties.class,
+		MqChannelAlias.class,
+		MqGatewayAlias.class,
+		ServiceuserAlias.class,
+		ArkiverDokumentproduksjonV1Alias.class,
+		DokumentproduksjonInfoV1Alias.class,
 })
 @Import({
-        TomcatConfig.class,
-        NaisContract.class,
-        DokumentproduksjonInfoV1EndpointConfig.class,
-        ArkiverDokumentproduksjonV1EndpointConfig.class,
-        Tjoark110SettJournalpostAttributter.class,
-        Tjoark122HentJournalpostInfo.class,
-        Qopp001Service.class,
-        Tjoark110Check.class,
-        Tjoark122Check.class,
-        Qopp001QueueCheck.class,
-        FunctionalBoqCheck.class,
-        Qopp001Route.class
+		TomcatConfig.class,
+		NaisContract.class,
+		DokumentproduksjonInfoV1EndpointConfig.class,
+		ArkiverDokumentproduksjonV1EndpointConfig.class,
+		Tjoark110SettJournalpostAttributter.class,
+		Tjoark122HentJournalpostInfo.class,
+		Qopp001Service.class,
+		Tjoark110Check.class,
+		Tjoark122Check.class,
+		Qopp001QueueCheck.class,
+		FunctionalBoqCheck.class,
+		Qopp001Route.class
 })
 @Configuration
 public class ApplicationConfig {

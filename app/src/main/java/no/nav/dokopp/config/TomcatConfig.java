@@ -15,18 +15,18 @@ import org.springframework.core.io.ClassPathResource;
 @Configuration
 public class TomcatConfig implements WebServerFactoryCustomizer<ConfigurableTomcatWebServerFactory> {
 
-    private static final String NAV_SAML = "NavSAML";
-    private static final String JAAS_LOGIN_CONFIG = "/login.config";
+	private static final String NAV_SAML = "NavSAML";
+	private static final String JAAS_LOGIN_CONFIG = "/login.config";
 
-    private void navSamlJaasRealm(Context context) {
-        JAASRealm realm = new JAASRealm();
-        realm.setAppName(NAV_SAML);
-        realm.setConfigFile(new ClassPathResource(JAAS_LOGIN_CONFIG).getPath());
-        context.setRealm(realm);
-    }
+	private void navSamlJaasRealm(Context context) {
+		JAASRealm realm = new JAASRealm();
+		realm.setAppName(NAV_SAML);
+		realm.setConfigFile(new ClassPathResource(JAAS_LOGIN_CONFIG).getPath());
+		context.setRealm(realm);
+	}
 
-    @Override
-    public void customize(ConfigurableTomcatWebServerFactory factory) {
-        factory.addContextCustomizers(this::navSamlJaasRealm);
-    }
+	@Override
+	public void customize(ConfigurableTomcatWebServerFactory factory) {
+		factory.addContextCustomizers(this::navSamlJaasRealm);
+	}
 }
