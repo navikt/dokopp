@@ -36,7 +36,7 @@
 			<artifactId>spring-retry</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.camel</groupId>
+			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
