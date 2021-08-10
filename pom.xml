@@ -74,8 +74,10 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.apache.camel.springboot</groupId>
-				<artifactId>camel-spring-boot-starter</artifactId>
+				<artifactId>camel-spring-boot-bom</artifactId>
 				<version>${camel.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.saxon</groupId>
