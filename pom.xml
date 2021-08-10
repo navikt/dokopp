@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.5</version>
+		<version>2.5.3</version>
 	</parent>
 	<groupId>no.nav.dokopp</groupId>
 	<artifactId>dokopp</artifactId>
@@ -35,7 +35,6 @@
 
 	<properties>
 		<start-class>no.nav.dokopp.Application</start-class>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<wmq.version>9.2.2.0</wmq.version>
 		<lombok.version>1.18.20</lombok.version>
@@ -55,14 +54,13 @@
 		<logstash-logback-encode.version>6.6</logstash-logback-encode.version>
 		<!-- Se https://issues.apache.org/jira/browse/HTTPCLIENT-1997 for bug i httpclient 4.5.9 -->
 		<httpclient.version>4.5.8</httpclient.version>
-		<camel.version>3.10.0</camel.version>
+		<camel.version>3.11.1</camel.version>
 		<resilience4j.version>1.6.1</resilience4j.version>
 		<rxjava.version>2.2.21</rxjava.version>
 		<spring-cloud.version>3.0.3</spring-cloud.version>
 		<!-- Take care when updating any of these. modig-security depends on CXF versions that might be incompatible. -->
 		<modig-security.version>3.0.6</modig-security.version>
 		<cxf.version>3.4.4</cxf.version>
-		<saaj-impl.version>1.5.1</saaj-impl.version>
 		<!-- Test dependencies -->
 		<activemq.version>5.15.0</activemq.version>
 		<awaitility.version>3.0.0</awaitility.version>
@@ -77,16 +75,6 @@
 			<dependency>
 				<groupId>org.apache.camel.springboot</groupId>
 				<artifactId>camel-spring-boot-starter</artifactId>
-				<version>${camel.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.camel</groupId>
-				<artifactId>camel-jms</artifactId>
-				<version>${camel.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.camel</groupId>
-				<artifactId>camel-jaxb</artifactId>
 				<version>${camel.version}</version>
 			</dependency>
 			<dependency>
@@ -128,11 +116,6 @@
 				<groupId>org.apache.cxf</groupId>
 				<artifactId>cxf-rt-ws-security</artifactId>
 				<version>${cxf.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.messaging.saaj</groupId>
-				<artifactId>saaj-impl</artifactId>
-				<version>${saaj-impl.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
@@ -346,23 +329,14 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-webdav-jackrabbit</artifactId>
-				<version>1.0</version>
-			</extension>
-		</extensions>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>3.0.0-M3</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-toolchains-plugin</artifactId>
