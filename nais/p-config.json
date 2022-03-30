@@ -9,7 +9,7 @@
   "OPPGAVE_OPPGAVER_URL": "https://oppgave.nais.adeo.no/api/v1/oppgaver",
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "SRVDOKOPP": "/serviceuser/data/prod/srvdokopp",
-  "NAMESPACE": "teamdokumenthandtering",
+  "APP_NAME": "dokopp",
   "INGRESSES": [
     "https://dokopp.intern.nav.no"
   ]
