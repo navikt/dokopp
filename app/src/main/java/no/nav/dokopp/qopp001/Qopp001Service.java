@@ -12,9 +12,8 @@ import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Handler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 
 import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
 import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
@@ -35,7 +34,7 @@ public class Qopp001Service {
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
 
-	@Inject
+	@Autowired
 	public Qopp001Service(Oppgave oppgave,
 						  OpprettOppgaveMapper opprettOppgaveMapper,
 						  Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo,

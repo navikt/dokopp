@@ -4,8 +4,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import no.nav.dokopp.Application;
-import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
-import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.dokopp.qopp001.Qopp001Service;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
@@ -18,6 +16,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -28,7 +27,6 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
@@ -74,19 +72,19 @@ public class Qopp001IT {
 	private static final String AKTOER_ID = "1000012345678";
 	private static final String ORGNR = "123456789";
 	
-	@Inject
+	@Autowired
 	private JmsTemplate jmsTemplate;
 	
-	@Inject
+	@Autowired
 	private Queue qopp001;
 	
-	@Inject
+	@Autowired
 	private Queue qopp001FunksjonellFeil;
 	
-	@Inject
+	@Autowired
 	private Queue backoutQueue;
 
-	@Inject
+	@Autowired
 	private CacheManager cacheManager;
 	
 	@Rule

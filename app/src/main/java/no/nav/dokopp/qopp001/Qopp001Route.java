@@ -11,9 +11,9 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.support.processor.validation.SchemaValidationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import javax.jms.Queue;
 
 /**
@@ -32,7 +32,7 @@ public class Qopp001Route extends SpringRouteBuilder {
 	private final Qopp001Service qopp001Service;
 	private final MeterRegistry meterRegistry;
 
-	@Inject
+	@Autowired
 	public Qopp001Route(Queue qopp001,
 						Queue qopp001FunksjonellFeil,
 						Qopp001Service qopp001Service,

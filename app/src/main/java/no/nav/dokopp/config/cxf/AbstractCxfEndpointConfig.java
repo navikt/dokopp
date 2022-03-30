@@ -5,8 +5,8 @@ import org.apache.cxf.feature.Feature;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.message.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.inject.Inject;
 import javax.xml.namespace.QName;
 import java.net.URL;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import java.util.Map;
 public abstract class AbstractCxfEndpointConfig {
 	public static final int DEFAULT_TIMEOUT = 30_000;
 
-	@Inject
+	@Autowired
 	private Bus bus;
 
 	private int receiveTimeout = DEFAULT_TIMEOUT;

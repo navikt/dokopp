@@ -9,6 +9,7 @@ import no.nav.dokopp.nais.selftest.AbstractDependencyCheck;
 import no.nav.dokopp.nais.selftest.DependencyCheckResult;
 import no.nav.dokopp.nais.selftest.Result;
 import no.nav.dokopp.nais.selftest.SelftestResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,7 +48,7 @@ public class NaisContract {
 	private final String version;
 	private final List<AbstractDependencyCheck> dependencyCheckList;
 
-	@Inject
+	@Autowired
 	public NaisContract(List<AbstractDependencyCheck> dependencyCheckList,
 						@Value("dokopp") String appName,
 						@Value("${APP_VERSION:0}") String version,

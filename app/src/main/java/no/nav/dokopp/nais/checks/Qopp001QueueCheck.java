@@ -4,10 +4,10 @@ import no.nav.dokopp.nais.selftest.AbstractDependencyCheck;
 import no.nav.dokopp.nais.selftest.ApplicationNotReadyException;
 import no.nav.dokopp.nais.selftest.DependencyType;
 import no.nav.dokopp.nais.selftest.Importance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 
@@ -20,7 +20,7 @@ public class Qopp001QueueCheck extends AbstractDependencyCheck {
 	private final Queue qopp001;
 	private final JmsTemplate jmsTemplate;
 
-	@Inject
+	@Autowired
 	public Qopp001QueueCheck(Queue qopp001,
 							 JmsTemplate jmsTemplate) throws JMSException {
 		super(DependencyType.QUEUE, "Qopp001QueueFeil", qopp001.getQueueName(), Importance.CRITICAL);
