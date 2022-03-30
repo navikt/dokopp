@@ -6,11 +6,10 @@ import no.nav.dokopp.consumer.tjoark122.Tjoark122HentJournalpostInfo;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -19,43 +18,37 @@ import static org.mockito.Mockito.when;
  */
 public class Qopp001ServiceTest {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo = Mockito.mock(Tjoark122HentJournalpostInfo.class);
 	private final Qopp001Service qopp001Service = new Qopp001Service(null, null, tjoark122HentJournalpostInfo, null);
 
 	@Test
 	public void shouldThrowAvsluttBehandlingOgKastMeldingExceptionWhenUgyldigArkivSystem() {
-		thrown.expect(AvsluttBehandlingOgKastMeldingException.class);
-
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
 		opprettOppgave.setOppgaveType(DomainConstants.BEHANDLE_RETURPOST);
 		opprettOppgave.setArkivKode("1");
-		qopp001Service.qopp001("1", opprettOppgave);
+
+		assertThrows(AvsluttBehandlingOgKastMeldingException.class, () -> qopp001Service.qopp001("1", opprettOppgave));
 	}
 
 	@Test
 	public void shouldThrowAvsluttBehandlingOgKastMeldingExceptionWhenUgyldigArkivKode() {
-		thrown.expect(AvsluttBehandlingOgKastMeldingException.class);
-
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
 		opprettOppgave.setOppgaveType(DomainConstants.BEHANDLE_RETURPOST);
 		opprettOppgave.setArkivSystem(DomainConstants.ARKIVSYSTEM_JOARK);
-		qopp001Service.qopp001("1", opprettOppgave);
+
+		assertThrows(AvsluttBehandlingOgKastMeldingException.class, () -> qopp001Service.qopp001("1", opprettOppgave));
 	}
 
 	@Test
 	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturNotNull() {
 		when(tjoark122HentJournalpostInfo.hentJournalpostInfo(any(String.class))).thenReturn(createHentJournalpostInfoResponse());
 
-		thrown.expect(ReturpostAlleredeFlaggetException.class);
-
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
 		opprettOppgave.setOppgaveType(DomainConstants.BEHANDLE_RETURPOST);
 		opprettOppgave.setArkivSystem(DomainConstants.ARKIVSYSTEM_JOARK);
 		opprettOppgave.setArkivKode("1");
-		qopp001Service.qopp001("1", opprettOppgave);
+
+		assertThrows(ReturpostAlleredeFlaggetException.class, () -> qopp001Service.qopp001("1", opprettOppgave));
 	}
 
 	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponse(){

@@ -1,13 +1,5 @@
 package no.nav.dokopp.qopp001;
 
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import no.nav.dokopp.constants.DomainConstants;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
@@ -15,11 +7,18 @@ import no.nav.dokopp.consumer.tjoark122.HentJournalpostInfoResponseTo;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
 import no.nav.dokopp.qopp001.domain.BrukerType;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class OpprettOppgaveMapperTest {
 
@@ -39,11 +38,8 @@ public class OpprettOppgaveMapperTest {
 	private static final String ENHETS_ID = "9999";
 	private static final int ANTALL_DAGER_AKTIV = 14;
 
-	private PdlGraphQLConsumer pdlGraphQLConsumer = mock(PdlGraphQLConsumer.class);
+	private final PdlGraphQLConsumer pdlGraphQLConsumer = mock(PdlGraphQLConsumer.class);
 	private final OpprettOppgaveMapper opprettOppgaveMapper = new OpprettOppgaveMapper(pdlGraphQLConsumer);
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 	@Test
 	public void shouldOpprettOppgaveGosys() {
@@ -102,11 +98,11 @@ public class OpprettOppgaveMapperTest {
 
 	@Test
 	public void shouldThrowUkjentBrukertypeException() {
-		expectedException.expect(UkjentBrukertypeException.class);
-		expectedException.expectMessage("Ukjent brukertype er ikke støttet.");
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for ukjent brukertype."));
-		opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettOppgave());
+
+		Exception e = Assertions.assertThrows(UkjentBrukertypeException.class, () -> opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettOppgave()));
+		Assertions.assertEquals("Ukjent brukertype er ikke støttet.", e.getMessage());
 	}
 
 	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithPersonAndPensjon() {

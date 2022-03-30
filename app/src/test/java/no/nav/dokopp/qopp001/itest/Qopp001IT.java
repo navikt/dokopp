@@ -9,12 +9,10 @@ import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,7 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.jms.Queue;
 import javax.jms.TextMessage;
@@ -51,13 +49,13 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
 import static no.nav.modig.common.MDCOperations.MDC_CALL_ID;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Import(JmsTestConfig.class)
 @SpringBootTest(classes = {Application.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
@@ -87,15 +85,12 @@ public class Qopp001IT {
 	@Autowired
 	private CacheManager cacheManager;
 	
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-	
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
 	}
 
-	@Before
+	@BeforeEach
 	public void setupBefore() {
 		resetAllRequests();
 		cacheManager.getCache(STS_CACHE).clear();

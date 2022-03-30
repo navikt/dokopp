@@ -1,26 +1,25 @@
 package no.nav.dokopp.consumer.tjoark122;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.nav.dokopp.exception.AvsluttBehandlingException;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.DokumentproduksjonInfoV1;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.meldinger.HentJournalpostInfoRequest;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.meldinger.HentJournalpostInfoResponse;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class Tjoark122HentJournalpostInfoTest {
 	private static final String JOURNALFOERENDE_ENHET = "9999";
 	private static final String FNR = "11111111111";
@@ -31,9 +30,6 @@ public class Tjoark122HentJournalpostInfoTest {
 	private static final int ANTALL_RETUR = 0;
 	private final DokumentproduksjonInfoV1 dokumentproduksjonInfoV1Mock = Mockito.mock(DokumentproduksjonInfoV1.class);
 	private final Tjoark122HentJournalpostInfo tjoark122 = new Tjoark122HentJournalpostInfo(dokumentproduksjonInfoV1Mock, new SimpleMeterRegistry());
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void shouldMapResponse() {
@@ -60,10 +56,9 @@ public class Tjoark122HentJournalpostInfoTest {
 	// https://jira.adeo.no/browse/MMA-2300
 	@Test
 	public void shouldThrowFunctionalExceptionWhenBrukerIdIsNull() {
-		thrown.expect(AvsluttBehandlingException.class);
-
 		when(dokumentproduksjonInfoV1Mock.hentJournalpostInfo(any(HentJournalpostInfoRequest.class))).thenReturn(createResponse().withBrukerId(null));
-		tjoark122.hentJournalpostInfo("1");
+
+		Assertions.assertThrows(AvsluttBehandlingException.class, () -> tjoark122.hentJournalpostInfo("1"));
 	}
 
 	private HentJournalpostInfoResponse createResponse() {
