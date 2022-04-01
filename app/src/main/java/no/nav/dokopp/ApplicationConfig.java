@@ -1,6 +1,5 @@
 package no.nav.dokopp;
 
-import no.nav.dokopp.config.TomcatConfig;
 import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1EndpointConfig;
 import no.nav.dokopp.config.cxf.DokumentproduksjonInfoV1EndpointConfig;
 import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
@@ -38,7 +37,6 @@ import org.springframework.retry.annotation.EnableRetry;
 		DokumentproduksjonInfoV1Alias.class,
 })
 @Import({
-		TomcatConfig.class,
 		NaisContract.class,
 		DokumentproduksjonInfoV1EndpointConfig.class,
 		ArkiverDokumentproduksjonV1EndpointConfig.class,

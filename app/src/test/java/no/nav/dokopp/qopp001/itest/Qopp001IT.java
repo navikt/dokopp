@@ -47,7 +47,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
-import static no.nav.modig.common.MDCOperations.MDC_CALL_ID;
+import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -153,10 +153,8 @@ public class Qopp001IT {
 		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(postRequestedFor(urlEqualTo("/oppgaver"))
-				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == null)]")));
-		});
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/oppgaver"))
+			.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == null)]"))));
 	}
 
 	@Test
@@ -172,11 +170,9 @@ public class Qopp001IT {
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(postRequestedFor(urlEqualTo("/oppgaver"))
-					.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
-					.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]")));
-		});
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/oppgaver"))
+				.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
+				.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]"))));
 	}
 
 	@Test
@@ -382,9 +378,7 @@ public class Qopp001IT {
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
-						verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")));
-				}
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")))
 		);
 		verify(exactly(0), postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 	}

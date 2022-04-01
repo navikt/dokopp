@@ -93,20 +93,6 @@
 			<groupId>com.ibm.mq</groupId>
 			<artifactId>com.ibm.mq.allclient</artifactId>
 		</dependency>
-		<!-- modig -->
-		<dependency>
-			<groupId>no.nav.modig</groupId>
-			<artifactId>modig-log-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.modig</groupId>
-			<artifactId>modig-security-ws</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.modig</groupId>
-			<artifactId>modig-security-loginmodule</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 
 		<!--Caching-->
 		<dependency>
@@ -186,11 +172,6 @@
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-legacy</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.modig</groupId>
-			<artifactId>modig-testcertificates</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
