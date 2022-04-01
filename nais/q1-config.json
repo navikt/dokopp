@@ -9,7 +9,7 @@
   "OPPGAVE_OPPGAVER_URL": "https://oppgave.nais.preprod.local/api/v1/oppgaver",
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
   "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
-  "NAMESPACE": "q1",
+  "APP_NAME": "dokopp-q1",
   "INGRESSES": [
     "https://dokopp-q1.dev.intern.nav.no"
   ]

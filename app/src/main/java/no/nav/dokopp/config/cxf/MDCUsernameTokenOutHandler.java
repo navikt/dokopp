@@ -1,10 +1,6 @@
 package no.nav.dokopp.config.cxf;
 
-import static no.nav.dokopp.ApplicationConstants.DEFAULT_APP_ID;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
-import no.nav.dokopp.ApplicationConstants;
-import no.nav.modig.common.MDCOperations;
+import no.nav.dokopp.util.MDCOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +15,13 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.util.HashSet;
 import java.util.Set;
 
+import static no.nav.dokopp.ApplicationConstants.APP_ID;
+import static no.nav.dokopp.ApplicationConstants.DEFAULT_APP_ID;
+import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
+import static no.nav.dokopp.util.MDCOperations.MDC_CONSUMER_ID;
+import static no.nav.dokopp.util.MDCOperations.MDC_USER_ID;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * Soap-handler that appends CallId and AppId to SOAP Header for outgoing requests
  *
@@ -29,34 +32,34 @@ public class MDCUsernameTokenOutHandler implements SOAPHandler<SOAPMessageContex
 	private static final Logger log = LoggerFactory.getLogger(MDCUsernameTokenOutHandler.class.getName());
 
 	public static final String URI_NO_NAV_APPLIKASJONSRAMMEVERK = "uri:no.nav.applikasjonsrammeverk";
-	private static final QName APP_ID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, ApplicationConstants.APP_ID);
-	private static final QName CALLID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDCOperations.MDC_CALL_ID);
-	private static final QName CONSUMER_ID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDCOperations.MDC_CONSUMER_ID);
-	private static final QName USER_ID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDCOperations.MDC_USER_ID);
+	private static final QName APP_ID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, APP_ID);
+	private static final QName CALLID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDC_CALL_ID);
+	private static final QName CONSUMER_ID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDC_CONSUMER_ID);
+	private static final QName USER_ID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDC_USER_ID);
 	
 	@Override
 	public boolean handleMessage(SOAPMessageContext context) {
 		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 		
 		if (outbound) {
-			String callId = MDCOperations.getFromMDC(MDCOperations.MDC_CALL_ID);
+			String callId = MDCOperations.getFromMDC(MDC_CALL_ID);
 			if (isEmpty(callId)) {
 				log.debug("Callid is null/empty, generating");
 				callId = MDCOperations.generateCallId();
 			}
 			appendToSoapHeader(context, CALLID_QNAME, callId);
 			
-			String appId = MDCOperations.getFromMDC(ApplicationConstants.APP_ID);
+			String appId = MDCOperations.getFromMDC(APP_ID);
 			if (isEmpty(appId)) {
 				log.debug("appId is null, using default");
 				appId = DEFAULT_APP_ID;
 			}
 			appendToSoapHeader(context, APP_ID_QNAME, appId);
 			
-			String consumerId = MDCOperations.getFromMDC(MDCOperations.MDC_CONSUMER_ID);
+			String consumerId = MDCOperations.getFromMDC(MDC_CONSUMER_ID);
 			appendToSoapHeader(context, CONSUMER_ID_QNAME, consumerId);
 			
-			String userId = MDCOperations.getFromMDC(MDCOperations.MDC_USER_ID);
+			String userId = MDCOperations.getFromMDC(MDC_USER_ID);
 			appendToSoapHeader(context, USER_ID_QNAME, userId);
 		}
 		return true;
@@ -85,7 +88,7 @@ public class MDCUsernameTokenOutHandler implements SOAPHandler<SOAPMessageContex
 	
 	@Override
 	public Set<QName> getHeaders() {
-		return new HashSet<QName>() {
+		return new HashSet<>() {
 			{
 				add(APP_ID_QNAME);
 				add(CALLID_QNAME);

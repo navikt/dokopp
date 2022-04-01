@@ -1,20 +1,19 @@
 package no.nav.dokopp.consumer.tjoark110;
 
-import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
-import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
-import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
-import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
-
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.ArkiverDokumentproduksjonV1;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.meldinger.SettJournalpostAttributterRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
+import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
+import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
+import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -25,7 +24,7 @@ public class Tjoark110SettJournalpostAttributter {
 	private final MeterRegistry meterRegistry;
 	private final static int RETRIES = 3;
 	
-	@Inject
+	@Autowired
 	public Tjoark110SettJournalpostAttributter(ArkiverDokumentproduksjonV1 arkiverDokumentproduksjonV1,
 											   MeterRegistry meterRegistry) {
 		this.arkiverDokumentproduksjonV1 = arkiverDokumentproduksjonV1;

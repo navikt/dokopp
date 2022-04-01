@@ -36,7 +36,7 @@ public class JmsTestConfig {
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
-	public BrokerService broker() throws Exception {
+	public BrokerService broker() {
 		BrokerService service = new BrokerService();
 		service.setPersistent(false);
 

@@ -13,10 +13,10 @@ import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 
 public class RequestEntityMatcher implements ArgumentMatcher<RequestEntity> {
 
-    private String personnummer;
-    private String callId;
-    private String token;
-    private URI pdlUrl;
+    private final String personnummer;
+    private final String callId;
+    private final String token;
+    private final URI pdlUrl;
 
 
     RequestEntityMatcher(String personnummer, String callId, String token, URI pdlUrl){

@@ -2,21 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<artifactId>dokopp</artifactId>
 		<groupId>no.nav.dokopp</groupId>
 		<version>1-SNAPSHOT</version>
 	</parent>
 
-	<modelVersion>4.0.0</modelVersion>
-
 	<artifactId>app</artifactId>
 	<packaging>jar</packaging>
 	<name>dokopp :: app</name>
-
-	<properties>
-		<start-class>no.nav.dokopp.Application</start-class>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -48,10 +44,6 @@
 			<artifactId>camel-jaxb-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-B</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
@@ -62,10 +54,6 @@
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>jta</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.xml.ws</groupId>
@@ -105,20 +93,7 @@
 			<groupId>com.ibm.mq</groupId>
 			<artifactId>com.ibm.mq.allclient</artifactId>
 		</dependency>
-		<!-- modig -->
-		<dependency>
-			<groupId>no.nav.modig</groupId>
-			<artifactId>modig-log-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.modig</groupId>
-			<artifactId>modig-security-ws</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.modig</groupId>
-			<artifactId>modig-security-loginmodule</artifactId>
-			<scope>runtime</scope>
-		</dependency>
+
 		<!--Caching-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -128,6 +103,7 @@
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
 		</dependency>
+
 		<!-- tjenester -->
 		<dependency>
 			<groupId>no.nav.tjenester.brevogarkiv</groupId>
@@ -143,12 +119,14 @@
 			<groupId>no.nav.dok</groupId>
 			<artifactId>opprettoppgave-tjenestespesifikasjon-v1</artifactId>
 		</dependency>
+
 		<!-- Provided dependencies -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 		<!--selftest-->
 		<dependency>
 			<groupId>io.reactivex.rxjava2</groupId>
@@ -156,33 +134,15 @@
 		</dependency>
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-circuitbreaker</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-retry</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-timelimiter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-prometheus</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-metrics</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-spring-boot2</artifactId>
 		</dependency>
+
 		<!--Logging-->
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
 			<artifactId>logstash-logback-encoder</artifactId>
 		</dependency>
+
 		<!-- test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -205,11 +165,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.github.tomakehurst</groupId>
-			<artifactId>wiremock-standalone</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
 			<scope>test</scope>
@@ -217,11 +172,6 @@
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-legacy</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.modig</groupId>
-			<artifactId>modig-testcertificates</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

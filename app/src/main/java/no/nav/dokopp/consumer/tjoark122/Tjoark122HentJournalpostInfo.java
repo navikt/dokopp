@@ -1,11 +1,5 @@
 package no.nav.dokopp.consumer.tjoark122;
 
-import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
-import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
-import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
-import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
-import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
-
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import no.nav.dokopp.exception.AvsluttBehandlingException;
@@ -16,11 +10,16 @@ import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.HentJournalp
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.meldinger.HentJournalpostInfoRequest;
 import no.nav.tjeneste.domene.brevogarkiv.dokumentproduksjoninfo.v1.meldinger.HentJournalpostInfoResponse;
 import org.apache.camel.ExchangeProperty;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
+import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
+import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
+import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
+import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -31,7 +30,7 @@ public class Tjoark122HentJournalpostInfo {
 	private final MeterRegistry meterRegistry;
 	private final static int retries = 3;
 	
-	@Inject
+	@Autowired
 	public Tjoark122HentJournalpostInfo(DokumentproduksjonInfoV1 dokumentproduksjonInfoV1, MeterRegistry meterRegistry) {
 		this.dokumentproduksjonInfoV1 = dokumentproduksjonInfoV1;
 		this.meterRegistry = meterRegistry;

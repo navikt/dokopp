@@ -1,12 +1,9 @@
 package no.nav.dokopp.consumer.sts;
 
-import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
-import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
-import static no.nav.dokopp.constants.RetryConstants.MULTIPLIER_SHORT;
-
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
-import no.nav.dokopp.exception.StsTechnicalException;
 import no.nav.dokopp.exception.DokoppTechnicalException;
+import no.nav.dokopp.exception.StsTechnicalException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,8 +13,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.inject.Inject;
 import java.time.Duration;
+
+import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
+import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
+import static no.nav.dokopp.constants.RetryConstants.MULTIPLIER_SHORT;
 
 /**
  * @author Sigurd Midttun, Visma Consulting.
@@ -28,7 +28,7 @@ public class StsRestConsumer {
 	private final RestTemplate restTemplate;
 	private final String stsUrl;
 
-	@Inject
+	@Autowired
 	public StsRestConsumer(@Value("${security-token-service-token.url}") String stsUrl,
 						   RestTemplateBuilder restTemplateBuilder,
 						   final ServiceuserAlias serviceuserAlias) {

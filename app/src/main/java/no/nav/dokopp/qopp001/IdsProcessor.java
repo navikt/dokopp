@@ -1,7 +1,7 @@
 package no.nav.dokopp.qopp001;
 
 import no.nav.dokopp.constants.HeaderConstants;
-import no.nav.modig.common.MDCOperations;
+import no.nav.dokopp.util.MDCOperations;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.MDC;

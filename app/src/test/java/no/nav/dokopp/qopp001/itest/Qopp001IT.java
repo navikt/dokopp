@@ -4,20 +4,17 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import no.nav.dokopp.Application;
-import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
-import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.dokopp.qopp001.Qopp001Service;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -26,9 +23,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
@@ -51,15 +47,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
-import static no.nav.modig.common.MDCOperations.MDC_CALL_ID;
+import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Import(JmsTestConfig.class)
 @SpringBootTest(classes = {Application.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
@@ -74,30 +70,27 @@ public class Qopp001IT {
 	private static final String AKTOER_ID = "1000012345678";
 	private static final String ORGNR = "123456789";
 	
-	@Inject
+	@Autowired
 	private JmsTemplate jmsTemplate;
 	
-	@Inject
+	@Autowired
 	private Queue qopp001;
 	
-	@Inject
+	@Autowired
 	private Queue qopp001FunksjonellFeil;
 	
-	@Inject
+	@Autowired
 	private Queue backoutQueue;
 
-	@Inject
+	@Autowired
 	private CacheManager cacheManager;
 	
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-	
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
 	}
 
-	@Before
+	@BeforeEach
 	public void setupBefore() {
 		resetAllRequests();
 		cacheManager.getCache(STS_CACHE).clear();
@@ -160,10 +153,8 @@ public class Qopp001IT {
 		
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(postRequestedFor(urlEqualTo("/oppgaver"))
-				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == null)]")));
-		});
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/oppgaver"))
+			.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == null)]"))));
 	}
 
 	@Test
@@ -179,11 +170,9 @@ public class Qopp001IT {
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(postRequestedFor(urlEqualTo("/oppgaver"))
-					.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
-					.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]")));
-		});
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/oppgaver"))
+				.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
+				.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]"))));
 	}
 
 	@Test
@@ -389,9 +378,7 @@ public class Qopp001IT {
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> {
-						verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")));
-				}
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")))
 		);
 		verify(exactly(0), postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 	}

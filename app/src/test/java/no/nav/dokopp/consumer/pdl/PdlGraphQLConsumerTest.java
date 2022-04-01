@@ -4,10 +4,11 @@ import no.nav.dokopp.config.props.PdlProperties;
 import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ import java.util.List;
 
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,14 +38,14 @@ public class PdlGraphQLConsumerTest {
     private static final String TOKEN = "a1676cbe-daaf-4fe0-aa53-f3a7b35258d0";
     private static final String CALL_ID = "17acff54-7c80-4242-819d-20765d7c883b";
 
-    private static RestTemplate restTemplate = mock(RestTemplate.class);
-    private static RestTemplateBuilder restTemplateBuilder = mock(RestTemplateBuilder.class);
-    private static StsRestConsumer stsRestConsumer = mock(StsRestConsumer.class);
+    private static final RestTemplate restTemplate = mock(RestTemplate.class);
+    private static final RestTemplateBuilder restTemplateBuilder = mock(RestTemplateBuilder.class);
+    private static final StsRestConsumer stsRestConsumer = mock(StsRestConsumer.class);
 
     private static PdlProperties pdlProperties;
     private static PdlGraphQLConsumer pdlGraphQLConsumer;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         MDC.put(NAV_CALL_ID, CALL_ID);
 
@@ -58,12 +59,12 @@ public class PdlGraphQLConsumerTest {
         pdlGraphQLConsumer = new PdlGraphQLConsumer(restTemplateBuilder, stsRestConsumer, pdlProperties);
     }
 
-    @Before
+    @BeforeEach
     public void beforeEach() {
         reset(restTemplate);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown(){
         MDC.clear();
     }
@@ -80,7 +81,7 @@ public class PdlGraphQLConsumerTest {
 
         String returnValue = pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
 
-        assertThat(returnValue, is("1000012345678"));
+        MatcherAssert.assertThat(returnValue, is("1000012345678"));
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(
                         "123",
@@ -92,7 +93,7 @@ public class PdlGraphQLConsumerTest {
         );
     }
 
-    @Test(expected = PdlHentAktoerIdForFnrFunctionalException.class)
+    @Test
     public void shouldThrowFunctionalExceptionIfResponseContainsError() throws URISyntaxException {
         PdlHentIdenterResponse pdlHentIdenterResponse = createPdlResponse(
                 List.of(createError("ErrorMessage", "ErrorCode", "ErrorClassification")),
@@ -101,7 +102,7 @@ public class PdlGraphQLConsumerTest {
 
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenReturn(new ResponseEntity<>(pdlHentIdenterResponse, HttpStatus.OK));
 
-        pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
+        assertThrows(PdlHentAktoerIdForFnrFunctionalException.class, () -> pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123"));
 
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(
@@ -114,16 +115,11 @@ public class PdlGraphQLConsumerTest {
         );
     }
 
-    @Test(expected = PdlHentAktoerIdForFnrFunctionalException.class)
+    @Test
     public void shouldThrowFunctionalExceptionIfResponseHas4xxStatusCode() throws URISyntaxException {
-        PdlHentIdenterResponse pdlHentIdenterResponse = createPdlResponse(
-                null,
-                createIdent("1000012345678", false, IdentType.AKTORID)
-        );
-
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
-        pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
+        assertThrows(PdlHentAktoerIdForFnrFunctionalException.class, () -> pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123"));
 
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(
@@ -136,16 +132,11 @@ public class PdlGraphQLConsumerTest {
         );
     }
 
-    @Test(expected = PdlHentAktoerIdForFnrTechnicalException.class)
+    @Test
     public void shouldThrowTechnicalExceptionIfResponseHas5xxStatusCode() throws URISyntaxException {
-        PdlHentIdenterResponse pdlHentIdenterResponse = createPdlResponse(
-                null,
-                createIdent("1000012345678", false, IdentType.AKTORID)
-        );
-
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
+        assertThrows(PdlHentAktoerIdForFnrTechnicalException.class, () -> pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123"));
 
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(
@@ -158,7 +149,7 @@ public class PdlGraphQLConsumerTest {
         );
     }
 
-    @Test(expected = PdlHentAktoerIdForFnrFunctionalException.class)
+    @Test
     public void shouldThrowFunctionalExceptionIfResponseContainsNoCurrentAktorIds() throws URISyntaxException {
         PdlHentIdenterResponse pdlHentIdenterResponse = createPdlResponse(
                 null,
@@ -169,7 +160,7 @@ public class PdlGraphQLConsumerTest {
 
         when(restTemplate.exchange(any(), eq(PdlHentIdenterResponse.class))).thenReturn(new ResponseEntity<>(pdlHentIdenterResponse, HttpStatus.OK));
 
-        pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123");
+        assertThrows(PdlHentAktoerIdForFnrFunctionalException.class, () -> pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident("123"));
 
         verify(restTemplate).exchange(
                 argThat(new RequestEntityMatcher(

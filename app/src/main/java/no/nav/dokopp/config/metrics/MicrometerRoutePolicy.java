@@ -84,7 +84,7 @@ public class MicrometerRoutePolicy extends RoutePolicySupport {
 
 	private Exception getException(Exchange exchange) {
 		Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-		if (exception == null && exchange.getException() instanceof Exception) {
+		if (exception == null && exchange.getException() != null) {
 			exception = (Exception) exchange.getException().getCause();
 		}
 		return exception;

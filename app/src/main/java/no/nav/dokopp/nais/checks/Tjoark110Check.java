@@ -6,9 +6,8 @@ import no.nav.dokopp.nais.selftest.ApplicationNotReadyException;
 import no.nav.dokopp.nais.selftest.DependencyType;
 import no.nav.dokopp.nais.selftest.Importance;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.ArkiverDokumentproduksjonV1;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -19,7 +18,7 @@ public class Tjoark110Check extends AbstractDependencyCheck {
 	public static final String ARKIVER_DOKUMENTPRODUKSJON_V1 = "ArkiverDokumentproduksjon_v1";
 	private final ArkiverDokumentproduksjonV1 arkiverDokumentproduksjonV1;
 
-	@Inject
+	@Autowired
 	public Tjoark110Check(ArkiverDokumentproduksjonV1 arkiverDokumentproduksjonV1, ArkiverDokumentproduksjonV1Alias arkiverDokumentproduksjonV1Alias) {
 		super(DependencyType.SOAP, "Tjoark110", arkiverDokumentproduksjonV1Alias.getEndpointurl(), Importance.WARNING);
 		this.arkiverDokumentproduksjonV1 = arkiverDokumentproduksjonV1;
