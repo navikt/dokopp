@@ -7,7 +7,7 @@ import lombok.Value;
  * @author Erik Bråten, Visma Consulting.
  */
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class OpprettOppgaveRequest {
 
 	private final String tildeltEnhetsnr;

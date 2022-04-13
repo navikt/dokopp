@@ -8,6 +8,7 @@ import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.support.processor.validation.SchemaValidationException;
@@ -21,7 +22,7 @@ import javax.jms.Queue;
  */
 @Slf4j
 @Component
-public class Qopp001Route extends SpringRouteBuilder {
+public class Qopp001Route extends RouteBuilder {
 
 	public static final String SERVICE_ID = "QOPP001";
 	public static final String PROPERTY_JOURNALPOST_ID = "journalpostId";

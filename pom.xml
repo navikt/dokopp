@@ -30,7 +30,7 @@
 		<commons-io.version>2.11.0</commons-io.version>
 		<logstash-logback-encode.version>7.0.1</logstash-logback-encode.version>
 		<resilience4j.version>1.7.1</resilience4j.version>
-		<cxf.version>3.5.1</cxf.version>
+		<cxf.version>3.5.2</cxf.version>
 
 		<dokumentproduksjoninfo-tjenestespesifikasjon.version>2.1.1
 		</dokumentproduksjoninfo-tjenestespesifikasjon.version>
@@ -64,13 +64,10 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.cxf</groupId>
-				<artifactId>cxf-spring-boot-starter-jaxws</artifactId>
+				<artifactId>cxf-bom</artifactId>
 				<version>${cxf.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.cxf</groupId>
-				<artifactId>cxf-rt-ws-security</artifactId>
-				<version>${cxf.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.ibm.mq</groupId>
