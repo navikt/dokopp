@@ -1,5 +1,5 @@
 {
-  "MQGATEWAY01_HOSTNAME": "a01apvl247.adeo.no",
+  "MQGATEWAY01_HOSTNAME": "mpls01.adeo.no",
   "MQGATEWAY01_PORT": "1414",
   "MQGATEWAY01_NAME": "MPLS01",
   "PDL_URL": "https://pdl-api.intern.nav.no/graphql",
