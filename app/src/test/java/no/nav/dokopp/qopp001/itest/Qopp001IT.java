@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Import;
@@ -96,7 +97,10 @@ public class Qopp001IT {
 	@BeforeEach
 	public void setupBefore() {
 		resetAllRequests();
-		cacheManager.getCache(STS_CACHE).clear();
+		Cache stsCache = cacheManager.getCache(STS_CACHE);
+		if(stsCache != null) {
+			stsCache.clear();
+		}
 	}
 
 	/**
