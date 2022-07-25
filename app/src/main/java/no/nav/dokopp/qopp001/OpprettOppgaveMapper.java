@@ -74,11 +74,20 @@ public class OpprettOppgaveMapper {
 
 		if (!isEmpty(aktoerId)) {
 			brukerMap.put(AKTOER_ID, aktoerId);
-		} else {
+		} else if(!isEmpty(orgnr)){
 			brukerMap.put(ORGNR, orgnr);
+		} else {
+			return brukerMap;
 		}
 
 		return brukerMap;
+	}
+
+	private String mapSaksreferanse(JournalpostResponse journalpostResponse) {
+		if (GOSYS_APPIDS.contains(journalpostResponse.getFagsystem())) {
+			return journalpostResponse.getSaksnummer();
+		}
+		return null;
 	}
 
 	//Sjekk at brukerType eller avsenderMottakerType er enten person eller organisasjon
@@ -108,12 +117,5 @@ public class OpprettOppgaveMapper {
 
 	private boolean isBrukerOrganisasjon(String brukertype) {
 		return ORGANISASJON.name().equalsIgnoreCase(brukertype);
-	}
-
-	private String mapSaksreferanse(JournalpostResponse journalpostResponse) {
-		if (GOSYS_APPIDS.contains(journalpostResponse.getFagsystem())) {
-			return journalpostResponse.getSaksnummer();
-		}
-		return null;
 	}
 }
