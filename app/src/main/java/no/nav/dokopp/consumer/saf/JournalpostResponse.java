@@ -1,4 +1,4 @@
-package no.nav.dokopp.consumer.tjoark122;
+package no.nav.dokopp.consumer.saf;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class HentJournalpostInfoResponseTo {
+public class JournalpostResponse {
 	private String journalfEnhet;
 	private String fagomrade;
 	private String brukerId;
@@ -16,6 +16,8 @@ public class HentJournalpostInfoResponseTo {
 	private String fagsystem;
 	private String brukertype;
 	private Integer antallRetur;
+	private String avsenderMottakerId;
+	private String avsenderMottakerType;
 
 	public boolean isAlleredeRegistrertReturpost() {
 		return antallRetur != null && antallRetur > 0;

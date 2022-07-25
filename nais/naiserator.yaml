@@ -25,6 +25,10 @@ spec:
       value: {{ OPPGAVE_OPPGAVER_URL }}
     - name: SECURITY_TOKEN_SERVICE_TOKEN_URL
       value: {{ SECURITY_TOKEN_SERVICE_TOKEN_URL }}
+    - name: DOKOPP_PROXY_HOST
+      value: {{ DOKOPP_PROXY_HOST }}
+    - name: DOKOPP_PROXY_PORT
+      value: "{{DOKOPP_PROXY_PORT}}"
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -55,3 +59,7 @@ spec:
     paths:
       - kvPath: {{ SRVDOKOPP }}
         mountPath: /var/run/secrets/nais.io/srvdokopp
+  webproxy: true
+  azure:
+    application:
+      enabled: true

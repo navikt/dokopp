@@ -1,4 +1,5 @@
 {
+  "APP_NAME": "dokopp",
   "MQGATEWAY01_HOSTNAME": "mpls01.adeo.no",
   "MQGATEWAY01_PORT": "1414",
   "MQGATEWAY01_NAME": "MPLS01",
@@ -8,8 +9,13 @@
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.P_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
   "OPPGAVE_OPPGAVER_URL": "https://oppgave.nais.adeo.no/api/v1/oppgaver",
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
+  "DOKOPP_PROXY_HOST": "webproxy.nais",
+  "DOKOPP_PROXY_PORT": "8088",
+  "AZURE_TENANT": "trygdeetaten.no",
+  "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/oauth2/v2.0/token",
+  "AZURE_APP_SCOPE": "api://prod-fss.teamdokumenthandtering.saf/.default",
+  "SAF_GRAPHQL_URL": "https://saf.nais.adeo.no/graphql",
   "SRVDOKOPP": "/serviceuser/data/prod/srvdokopp",
-  "APP_NAME": "dokopp",
   "INGRESSES": [
     "https://dokopp.intern.nav.no"
   ]

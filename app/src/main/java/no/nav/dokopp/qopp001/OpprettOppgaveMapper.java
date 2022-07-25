@@ -2,9 +2,8 @@ package no.nav.dokopp.qopp001;
 
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
-import no.nav.dokopp.consumer.tjoark122.HentJournalpostInfoResponseTo;
+import no.nav.dokopp.consumer.saf.JournalpostResponse;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
-import no.nav.dokopp.qopp001.domain.BrukerType;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +12,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static no.nav.dokopp.qopp001.domain.BrukerType.ORGANISASJON;
+import static no.nav.dokopp.qopp001.domain.BrukerType.PERSON;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 
 /**
  * @author Erik Bråten, Visma Consulting.
@@ -37,8 +41,8 @@ public class OpprettOppgaveMapper {
 		this.pdlGraphQLConsumer = pdlGraphQLConsumer;
 	}
 
-	public OpprettOppgaveRequest map(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo, OpprettOppgave opprettOppgave) {
-		Map<String, String> brukerMap = mapBruker(hentJournalpostInfoResponseTo.getBrukerId(), hentJournalpostInfoResponseTo.getBrukertype());
+	public OpprettOppgaveRequest map(JournalpostResponse journalpost, OpprettOppgave opprettOppgave) {
+		Map<String, String> brukerMap = mapBruker(journalpost);
 		return OpprettOppgaveRequest.builder()
 				.aktivDato(LocalDate.now().toString())
 				.aktoerId(brukerMap.get(AKTOER_ID))
@@ -49,39 +53,66 @@ public class OpprettOppgaveMapper {
 				.opprettetAvEnhetsnr(OPPRETTET_AV_ENHET)
 				.orgnr(brukerMap.get(ORGNR))
 				.prioritet(GSAK_PRIORITETKODE_LAV)
-				.saksreferanse(mapSaksreferanse(hentJournalpostInfoResponseTo))
-				.tema(hentJournalpostInfoResponseTo.getFagomrade())
-				.tildeltEnhetsnr(hentJournalfEnhet(hentJournalpostInfoResponseTo))
+				.saksreferanse(mapSaksreferanse(journalpost))
+				.tema(journalpost.getFagomrade())
+				.tildeltEnhetsnr(hentJournalfEnhet(journalpost))
 				.build();
 	}
 
-	private String hentJournalfEnhet(HentJournalpostInfoResponseTo responseTo) {
-		return OPPRETTET_AV_ENHET.equals(responseTo.getJournalfEnhet()) ? null :responseTo.getJournalfEnhet();
+	private String hentJournalfEnhet(JournalpostResponse responseTo) {
+		return OPPRETTET_AV_ENHET.equals(responseTo.getJournalfEnhet()) ? null : responseTo.getJournalfEnhet();
 	}
 
-	private Map<String, String> mapBruker(String brukerId, String brukertype) {
+
+	private Map<String, String> mapBruker(JournalpostResponse journalpost) {
+
 		Map<String, String> brukerMap = new HashMap<>();
-		if (brukerId == null || brukerId.isEmpty() || brukertype == null || brukertype.isEmpty()) {
-			return brukerMap;
+		validateBrukerType(journalpost);
+		String aktoerId = mapAktoerId(journalpost);
+		String orgnr = mapOrgnr(journalpost);
+
+
+		if (!isEmpty(aktoerId)) {
+			brukerMap.put(AKTOER_ID, aktoerId);
+		} else {
+			brukerMap.put(ORGNR, orgnr);
 		}
 
-		BrukerType brukertypeKode = BrukerType.valueOf(brukertype);
-		switch (brukertypeKode) {
-			case PERSON:
-				brukerMap.put(AKTOER_ID, pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId));
-				break;
-			case ORGANISASJON:
-				brukerMap.put(ORGNR, brukerId);
-				break;
-			default:
-				throw new UkjentBrukertypeException("Ukjent brukertype er ikke støttet.");
-		}
 		return brukerMap;
 	}
 
-	private String mapSaksreferanse(HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo) {
-		if (GOSYS_APPIDS.contains(hentJournalpostInfoResponseTo.getFagsystem())) {
-			return hentJournalpostInfoResponseTo.getSaksnummer();
+	//Sjekk at brukerType eller avsenderMottakerType er enten person eller organisasjon
+	private void validateBrukerType(JournalpostResponse journalpost) {
+		if (!isBrukerPerson(journalpost.getBrukertype()) && !isBrukerPerson(journalpost.getAvsenderMottakerType()) &&
+				!isBrukerOrganisasjon(journalpost.getBrukertype()) && !isBrukerOrganisasjon(journalpost.getAvsenderMottakerType())) {
+			throw new UkjentBrukertypeException("Ukjent brukertype er ikke støttet.");
+		}
+	}
+
+	private String mapOrgnr(JournalpostResponse journalpost) {
+		return isBrukerOrganisasjon(journalpost.getBrukertype()) ? journalpost.getBrukerId() :
+				isBrukerOrganisasjon(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() :
+						"";
+	}
+
+	private String mapAktoerId(JournalpostResponse journalpost) {
+		String brukerId = isBrukerPerson(journalpost.getBrukertype()) ? journalpost.getBrukerId() :
+				isBrukerPerson(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() :
+						"";
+		return isEmpty(brukerId) ? brukerId : pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId);
+	}
+
+	private boolean isBrukerPerson(String brukertype) {
+		return PERSON.name().equalsIgnoreCase(brukertype);
+	}
+
+	private boolean isBrukerOrganisasjon(String brukertype) {
+		return ORGANISASJON.name().equalsIgnoreCase(brukertype);
+	}
+
+	private String mapSaksreferanse(JournalpostResponse journalpostResponse) {
+		if (GOSYS_APPIDS.contains(journalpostResponse.getFagsystem())) {
+			return journalpostResponse.getSaksnummer();
 		}
 		return null;
 	}

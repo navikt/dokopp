@@ -1,0 +1,13 @@
+{
+  "errors": [
+    {
+      "extensions": {
+        "code": "not_found"
+      },
+      "message": "not found SAF"
+    }
+  ],
+  "data": {
+    "journalpost": null
+  }
+}

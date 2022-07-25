@@ -1,0 +1,14 @@
+{
+  "data": {
+    "journalpost": {
+      "journalfoerendeEnhet": "2990",
+      "tema": "DAG",
+      "bruker": null,
+      "avsenderMottaker": null,
+      "sak": {
+        "arkivsaksnummer": "1",
+        "arkivsaksystem": "FS22"
+      }
+    }
+  }
+}

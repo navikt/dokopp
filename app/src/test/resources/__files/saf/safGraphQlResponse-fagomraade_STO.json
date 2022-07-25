@@ -1,0 +1,20 @@
+{
+  "data": {
+    "journalpost": {
+      "journalfoerendeEnhet": "2990",
+      "tema": "STO",
+      "bruker": {
+        "id": "1000012345678",
+        "type": "AKTOERID"
+      },
+      "avsenderMottaker": {
+        "id": "06046515593",
+        "type": "AKTOERID"
+      },
+      "sak": {
+        "arkivsaksnummer": "1",
+        "arkivsaksystem": "FS22"
+      }
+    }
+  }
+}

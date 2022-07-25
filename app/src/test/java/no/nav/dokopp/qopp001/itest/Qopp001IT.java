@@ -5,6 +5,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import no.nav.dokopp.Application;
+import no.nav.dokopp.consumer.azure.AzureTokenConsumer;
+import no.nav.dokopp.consumer.azure.TokenResponse;
 import no.nav.dokopp.qopp001.Qopp001Service;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
@@ -14,13 +16,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
@@ -45,6 +50,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -53,12 +59,14 @@ import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
 @ExtendWith(SpringExtension.class)
-@Import(JmsTestConfig.class)
+@Import({JmsTestConfig.class, ApplicationItestConfig.class})
 @SpringBootTest(classes = {Application.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
@@ -104,7 +112,7 @@ public class Qopp001IT {
 	}
 
 	/**
-	 * HVIS kall er gjort mot TJOARK0122 SÅ SKAL input til tjenesten sendes som angitt i behandlingssteg
+	 * HVIS kall er gjort mot SAF SÅ SKAL input til tjenesten sendes som angitt i behandlingssteg
 	 * HVIS kall mot TJOARK110 går ok SÅ skal input og output behandles som angitt i behandlingssteg
 	 * HVIS kall mot BehandleOppgave_v1 er ok SÅ skal input og output behandles som angitt i behandlingssteg
 	 */
@@ -112,8 +120,10 @@ public class Qopp001IT {
 	public void shouldOppretteOppgaveGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy.json")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
@@ -130,8 +140,6 @@ public class Qopp001IT {
 			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 		});
 
-		verify(postRequestedFor(urlEqualTo("/dokumentproduksjoninfo"))
-				.withRequestBody(matchingXPath("//journalpostId/text()", equalTo(JOURNALPOST_ID))));
 		verify(1, getRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 		verify(1, postRequestedFor(urlEqualTo("/pdl")));
 		verify(postRequestedFor(urlEqualTo("/oppgaver"))
@@ -148,8 +156,10 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWithSaksreferanseWhenFagomradeNotGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_pensjon.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-pensjon.json")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
@@ -169,8 +179,10 @@ public class Qopp001IT {
 	public void shouldOppretteOppgaveWithOrgnrGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_organisasjon.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-organisasjon.json")));
 		stubGetSecurityToken();
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
@@ -192,8 +204,10 @@ public class Qopp001IT {
 
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_fagomraade_STO.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-fagomraade_STO.json")));
 		stubGetSecurityToken();
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
@@ -211,8 +225,10 @@ public class Qopp001IT {
 	void shouldOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFails() throws IOException {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy.json")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
@@ -250,8 +266,10 @@ public class Qopp001IT {
 	void shouldNotOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFailsAndEnhet9999() throws IOException {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy_maskin.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy_maskin.json")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
@@ -274,8 +292,10 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowUkjentBrukertypeException() throws Exception {
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_ukjent.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-ukjent.json")));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
@@ -303,12 +323,30 @@ public class Qopp001IT {
 
 	/**
 	 * HVIS oppgavetype er feil -  legg i kø for funksjonelle feil (med hele meldingen)
-	 * HVIS det oppstår en funksjonell feil i TJOARK122 SÅ avslutt og returner feilmelding
+	 * HVIS det oppstår en funksjonell feil i SAF SÅ avslutt og returner feilmelding
 	 */
 	@Test
-	public void shouldThrowJournalpostIkkeFunnetExceptionTjoark122() throws Exception {
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_jp-ikkefunnet.xml")));
+	public void shouldThrowJournalpostIkkeFunnetException() throws Exception {
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-journalpostIkkeFunnet.json")));
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+
+		await().atMost(10, SECONDS)
+				.untilAsserted(() -> {
+					String response = receive(qopp001FunksjonellFeil);
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+				});
+	}
+
+	@Test
+	public void shouldThrowUkjentBrukertypeExceptionWhenNoBruker() throws Exception {
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-ingenBruker.json")));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
@@ -320,27 +358,14 @@ public class Qopp001IT {
 	}
 
 	/**
-	 * HVIS operasjonen kalles uten at alle påkrevde inputparametere er oppgitt SÅ skal det returneres en feil
-	 * HVIS oppgavetype er feil -  legg i kø for funksjonelle feil (med hele meldingen)
+	 * HVIS SAF ikke er tilgjengelig SÅ prøv igjen før avslutt
 	 */
 	@Test
-	public void shouldThrowUgyldigInputverdiExceptionJournalpostIdNotANumberTjoark122() throws Exception {
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_journalpostId_notANumber.xml"), CALLID);
-
-		await().atMost(10, SECONDS)
-				.untilAsserted(() -> {
-					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_journalpostId_notANumber.xml")));
-				});
-	}
-
-	/**
-	 * HVIS TJOARK122 ikke er tilgjengelig SÅ prøv igjen før avslutt
-	 */
-	@Test
-	public void shouldThrowTechnicalExceptionTjoark122() throws Exception {
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_internalServerError.xml")));
+	public void shouldThrowTechnicalExceptionSAF() throws Exception {
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-internalServerError.json")));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
@@ -349,6 +374,7 @@ public class Qopp001IT {
 					String response = receive(backoutQueue);
 					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
 				});
+		verify(exactly(3), postRequestedFor(urlEqualTo("/saf")));
 	}
 
 	/**
@@ -358,8 +384,10 @@ public class Qopp001IT {
 	public void shouldThrowTechnicalExceptionTjoark110() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_internalServerError.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy.json")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
@@ -385,8 +413,6 @@ public class Qopp001IT {
 	public void shouldThrowTechnicalExceptionOpprettOppgave() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
@@ -410,8 +436,10 @@ public class Qopp001IT {
 	public void shouldThrowSikkerhetsbegrensningExceptionGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy.json")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
@@ -444,10 +472,12 @@ public class Qopp001IT {
 	}
 
 	@Test
-	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturpostReturnedFromTjoark122() throws Exception {
+	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturpostReturnedFromSaf() throws Exception {
 		resetAllRequests();
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_returpostflagget.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-returpostFlagget.json")));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
 
@@ -458,8 +488,10 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowAktoerHentAktoerIdForFnrFunctionalException() throws Exception {
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy.json")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(
 				aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
@@ -475,8 +507,10 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowAktoerHentAktoerIdForFnrTechnicalException() throws Exception {
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy.json")));
 		stubGetSecurityToken();
 		stubFor(post("/pdl").willReturn(
 				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
@@ -492,8 +526,10 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowStsTechnicalException() throws Exception {
-		stubFor(post("/dokumentproduksjoninfo").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark122/tjoark122_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy.json")));
 		stubFor(get("/securitytoken?grant_type=client_credentials&scope=openid").willReturn(
 				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
