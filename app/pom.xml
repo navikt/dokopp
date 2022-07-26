@@ -111,11 +111,6 @@
 			<classifier>jaxws</classifier>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.tjenester.brevogarkiv</groupId>
-			<artifactId>dokumentproduksjoninfo-tjenestespesifikasjon</artifactId>
-			<classifier>jaxws</classifier>
-		</dependency>
-		<dependency>
 			<groupId>no.nav.dok</groupId>
 			<artifactId>opprettoppgave-tjenestespesifikasjon-v1</artifactId>
 		</dependency>

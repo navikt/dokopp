@@ -2,9 +2,7 @@ package no.nav.dokopp;
 
 import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1EndpointConfig;
-import no.nav.dokopp.config.cxf.DokumentproduksjonInfoV1EndpointConfig;
 import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
-import no.nav.dokopp.config.fasit.DokumentproduksjonInfoV1Alias;
 import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
@@ -32,14 +30,12 @@ import org.springframework.retry.annotation.EnableRetry;
 		MqGatewayAlias.class,
 		ServiceuserAlias.class,
 		ArkiverDokumentproduksjonV1Alias.class,
-		DokumentproduksjonInfoV1Alias.class,
 		DokoppProperties.class,
 		AzureProperties.class
 
 })
 @Import({
 		NaisContract.class,
-		DokumentproduksjonInfoV1EndpointConfig.class,
 		ArkiverDokumentproduksjonV1EndpointConfig.class,
 		Tjoark110SettJournalpostAttributter.class,
 		Qopp001Service.class,
