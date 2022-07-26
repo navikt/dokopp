@@ -1,5 +1,6 @@
 package no.nav.dokopp;
 
+import no.nav.dokopp.config.CoreConfig;
 import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1EndpointConfig;
 import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
@@ -42,7 +43,8 @@ import org.springframework.retry.annotation.EnableRetry;
 		Tjoark110Check.class,
 		Qopp001QueueCheck.class,
 		FunctionalBoqCheck.class,
-		Qopp001Route.class
+		Qopp001Route.class,
+		CoreConfig.class
 })
 @Configuration
 public class ApplicationConfig {
