@@ -8,7 +8,6 @@ import no.nav.dokopp.config.fasit.DokumentproduksjonInfoV1Alias;
 import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
-import no.nav.dokopp.config.props.PdlProperties;
 import no.nav.dokopp.consumer.azure.AzureProperties;
 import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.nais.NaisContract;
@@ -29,7 +28,6 @@ import org.springframework.retry.annotation.EnableRetry;
 @EnableRetry
 @EnableJms
 @EnableConfigurationProperties({
-		PdlProperties.class,
 		MqChannelAlias.class,
 		MqGatewayAlias.class,
 		ServiceuserAlias.class,

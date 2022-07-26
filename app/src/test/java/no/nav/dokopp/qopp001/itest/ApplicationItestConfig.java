@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
+import static org.mockito.ArgumentMatchers.anyString;
+
 @Configuration
 @Profile("itest")
 public class ApplicationItestConfig {
@@ -17,7 +19,7 @@ public class ApplicationItestConfig {
 		@Primary
 		AzureTokenConsumer azureTokenConsumer() {
 			AzureTokenConsumer azureTokenConsumer = Mockito.mock(AzureTokenConsumer.class);
-			Mockito.when(azureTokenConsumer.getClientCredentialToken()).thenReturn(
+			Mockito.when(azureTokenConsumer.getClientCredentialToken(anyString())).thenReturn(
 					TokenResponse.builder()
 							.access_token("dummy")
 							.build()

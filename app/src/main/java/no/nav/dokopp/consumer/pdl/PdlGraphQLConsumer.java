@@ -1,7 +1,7 @@
 package no.nav.dokopp.consumer.pdl;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokopp.config.props.PdlProperties;
+import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
@@ -41,13 +41,13 @@ public class PdlGraphQLConsumer {
 
     public PdlGraphQLConsumer(RestTemplateBuilder restTemplateBuilder,
                               StsRestConsumer stsConsumer,
-                              PdlProperties pdlProperties) {
+                              DokoppProperties dokoppProperties) {
         this.restTemplate = restTemplateBuilder
                 .setConnectTimeout(Duration.ofSeconds(3))
                 .setReadTimeout(Duration.ofSeconds(20))
                 .build();
         this.stsConsumer = stsConsumer;
-        this.pdlUrl = pdlProperties.getUrl();
+        this.pdlUrl = dokoppProperties.getEndpoints().getPdl();
     }
 
     @Retryable(include = HttpServerErrorException.class)

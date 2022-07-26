@@ -1,5 +1,6 @@
 package no.nav.dokopp.consumer.saf;
 
+import no.nav.dokopp.qopp001.JournalpostResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -107,7 +108,7 @@ public class SafHentSafJournalpostMapperTest {
 
 	private void validateJournalpost(JournalpostResponse response){
 		assertThat(response.getJournalfEnhet(), is(JOURNALFOERENDE_ENHET));
-		assertThat(response.getFagomrade(), is(TEMA_DAG));
+		assertThat(response.getTema(), is(TEMA_DAG));
 		assertThat(response.getAntallRetur(), is(0));
 		assertThat(response.getFagsystem(), is(GOSYS));
 		assertThat(response.getSaksnummer(), is(SAKSNUMMER));

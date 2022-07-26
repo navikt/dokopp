@@ -3,7 +3,6 @@ package no.nav.dokopp.qopp001;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.consumer.oppgave.Oppgave;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
-import no.nav.dokopp.consumer.saf.JournalpostResponse;
 import no.nav.dokopp.consumer.saf.SafJournalpostConsumer;
 import no.nav.dokopp.consumer.tjoark110.SettJournalpostAttributterRequestTo;
 import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
@@ -63,7 +62,7 @@ public class Qopp001Service {
 	}
 
 	private void behandleReturpostOppgave(String journalpostId, OpprettOppgave opprettOppgave, JournalpostResponse journalpostResponse) {
-		final String fagomrade = journalpostResponse.getFagomrade();
+		final String fagomrade = journalpostResponse.getTema();
 		final String journalfoerendeEnhet = journalpostResponse.getJournalfEnhet();
 		if (FAGOMRAADE_STO.equalsIgnoreCase(fagomrade)) {
 			log.info("qopp001 lager ikke oppgave i Gosys for journalpostId={} da den er returpost fra fagområde={} og ikke vil bli behandlet.",

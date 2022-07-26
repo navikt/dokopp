@@ -31,7 +31,9 @@ public class LokalCacheConfig {
 						.expireAfterWrite(55, TimeUnit.MINUTES)
 						.build()),
 				new CaffeineCache(AZURE_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(50, TimeUnit.MINUTES).maximumSize(1).build())
+						.expireAfterWrite(50, TimeUnit.MINUTES)
+						.maximumSize(10)
+						.build())
 				));
 		return manager;
 	}

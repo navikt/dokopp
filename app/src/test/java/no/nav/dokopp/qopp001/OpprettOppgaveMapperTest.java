@@ -3,7 +3,6 @@ package no.nav.dokopp.qopp001;
 import no.nav.dokopp.constants.DomainConstants;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
-import no.nav.dokopp.consumer.saf.JournalpostResponse;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
 import no.nav.dokopp.qopp001.domain.BrukerType;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
@@ -143,7 +142,7 @@ public class OpprettOppgaveMapperTest {
 				.brukertype(BrukerType.PERSON.name())
 				.avsenderMottakerId(BrukerType.ORGANISASJON.name())
 				.avsenderMottakerId(ORGNR)
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
@@ -155,7 +154,7 @@ public class OpprettOppgaveMapperTest {
 				.brukertype(null)
 				.avsenderMottakerType(BrukerType.ORGANISASJON.name())
 				.avsenderMottakerId(ORGNR)
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
@@ -165,7 +164,7 @@ public class OpprettOppgaveMapperTest {
 		return JournalpostResponse.builder()
 				.brukerId(FNR)
 				.brukertype(BrukerType.PERSON.name())
-				.fagomrade(FAGOMRAADE_HJE)
+				.tema(FAGOMRAADE_HJE)
 				.fagsystem(FAGSYSTEM_PEN)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
@@ -176,7 +175,7 @@ public class OpprettOppgaveMapperTest {
 		return JournalpostResponse.builder()
 				.brukerId(FNR)
 				.brukertype(BrukerType.PERSON.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
@@ -187,7 +186,7 @@ public class OpprettOppgaveMapperTest {
 		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
 				.brukertype(BrukerType.ORGANISASJON.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
@@ -198,7 +197,7 @@ public class OpprettOppgaveMapperTest {
 		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
 				.brukertype(BrukerType.ORGANISASJON.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(null)
 				.saksnummer(SAKSNUMMER)
@@ -209,7 +208,7 @@ public class OpprettOppgaveMapperTest {
 		return JournalpostResponse.builder()
 				.brukerId(FNR)
 				.brukertype(BrukerType.UKJENT.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
@@ -220,7 +219,7 @@ public class OpprettOppgaveMapperTest {
 		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
 				.brukertype(BrukerType.ORGANISASJON.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(ENHETS_ID)
 				.saksnummer(SAKSNUMMER)

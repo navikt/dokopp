@@ -1,13 +1,16 @@
 package no.nav.dokopp.consumer.saf;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.consumer.azure.AzureTokenConsumer;
+import no.nav.dokopp.consumer.azure.TokenResponse;
 import no.nav.dokopp.consumer.saf.exceptions.SafFunctionalException;
 import no.nav.dokopp.consumer.saf.exceptions.SafJournalpostQueryTechnicalException;
 import no.nav.dokopp.consumer.saf.exceptions.SafJournalpostUnauthorizedException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
+import no.nav.dokopp.qopp001.JournalpostResponse;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,21 +22,28 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 
 import static ch.qos.logback.core.recovery.RecoveryCoordinator.BACKOFF_MULTIPLIER;
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
+import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
+import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
+import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
+import static no.nav.dokopp.constants.HeaderConstants.X_CORRELATION_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
 
 @Slf4j
 @Component
 public class SafJournalpostConsumer {
 	private final RestTemplate restTemplate;
-	private final String graphQLurl;
 	private final AzureTokenConsumer azureTokenConsumer;
+	private final URI safUri;
+	private final String safScope;
 
 	private final String SERVER_ERROR_CODE = "server_error";
 	private final String JP_NOT_FOUND_ERROR_CODE = "not_found";
@@ -42,13 +52,15 @@ public class SafJournalpostConsumer {
 
 	@Autowired
 	public SafJournalpostConsumer(RestTemplateBuilder restTemplateBuilder,
-								  @Value("${saf.graphql.url}") String graphQLurl,
-								  AzureTokenConsumer azureTokenConsumer) {
+								  AzureTokenConsumer azureTokenConsumer,
+								  DokoppProperties dokoppProperties) {
+		DokoppProperties.AzureEndpoint saf = dokoppProperties.getEndpoints().getSaf();
 		this.restTemplate = restTemplateBuilder
 				.setReadTimeout(Duration.ofSeconds(20))
 				.setConnectTimeout(Duration.ofSeconds(5))
 				.build();
-		this.graphQLurl = graphQLurl;
+		this.safUri = UriComponentsBuilder.fromHttpUrl(saf.getUrl()).build().toUri();
+		this.safScope = saf.getScope();
 		this.azureTokenConsumer = azureTokenConsumer;
 	}
 
@@ -56,7 +68,7 @@ public class SafJournalpostConsumer {
 	public JournalpostResponse hentJournalpost(String journalpostId) {
 		try {
 			final SafRequest hentJournalpostRequest = createHentJournalpostRequest(journalpostId);
-			final SafResponse safResponse = restTemplate.exchange(graphQLurl, HttpMethod.POST, new HttpEntity<>(hentJournalpostRequest, createAuthorizationHeader()), SafResponse.class).getBody();
+			final SafResponse safResponse = restTemplate.exchange(safUri, HttpMethod.POST, new HttpEntity<>(hentJournalpostRequest, createHeaders()), SafResponse.class).getBody();
 
 			List<SafResponse.SafError> errors = safResponse.getErrors();
 			return (errors == null || errors.isEmpty()) ? SafJournalpostMapper.map(safResponse.getData().getJournalpost()) : handleSafError(errors, journalpostId);
@@ -69,10 +81,14 @@ public class SafJournalpostConsumer {
 		}
 	}
 
-	private HttpHeaders createAuthorizationHeader() {
+	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
+		TokenResponse azureToken = azureTokenConsumer.getClientCredentialToken(safScope);
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.setBearerAuth(azureTokenConsumer.getClientCredentialToken().getAccess_token());
+		headers.setBearerAuth(azureToken.getAccess_token());
+		headers.add(NAV_CONSUMER_ID, APP_NAME);
+		headers.add(NAV_CALL_ID, MDC.get(NAV_CALL_ID));
+		headers.add(X_CORRELATION_ID, MDC.get(NAV_CALL_ID));
 		return headers;
 	}
 

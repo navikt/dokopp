@@ -153,6 +153,42 @@ public class Qopp001IT {
 	}
 
 	@Test
+	public void shouldOppretteOppgaveGosysMedAvsenderMottaker() throws Exception {
+		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark110/tjoark110_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happyAvsenderMottaker.json")));
+		stubGetSecurityToken();
+		stubFor(post("/pdl").willReturn(aResponse()
+				.withStatus(HttpStatus.OK.value())
+				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
+				.withBodyFile("pdl/pdl-happy.json")));
+		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
+				.withBodyFile("oppgaver/opprett_oppgave_happy.json")));
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			// vent på siste API-kall før videre verifisering
+			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
+		});
+
+		verify(1, getRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
+		verify(1, postRequestedFor(urlEqualTo("/pdl")));
+		verify(postRequestedFor(urlEqualTo("/oppgaver"))
+				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
+				.withRequestBody(matchingJsonPath("$[?(@.tildeltEnhetsnr == '" + JOURNALF_ENHET_ID + "')]"))
+				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == '" + SAKS_REFERANSE + "')]"))
+				.withRequestBody(matchingJsonPath("$[?(@.aktoerId == '" + AKTOER_ID + "')]"))
+				.withRequestBody(matchingJsonPath("$[?(@.orgnr == null)]")));
+		verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon"))
+				.withRequestBody(matchingXPath("//journalpostIdListe/text()", equalTo(JOURNALPOST_ID))));
+	}
+
+	@Test
 	public void shouldNotOppretteOppgaveWithSaksreferanseWhenFagomradeNotGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
@@ -342,7 +378,7 @@ public class Qopp001IT {
 	}
 
 	@Test
-	public void shouldThrowUkjentBrukertypeExceptionWhenNoBruker() throws Exception {
+	public void shouldThrowUkjentBrukertypeExceptionWhenNoBrukerAndAvsenderMottaker() throws Exception {
 		stubFor(post(urlMatching("/saf"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)

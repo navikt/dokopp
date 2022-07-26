@@ -1,4 +1,4 @@
-package no.nav.dokopp.consumer.saf;
+package no.nav.dokopp.qopp001;
 
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +10,7 @@ import lombok.Data;
 @Builder
 public class JournalpostResponse {
 	private String journalfEnhet;
-	private String fagomrade;
+	private String tema;
 	private String brukerId;
 	private String saksnummer;
 	private String fagsystem;

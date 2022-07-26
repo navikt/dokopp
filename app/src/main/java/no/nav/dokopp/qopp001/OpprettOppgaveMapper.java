@@ -2,7 +2,6 @@ package no.nav.dokopp.qopp001;
 
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
-import no.nav.dokopp.consumer.saf.JournalpostResponse;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.springframework.stereotype.Component;
@@ -54,7 +53,7 @@ public class OpprettOppgaveMapper {
 				.orgnr(brukerMap.get(ORGNR))
 				.prioritet(GSAK_PRIORITETKODE_LAV)
 				.saksreferanse(mapSaksreferanse(journalpost))
-				.tema(journalpost.getFagomrade())
+				.tema(journalpost.getTema())
 				.tildeltEnhetsnr(hentJournalfEnhet(journalpost))
 				.build();
 	}
