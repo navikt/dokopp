@@ -7,7 +7,6 @@
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
   "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
-  "AZURE_TENANT": "trygdeetaten.no",
   "DOKOPP_PROXY_HOST": "webproxy.nais",
   "DOKOPP_PROXY_PORT": "8088",
   "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token",
