@@ -31,10 +31,8 @@ import java.util.List;
 import static ch.qos.logback.core.recovery.RecoveryCoordinator.BACKOFF_MULTIPLIER;
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
-import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
+import static no.nav.dokopp.constants.HeaderConstants.NAV_CALLID;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
-import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
-import static no.nav.dokopp.constants.HeaderConstants.X_CORRELATION_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
 
 @Slf4j
@@ -86,9 +84,7 @@ public class SafJournalpostConsumer {
 		TokenResponse azureToken = azureTokenConsumer.getClientCredentialToken(safScope);
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setBearerAuth(azureToken.getAccess_token());
-		headers.add(NAV_CONSUMER_ID, APP_NAME);
-		headers.add(NAV_CALL_ID, MDC.get(NAV_CALL_ID));
-		headers.add(X_CORRELATION_ID, MDC.get(NAV_CALL_ID));
+		headers.add(NAV_CALLID, MDC.get(NAV_CALL_ID));
 		return headers;
 	}
 
