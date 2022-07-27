@@ -61,6 +61,16 @@ public class SafHentSafJournalpostMapperTest {
 	}
 
 	@Test
+	public void shouldMapWhenSakNull(){
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0", null));
+		assertThat(response.getBrukerId(), is(BRUKER_ID));
+		assertThat(response.getBrukertype(), is(PERSON));
+		assertNull(response.getAvsenderMottakerType());
+		assertNull(response.getAvsenderMottakerId());
+		assertNull(response.getSaksnummer());
+	}
+
+	@Test
 	public void shouldMapWhenAntallReturNull(){
 		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, null));
 		assertNull(response.getAntallRetur());
@@ -117,15 +127,25 @@ public class SafHentSafJournalpostMapperTest {
 	public SafResponse.SafJournalpost createJournalpost(SafResponse.SafJournalpost.Bruker bruker,
 														SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker,
 														String antallRetur) {
+		return createJournalpost(bruker, avsenderMottaker,antallRetur, createSak());
+
+	}
+
+
+	public SafResponse.SafJournalpost createJournalpost(SafResponse.SafJournalpost.Bruker bruker,
+														SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker,
+														String antallRetur,
+														SafResponse.SafJournalpost.Sak sak) {
 		return SafResponse.SafJournalpost.builder()
 				.antallRetur(antallRetur)
 				.bruker(bruker)
 				.avsenderMottaker(avsenderMottaker)
-				.sak(createDefaultSak())
+				.sak(sak)
 				.journalfoerendeEnhet(JOURNALFOERENDE_ENHET)
 				.tema(TEMA_DAG).build();
 
 	}
+
 
 	private SafResponse.SafJournalpost.Bruker createBruker(String brukerType) {
 		return SafResponse.SafJournalpost.Bruker.builder()
@@ -133,7 +153,7 @@ public class SafHentSafJournalpostMapperTest {
 				.id(BRUKER_ID).build();
 	}
 
-	private SafResponse.SafJournalpost.Sak createDefaultSak() {
+	private SafResponse.SafJournalpost.Sak createSak() {
 		return SafResponse.SafJournalpost.Sak.builder()
 				.arkivsaksnummer(SAKSNUMMER)
 				.arkivsaksystem(GOSYS).build();

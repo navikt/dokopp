@@ -16,13 +16,14 @@ public class SafJournalpostMapper {
 	public static JournalpostResponse map(SafResponse.SafJournalpost safJournalpost) {
 		SafResponse.SafJournalpost.Bruker bruker = safJournalpost.getBruker();
 		SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker = safJournalpost.getAvsenderMottaker();
+		SafResponse.SafJournalpost.Sak sak = safJournalpost.getSak();
 		return JournalpostResponse.builder()
 				.journalfEnhet(safJournalpost.getJournalfoerendeEnhet())
 				.tema(safJournalpost.getTema())
 				.brukerId((bruker == null || isEmpty(bruker.getId())) ? null : bruker.getId().trim())
 				.brukertype(bruker == null ? null : mapBrukerType(bruker.getType()))
-				.saksnummer(safJournalpost.getSak().getArkivsaksnummer())
-				.fagsystem(safJournalpost.getSak().getArkivsaksystem())
+				.saksnummer(sak == null ? null : sak.getArkivsaksnummer())
+				.fagsystem(sak == null ? null : sak.getArkivsaksystem())
 				.avsenderMottakerId((avsenderMottaker == null || isEmpty(avsenderMottaker.getId())) ? null : avsenderMottaker.getId().trim())
 				.avsenderMottakerType(avsenderMottaker == null ? null : mapBrukerType(avsenderMottaker.getType()))
 				.antallRetur(mapAntallRetur(safJournalpost.getAntallRetur()))
