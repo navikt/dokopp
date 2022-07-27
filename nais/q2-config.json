@@ -1,15 +1,20 @@
 {
+  "APP_NAME": "dokopp",
   "MQGATEWAY01_HOSTNAME": "b27apvl219.preprod.local",
   "MQGATEWAY01_PORT": "1413",
   "MQGATEWAY01_NAME": "MQLS01",
-  "PDL_URL": "https://pdl-api.dev.intern.nav.no/graphql",
   "DOKOPP_CHANNEL_NAME": "Q2_DOKOPP",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
-  "OPPGAVE_OPPGAVER_URL": "https://oppgave-q2.nais.preprod.local/api/v1/oppgaver",
-  "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
   "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
-  "APP_NAME": "dokopp",
+  "DOKOPP_PROXY_HOST": "webproxy.nais",
+  "DOKOPP_PROXY_PORT": "8088",
+  "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token",
+  "DOKOPP_ENDPOINTS_SAF_SCOPE": "api://dev-fss.teamdokumenthandtering.saf/.default",
+  "DOKOPP_ENDPOINTS_SAF_URL": "https://saf-q2.dev.adeo.no/graphql",
+  "DOKOPP_ENDPOINTS_PDL": "https://pdl-api.dev.intern.nav.no/graphql",
+  "DOKOPP_ENDPOINTS_OPPGAVE": "https://oppgave-q2.nais.preprod.local/api/v1/oppgaver",
+  "DOKOPP_ENDPOINTS_STS": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
   "INGRESSES": [
     "https://dokopp.dev.intern.nav.no"
   ]

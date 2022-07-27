@@ -1,8 +1,7 @@
 package no.nav.dokopp.qopp001;
 
 import no.nav.dokopp.constants.DomainConstants;
-import no.nav.dokopp.consumer.tjoark122.HentJournalpostInfoResponseTo;
-import no.nav.dokopp.consumer.tjoark122.Tjoark122HentJournalpostInfo;
+import no.nav.dokopp.consumer.saf.SafJournalpostConsumer;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
@@ -18,8 +17,8 @@ import static org.mockito.Mockito.when;
  */
 public class Qopp001ServiceTest {
 
-	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo = Mockito.mock(Tjoark122HentJournalpostInfo.class);
-	private final Qopp001Service qopp001Service = new Qopp001Service(null, null, tjoark122HentJournalpostInfo, null);
+	private final SafJournalpostConsumer safHentJournalpostInfo = Mockito.mock(SafJournalpostConsumer.class);
+	private final Qopp001Service qopp001Service = new Qopp001Service(null, null, null, safHentJournalpostInfo);
 
 	@Test
 	public void shouldThrowAvsluttBehandlingOgKastMeldingExceptionWhenUgyldigArkivSystem() {
@@ -41,7 +40,7 @@ public class Qopp001ServiceTest {
 
 	@Test
 	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturNotNull() {
-		when(tjoark122HentJournalpostInfo.hentJournalpostInfo(any(String.class))).thenReturn(createHentJournalpostInfoResponse());
+		when(safHentJournalpostInfo.hentJournalpost(any(String.class))).thenReturn(createHentJournalpostInfoResponse());
 
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
 		opprettOppgave.setOppgaveType(DomainConstants.BEHANDLE_RETURPOST);
@@ -51,8 +50,8 @@ public class Qopp001ServiceTest {
 		assertThrows(ReturpostAlleredeFlaggetException.class, () -> qopp001Service.qopp001("1", opprettOppgave));
 	}
 
-	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponse(){
-		return HentJournalpostInfoResponseTo.builder()
+	private JournalpostResponse createHentJournalpostInfoResponse(){
+		return JournalpostResponse.builder()
 				.antallRetur(1)
 				.build();
 	}

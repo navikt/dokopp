@@ -1,0 +1,16 @@
+{
+  "data": {
+    "journalpost": {
+      "journalfoerendeEnhet": "9999",
+      "tema": "HJE",
+      "bruker": {
+        "id": "11111111111",
+        "type": "AKTOERID"
+      },
+      "sak": {
+        "arkivsaksnummer": "1",
+        "arkivsaksystem": "FS22"
+      }
+    }
+  }
+}

@@ -13,6 +13,7 @@ import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.OpprettOppgaveTechnicalException;
@@ -43,14 +44,14 @@ public class OppgaveConsumer implements Oppgave {
 	private final MeterRegistry meterRegistry;
 
 	public OppgaveConsumer(RestTemplateBuilder restTemplateBuilder,
-						   @Value("${oppgave.oppgaver.url}") String oppgaveoppgaverUrl,
 						   StsRestConsumer stsRestConsumer,
-						   MeterRegistry meterRegistry) {
+						   MeterRegistry meterRegistry,
+						   DokoppProperties dokoppProperties) {
 		this.restTemplate = restTemplateBuilder
 				.setReadTimeout(Duration.ofSeconds(20))
 				.setConnectTimeout(Duration.ofSeconds(5))
 				.build();
-		this.oppgaveoppgaverUrl = oppgaveoppgaverUrl;
+		this.oppgaveoppgaverUrl = dokoppProperties.getEndpoints().getOppgave();
 		this.stsRestConsumer = stsRestConsumer;
 		this.meterRegistry = meterRegistry;
 	}

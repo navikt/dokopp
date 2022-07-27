@@ -3,7 +3,6 @@ package no.nav.dokopp.qopp001;
 import no.nav.dokopp.constants.DomainConstants;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
-import no.nav.dokopp.consumer.tjoark122.HentJournalpostInfoResponseTo;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
 import no.nav.dokopp.qopp001.domain.BrukerType;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
@@ -48,6 +47,38 @@ public class OpprettOppgaveMapperTest {
 				createOpprettOppgave());
 
 		assertOpprettOppgaveRequestWithPersonAndPensjon(request);
+	}
+
+	/**
+	 * Om både bruker og avsenderMottaker er satt skal bruker brukes
+	 */
+	@Test
+	public void shouldMapWithBothBrukerAndAvsenderMottaker() {
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerAndAvsenderMottaker(),
+				createOpprettOppgave());
+
+		assertThat(request.getAktoerId(), is(AKTOER_ID));
+		assertNull(request.getOrgnr());
+		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
+		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertOpprettOppgaveRequest(request);
+	}
+
+	/**
+	 * Om bare avsenderMottaker er satt skal avsenderMottaker brukes i steden for bruker
+	 */
+	@Test
+	public void shouldMapWithBrukerNullAvsenderMottakerOrganisasjon() {
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerisNullAndAvsenderMottaker(),
+				createOpprettOppgave());
+
+		assertNull(request.getAktoerId());
+		assertThat(request.getOrgnr(), is(ORGNR));
+		assertNull(request.getAktoerId());
+		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
+		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertOpprettOppgaveRequest(request);
 	}
 
 	@Test
@@ -105,66 +136,90 @@ public class OpprettOppgaveMapperTest {
 		Assertions.assertEquals("Ukjent brukertype er ikke støttet.", e.getMessage());
 	}
 
-	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithPersonAndPensjon() {
-		return HentJournalpostInfoResponseTo.builder()
+	private JournalpostResponse createHentJournalpostInfoResponseToWithBrukerAndAvsenderMottaker() {
+		return JournalpostResponse.builder()
 				.brukerId(FNR)
 				.brukertype(BrukerType.PERSON.name())
-				.fagomrade(FAGOMRAADE_HJE)
+				.avsenderMottakerId(BrukerType.ORGANISASJON.name())
+				.avsenderMottakerId(ORGNR)
+				.tema(FAGOMRAADE_IAR)
+				.fagsystem(FAGSYSTEM_GOSYS)
+				.journalfEnhet(JOURNALF_ENHET)
+				.saksnummer(SAKSNUMMER)
+				.build();
+	}
+	private JournalpostResponse createHentJournalpostInfoResponseToWithBrukerisNullAndAvsenderMottaker() {
+		return JournalpostResponse.builder()
+				.brukerId(null)
+				.brukertype(null)
+				.avsenderMottakerType(BrukerType.ORGANISASJON.name())
+				.avsenderMottakerId(ORGNR)
+				.tema(FAGOMRAADE_IAR)
+				.fagsystem(FAGSYSTEM_GOSYS)
+				.journalfEnhet(JOURNALF_ENHET)
+				.saksnummer(SAKSNUMMER)
+				.build();
+	}
+	private JournalpostResponse createHentJournalpostInfoResponseToWithPersonAndPensjon() {
+		return JournalpostResponse.builder()
+				.brukerId(FNR)
+				.brukertype(BrukerType.PERSON.name())
+				.tema(FAGOMRAADE_HJE)
 				.fagsystem(FAGSYSTEM_PEN)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
 				.build();
 	}
 
-	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithPersonAndGosys() {
-		return HentJournalpostInfoResponseTo.builder()
+	private JournalpostResponse createHentJournalpostInfoResponseToWithPersonAndGosys() {
+		return JournalpostResponse.builder()
 				.brukerId(FNR)
 				.brukertype(BrukerType.PERSON.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
 				.build();
 	}
 
-	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithOrganisasjon() {
-		return HentJournalpostInfoResponseTo.builder()
+	private JournalpostResponse createHentJournalpostInfoResponseToWithOrganisasjon() {
+		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
 				.brukertype(BrukerType.ORGANISASJON.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
 				.build();
 	}
 
-	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithJournalEnhetNull() {
-		return HentJournalpostInfoResponseTo.builder()
+	private JournalpostResponse createHentJournalpostInfoResponseToWithJournalEnhetNull() {
+		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
 				.brukertype(BrukerType.ORGANISASJON.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(null)
 				.saksnummer(SAKSNUMMER)
 				.build();
 	}
 
-	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithUkjent() {
-		return HentJournalpostInfoResponseTo.builder()
+	private JournalpostResponse createHentJournalpostInfoResponseToWithUkjent() {
+		return JournalpostResponse.builder()
 				.brukerId(FNR)
 				.brukertype(BrukerType.UKJENT.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
 				.build();
 	}
 
-	private HentJournalpostInfoResponseTo createHentJournalpostInfoResponseToWithEnhet9999() {
-		return HentJournalpostInfoResponseTo.builder()
+	private JournalpostResponse createHentJournalpostInfoResponseToWithEnhet9999() {
+		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
 				.brukertype(BrukerType.ORGANISASJON.name())
-				.fagomrade(FAGOMRAADE_IAR)
+				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(ENHETS_ID)
 				.saksnummer(SAKSNUMMER)

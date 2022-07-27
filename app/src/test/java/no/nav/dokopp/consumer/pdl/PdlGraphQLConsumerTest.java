@@ -1,6 +1,6 @@
 package no.nav.dokopp.consumer.pdl;
 
-import no.nav.dokopp.config.props.PdlProperties;
+import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
@@ -42,7 +42,7 @@ public class PdlGraphQLConsumerTest {
     private static final RestTemplateBuilder restTemplateBuilder = mock(RestTemplateBuilder.class);
     private static final StsRestConsumer stsRestConsumer = mock(StsRestConsumer.class);
 
-    private static PdlProperties pdlProperties;
+    private static DokoppProperties dokoppProperties;
     private static PdlGraphQLConsumer pdlGraphQLConsumer;
 
     @BeforeAll
@@ -54,9 +54,9 @@ public class PdlGraphQLConsumerTest {
         when(restTemplateBuilder.build()).thenReturn(restTemplate);
         when(stsRestConsumer.getOidcToken()).thenReturn(TOKEN);
 
-        pdlProperties = new PdlProperties();
-        pdlProperties.setUrl("http://localhost");
-        pdlGraphQLConsumer = new PdlGraphQLConsumer(restTemplateBuilder, stsRestConsumer, pdlProperties);
+        dokoppProperties = new DokoppProperties();
+        dokoppProperties.getEndpoints().setPdl("http://localhost");
+        pdlGraphQLConsumer = new PdlGraphQLConsumer(restTemplateBuilder, stsRestConsumer, dokoppProperties);
     }
 
     @BeforeEach
@@ -87,7 +87,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getUrl())
+                        new URI(dokoppProperties.getEndpoints().getPdl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
@@ -109,7 +109,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getUrl())
+                        new URI(dokoppProperties.getEndpoints().getPdl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
@@ -126,7 +126,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getUrl())
+                        new URI(dokoppProperties.getEndpoints().getPdl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
@@ -143,7 +143,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getUrl())
+                        new URI(dokoppProperties.getEndpoints().getPdl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );
@@ -167,7 +167,7 @@ public class PdlGraphQLConsumerTest {
                         "123",
                         CALL_ID,
                         TOKEN,
-                        new URI(pdlProperties.getUrl())
+                        new URI(dokoppProperties.getEndpoints().getPdl())
                 )),
                 eq(PdlHentIdenterResponse.class)
         );

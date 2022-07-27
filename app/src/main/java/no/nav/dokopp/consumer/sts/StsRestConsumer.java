@@ -1,5 +1,6 @@
 package no.nav.dokopp.consumer.sts;
 
+import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
 import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.dokopp.exception.StsTechnicalException;
@@ -29,10 +30,10 @@ public class StsRestConsumer {
 	private final String stsUrl;
 
 	@Autowired
-	public StsRestConsumer(@Value("${security-token-service-token.url}") String stsUrl,
-						   RestTemplateBuilder restTemplateBuilder,
-						   final ServiceuserAlias serviceuserAlias) {
-		this.stsUrl = stsUrl;
+	public StsRestConsumer(RestTemplateBuilder restTemplateBuilder,
+						   final ServiceuserAlias serviceuserAlias,
+						   DokoppProperties dokoppProperties) {
+		this.stsUrl = dokoppProperties.getEndpoints().getSts();
 		this.restTemplate = restTemplateBuilder
 				.setReadTimeout(Duration.ofSeconds(20))
 				.setConnectTimeout(Duration.ofSeconds(5))

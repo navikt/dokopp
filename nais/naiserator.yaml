@@ -13,18 +13,28 @@ spec:
       value: "{{ MQGATEWAY01_PORT }}"
     - name: MQGATEWAY01_NAME
       value: {{ MQGATEWAY01_NAME }}
-    - name: PDL_URL
-      value: "{{PDL_URL}}"
     - name: DOKOPP_CHANNEL_NAME
       value: {{ DOKOPP_CHANNEL_NAME }}
     - name: DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME
       value: {{ DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME }}
     - name: DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME
       value: {{ DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME }}
-    - name: OPPGAVE_OPPGAVER_URL
-      value: {{ OPPGAVE_OPPGAVER_URL }}
-    - name: SECURITY_TOKEN_SERVICE_TOKEN_URL
-      value: {{ SECURITY_TOKEN_SERVICE_TOKEN_URL }}
+    - name: DOKOPP_PROXY_HOST
+      value: {{ DOKOPP_PROXY_HOST }}
+    - name: DOKOPP_PROXY_PORT
+      value: "{{DOKOPP_PROXY_PORT}}"
+    - name: DOKOPP_ENDPOINTS_SAF_SCOPE
+      value: {{ DOKOPP_ENDPOINTS_SAF_SCOPE }}
+    - name: DOKOPP_ENDPOINTS_SAF_URL
+      value: {{ DOKOPP_ENDPOINTS_SAF_URL }}
+    - name: DOKOPP_ENDPOINTS_PDL
+      value: {{ DOKOPP_ENDPOINTS_PDL }}
+    - name: DOKOPP_ENDPOINTS_OPPGAVE
+      value: {{ DOKOPP_ENDPOINTS_OPPGAVE }}
+    - name: DOKOPP_ENDPOINTS_STS
+      value: {{ DOKOPP_ENDPOINTS_STS }}
+    - name: AZURE_APP_TOKEN_URL
+      value: {{ AZURE_APP_TOKEN_URL }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -55,3 +65,6 @@ spec:
     paths:
       - kvPath: {{ SRVDOKOPP }}
         mountPath: /var/run/secrets/nais.io/srvdokopp
+  azure:
+    application:
+      enabled: true

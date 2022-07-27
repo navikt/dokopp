@@ -3,10 +3,9 @@ package no.nav.dokopp.qopp001;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.consumer.oppgave.Oppgave;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
+import no.nav.dokopp.consumer.saf.SafJournalpostConsumer;
 import no.nav.dokopp.consumer.tjoark110.SettJournalpostAttributterRequestTo;
 import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
-import no.nav.dokopp.consumer.tjoark122.HentJournalpostInfoResponseTo;
-import no.nav.dokopp.consumer.tjoark122.Tjoark122HentJournalpostInfo;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
@@ -34,42 +33,42 @@ public class Qopp001Service {
 	private static final String MASKINELL_ENHET = "9999";
 	private final Oppgave oppgave;
 	private final OpprettOppgaveMapper opprettOppgaveMapper;
-	private final Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo;
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
+	private final SafJournalpostConsumer safJournalpostConsumer;
 
 	@Autowired
 	public Qopp001Service(Oppgave oppgave,
 						  OpprettOppgaveMapper opprettOppgaveMapper,
-						  Tjoark122HentJournalpostInfo tjoark122HentJournalpostInfo,
-						  Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter) {
+						  Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter,
+						  SafJournalpostConsumer safJournalpostConsumer) {
 		this.oppgave = oppgave;
 		this.opprettOppgaveMapper = opprettOppgaveMapper;
-		this.tjoark122HentJournalpostInfo = tjoark122HentJournalpostInfo;
 		this.tjoark110SettJournalpostAttributter = tjoark110SettJournalpostAttributter;
+		this.safJournalpostConsumer = safJournalpostConsumer;
 	}
 
 	@Handler
 	public void qopp001(@ExchangeProperty(PROPERTY_JOURNALPOST_ID) String journalpostId, OpprettOppgave opprettOppgave) {
 		validateOppgaveTypeAndArkivsystem(opprettOppgave);
 
-		HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo = tjoark122HentJournalpostInfo.hentJournalpostInfo(journalpostId);
+		JournalpostResponse journalpostResponse = safJournalpostConsumer.hentJournalpost(journalpostId);
 		log.info("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId={}.", journalpostId);
 
-		if (hentJournalpostInfoResponseTo.isAlleredeRegistrertReturpost()) {
-			throw new ReturpostAlleredeFlaggetException("qopp001 har oppdaget at returpost allerede er flagget som antallRetur=" + hentJournalpostInfoResponseTo.getAntallRetur() + ". Oppretter ikke oppgave i Gosys");
+		if (journalpostResponse.isAlleredeRegistrertReturpost()) {
+			throw new ReturpostAlleredeFlaggetException("qopp001 har oppdaget at returpost allerede er flagget som antallRetur=" + journalpostResponse.getAntallRetur() + ". Oppretter ikke oppgave i Gosys");
 		} else {
-			behandleReturpostOppgave(journalpostId, opprettOppgave, hentJournalpostInfoResponseTo);
+			behandleReturpostOppgave(journalpostId, opprettOppgave, journalpostResponse);
 		}
 	}
 
-	private void behandleReturpostOppgave(String journalpostId, OpprettOppgave opprettOppgave, HentJournalpostInfoResponseTo hentJournalpostInfoResponseTo) {
-		final String fagomrade = hentJournalpostInfoResponseTo.getFagomrade();
-		final String journalfoerendeEnhet = hentJournalpostInfoResponseTo.getJournalfEnhet();
+	private void behandleReturpostOppgave(String journalpostId, OpprettOppgave opprettOppgave, JournalpostResponse journalpostResponse) {
+		final String fagomrade = journalpostResponse.getTema();
+		final String journalfoerendeEnhet = journalpostResponse.getJournalfEnhet();
 		if (FAGOMRAADE_STO.equalsIgnoreCase(fagomrade)) {
 			log.info("qopp001 lager ikke oppgave i Gosys for journalpostId={} da den er returpost fra fagområde={} og ikke vil bli behandlet.",
 					journalpostId, fagomrade);
 		} else {
-			OpprettOppgaveRequest opprettOppgaveRequest = opprettOppgaveMapper.map(hentJournalpostInfoResponseTo, opprettOppgave);
+			OpprettOppgaveRequest opprettOppgaveRequest = opprettOppgaveMapper.map(journalpostResponse, opprettOppgave);
 			try {
 				Integer oppgaveId = oppgave.opprettOppgave(opprettOppgaveRequest);
 				log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.",
