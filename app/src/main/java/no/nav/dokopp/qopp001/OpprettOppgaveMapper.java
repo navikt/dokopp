@@ -1,5 +1,6 @@
 package no.nav.dokopp.qopp001;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
@@ -21,6 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * @author Erik Bråten, Visma Consulting.
  */
 @Component
+@Slf4j
 public class OpprettOppgaveMapper {
 
 	private static final String GSAK_OPPGAVETYPE_RETURPOST = "RETUR";
@@ -98,15 +100,22 @@ public class OpprettOppgaveMapper {
 	}
 
 	private String mapOrgnr(JournalpostResponse journalpost) {
-		return isBrukerOrganisasjon(journalpost.getBrukertype()) ? journalpost.getBrukerId() :
-				isBrukerOrganisasjon(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() :
-						"";
+		String orgnr = isBrukerOrganisasjon(journalpost.getBrukertype()) ? journalpost.getBrukerId() : "";
+
+		if(isEmpty(orgnr) && isBrukerOrganisasjon(journalpost.getAvsenderMottakerType())){
+			log.info("Journalposten har ikke brukerId. Bruker avsenderMottakerId for å hente ut orgnr");
+			orgnr = journalpost.getAvsenderMottakerId();
+		}
+		return orgnr;
 	}
 
 	private String mapAktoerId(JournalpostResponse journalpost) {
-		String brukerId = isBrukerPerson(journalpost.getBrukertype()) ? journalpost.getBrukerId() :
-				isBrukerPerson(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() :
-						"";
+		String brukerId = isBrukerPerson(journalpost.getBrukertype()) ? journalpost.getBrukerId() : "";
+
+		if(isEmpty(brukerId) && isBrukerPerson(journalpost.getAvsenderMottakerType())){
+			log.info("Journalposten har ikke brukerId. Bruker AvsenderMottakerId for å hente ut personIdent");
+			brukerId = journalpost.getAvsenderMottakerId();
+		}
 		return isEmpty(brukerId) ? brukerId : pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId);
 	}
 
