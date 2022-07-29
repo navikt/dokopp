@@ -13,11 +13,12 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 @Slf4j
 public class SafJournalpostMapper {
 
-	public static JournalpostResponse map(SafResponse.SafJournalpost safJournalpost) {
+	public static JournalpostResponse map(SafResponse.SafJournalpost safJournalpost, String journalpostId) {
 		SafResponse.SafJournalpost.Bruker bruker = safJournalpost.getBruker();
 		SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker = safJournalpost.getAvsenderMottaker();
 		SafResponse.SafJournalpost.Sak sak = safJournalpost.getSak();
 		return JournalpostResponse.builder()
+				.journalpostId(journalpostId)
 				.journalfEnhet(safJournalpost.getJournalfoerendeEnhet())
 				.tema(safJournalpost.getTema())
 				.brukerId((bruker == null || isEmpty(bruker.getId())) ? null : bruker.getId().trim())

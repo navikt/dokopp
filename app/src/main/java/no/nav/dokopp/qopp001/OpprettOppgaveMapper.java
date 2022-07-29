@@ -100,7 +100,7 @@ public class OpprettOppgaveMapper {
 		if (!isEmpty(brukerOrgnr)) {
 			return brukerOrgnr;
 		} else if (!isEmpty(avsenderMottakerOrgnr)) {
-			log.info("Journalposten har ikke brukerId. Bruker avsenderMottakerId for å hente ut orgnr");
+			log.info("JournalpostId={} har ikke brukerId. Bruker avsenderMottakerId for å hente ut orgnr", journalpost.getJournalpostId());
 			return avsenderMottakerOrgnr;
 		}
 		return "";
@@ -113,7 +113,7 @@ public class OpprettOppgaveMapper {
 		if (!isEmpty(brukerId)) {
 			return pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId);
 		} else if (!isEmpty(avsenderMottakerId)) {
-			log.info("Journalposten har ikke brukerId. Bruker AvsenderMottakerId for å hente ut personIdent");
+			log.info("JournalpostId={} har ikke brukerId. Bruker AvsenderMottakerId for å hente ut personIdent", journalpost.getJournalpostId());
 			return pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(avsenderMottakerId);
 		}
 		return "";

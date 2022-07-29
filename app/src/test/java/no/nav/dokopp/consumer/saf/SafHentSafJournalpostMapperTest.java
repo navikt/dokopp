@@ -22,10 +22,11 @@ public class SafHentSafJournalpostMapperTest {
 	private final String BRUKER_ID = "4324324234";
 	private final String BRUKER_ID2 = "1212121";
 	private final String SAKSNUMMER = "123";
+	private final String JOURNALPOSTID = "12345678911";
 
 	@Test
 	public void shouldMap() {
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0"),JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is(BRUKER_ID));
 		assertThat(response.getBrukertype(), is(PERSON));
 		assertNull(response.getAvsenderMottakerId());
@@ -35,7 +36,7 @@ public class SafHentSafJournalpostMapperTest {
 
 	@Test
 	public void shouldMapBrukerOgAvsenderMottakerSatt(){
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), createAvsenderMottaker(ORGNR), "0"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), createAvsenderMottaker(ORGNR), "0"), JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is(BRUKER_ID));
 		assertThat(response.getBrukertype(), is(PERSON));
 		assertThat(response.getAvsenderMottakerType(), is(ORGANISASJON));
@@ -44,7 +45,7 @@ public class SafHentSafJournalpostMapperTest {
 
 	@Test
 	public void shouldMapWhenBrukerNullAndAvsenderMottaker(){
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(null, createAvsenderMottaker(ORGNR), "0"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(null, createAvsenderMottaker(ORGNR), "0"), JOURNALPOSTID);
 		assertNull(response.getBrukerId());
 		assertNull(response.getBrukertype());
 		assertThat(response.getAvsenderMottakerType(), is(ORGANISASJON));
@@ -53,7 +54,7 @@ public class SafHentSafJournalpostMapperTest {
 
 	@Test
 	public void shouldMapWhenAvsenderMottakerNull(){
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0"), JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is(BRUKER_ID));
 		assertThat(response.getBrukertype(), is(PERSON));
 		assertNull(response.getAvsenderMottakerType());
@@ -62,7 +63,7 @@ public class SafHentSafJournalpostMapperTest {
 
 	@Test
 	public void shouldMapWhenSakNull(){
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0", null));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0", null), JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is(BRUKER_ID));
 		assertThat(response.getBrukertype(), is(PERSON));
 		assertNull(response.getAvsenderMottakerType());
@@ -72,13 +73,13 @@ public class SafHentSafJournalpostMapperTest {
 
 	@Test
 	public void shouldMapWhenAntallReturNull(){
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, null));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, null), JOURNALPOSTID);
 		assertNull(response.getAntallRetur());
 	}
 
 	@Test
 	public void shouldMapWhenAntallReturisNumber(){
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "1"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "1"), JOURNALPOSTID);
 		assertThat(response.getAntallRetur(), is(1));
 	}
 
@@ -88,7 +89,7 @@ public class SafHentSafJournalpostMapperTest {
 				.type(FNR)
 				.id("9999999999 ").build();
 
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(bruker, null, "0"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(bruker, null, "0"), JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is("9999999999"));
 	}
 
@@ -98,25 +99,26 @@ public class SafHentSafJournalpostMapperTest {
 				.type(FNR)
 				.id("9999999999 ").build();
 
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(null, avsenderMottaker, "0"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(null, avsenderMottaker, "0"), JOURNALPOSTID);
 		assertThat(response.getAvsenderMottakerId(), is("9999999999"));
 	}
 
 	@ParameterizedTest()
 	@ValueSource(strings = {AKTOERID, FNR})
 	public void shouldMapBrukerTypeWhenPerson(String brukertype) {
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(brukertype), null, "0"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(brukertype), null, "0"), JOURNALPOSTID);
 		assertThat(response.getBrukertype(), is(PERSON));
 	}
 
 	@ParameterizedTest()
 	@ValueSource(strings = ORGNR)
 	public void shouldMapBrukerTypeWhenOrganisasjon(String brukertype) {
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(brukertype), null, "0"));
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(brukertype), null, "0"), JOURNALPOSTID);
 		assertThat(response.getBrukertype(), is(ORGANISASJON));
 	}
 
 	private void validateJournalpost(JournalpostResponse response){
+		assertThat(response.getJournalpostId(), is(JOURNALPOSTID));
 		assertThat(response.getJournalfEnhet(), is(JOURNALFOERENDE_ENHET));
 		assertThat(response.getTema(), is(TEMA_DAG));
 		assertThat(response.getAntallRetur(), is(0));
@@ -131,7 +133,7 @@ public class SafHentSafJournalpostMapperTest {
 
 	}
 
-
+	
 	public SafResponse.SafJournalpost createJournalpost(SafResponse.SafJournalpost.Bruker bruker,
 														SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker,
 														String antallRetur,

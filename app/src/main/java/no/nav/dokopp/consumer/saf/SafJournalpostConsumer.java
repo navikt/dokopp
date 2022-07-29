@@ -69,13 +69,13 @@ public class SafJournalpostConsumer {
 			final SafResponse safResponse = restTemplate.exchange(safUri, HttpMethod.POST, new HttpEntity<>(hentJournalpostRequest, createHeaders()), SafResponse.class).getBody();
 
 			List<SafResponse.SafError> errors = safResponse.getErrors();
-			return (errors == null || errors.isEmpty()) ? SafJournalpostMapper.map(safResponse.getData().getJournalpost()) : handleSafError(errors, journalpostId);
+			return (errors == null || errors.isEmpty()) ? SafJournalpostMapper.map(safResponse.getData().getJournalpost(), journalpostId) : handleSafError(errors, journalpostId);
 
 		} catch (HttpClientErrorException e) {
-			throw new SafJournalpostUnauthorizedException(format("Henting av journalpost feilet med status: %s, feilmelding: %s", e
+			throw new SafJournalpostUnauthorizedException(format("Henting av journalpost=%s feilet med status: %s, feilmelding: %s", journalpostId, e
 					.getStatusCode(), e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			throw new SafJournalpostQueryTechnicalException(format("Tjenesten SAF (graphQL) feilet med status: %s, feilmelding: %s", e.getStatusCode(), e.getMessage()), e);
+			throw new SafJournalpostQueryTechnicalException(format("Kall mot SAF feilet for journalpost=%s med status: %s, feilmelding: %s", journalpostId,  e.getStatusCode(), e.getMessage()), e);
 		}
 	}
 
