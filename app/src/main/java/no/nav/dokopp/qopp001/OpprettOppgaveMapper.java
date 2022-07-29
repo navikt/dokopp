@@ -1,8 +1,8 @@
 package no.nav.dokopp.qopp001;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
+import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.springframework.stereotype.Component;
@@ -64,23 +64,17 @@ public class OpprettOppgaveMapper {
 		return OPPRETTET_AV_ENHET.equals(responseTo.getJournalfEnhet()) ? null : responseTo.getJournalfEnhet();
 	}
 
-
 	private Map<String, String> mapBruker(JournalpostResponse journalpost) {
-
 		Map<String, String> brukerMap = new HashMap<>();
 		validateBrukerType(journalpost);
 		String aktoerId = mapAktoerId(journalpost);
 		String orgnr = mapOrgnr(journalpost);
 
-
 		if (!isEmpty(aktoerId)) {
 			brukerMap.put(AKTOER_ID, aktoerId);
-		} else if(!isEmpty(orgnr)){
+		} else if (!isEmpty(orgnr)) {
 			brukerMap.put(ORGNR, orgnr);
-		} else {
-			return brukerMap;
 		}
-
 		return brukerMap;
 	}
 
@@ -93,37 +87,43 @@ public class OpprettOppgaveMapper {
 
 	//Sjekk at brukerType eller avsenderMottakerType er enten person eller organisasjon
 	private void validateBrukerType(JournalpostResponse journalpost) {
-		if (!isBrukerPerson(journalpost.getBrukertype()) && !isBrukerPerson(journalpost.getAvsenderMottakerType()) &&
-				!isBrukerOrganisasjon(journalpost.getBrukertype()) && !isBrukerOrganisasjon(journalpost.getAvsenderMottakerType())) {
+		if (!isBrukerTypePerson(journalpost.getBrukertype()) && !isBrukerTypePerson(journalpost.getAvsenderMottakerType()) &&
+				!isBrukerTypeOrganisasjon(journalpost.getBrukertype()) && !isBrukerTypeOrganisasjon(journalpost.getAvsenderMottakerType())) {
 			throw new UkjentBrukertypeException("Ukjent brukertype er ikke støttet.");
 		}
 	}
 
 	private String mapOrgnr(JournalpostResponse journalpost) {
-		String orgnr = isBrukerOrganisasjon(journalpost.getBrukertype()) ? journalpost.getBrukerId() : "";
+		String brukerOrgnr = isBrukerTypeOrganisasjon(journalpost.getBrukertype()) ? journalpost.getBrukerId() : "";
+		String avsenderMottakerOrgnr = isBrukerTypeOrganisasjon(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() : "";
 
-		if(isEmpty(orgnr) && isBrukerOrganisasjon(journalpost.getAvsenderMottakerType())){
+		if (!isEmpty(brukerOrgnr)) {
+			return brukerOrgnr;
+		} else if (!isEmpty(avsenderMottakerOrgnr)) {
 			log.info("Journalposten har ikke brukerId. Bruker avsenderMottakerId for å hente ut orgnr");
-			orgnr = journalpost.getAvsenderMottakerId();
+			return avsenderMottakerOrgnr;
 		}
-		return orgnr;
+		return "";
 	}
 
 	private String mapAktoerId(JournalpostResponse journalpost) {
-		String brukerId = isBrukerPerson(journalpost.getBrukertype()) ? journalpost.getBrukerId() : "";
+		String brukerId = isBrukerTypePerson(journalpost.getBrukertype()) ? journalpost.getBrukerId() : "";
+		String avsenderMottakerId = isBrukerTypePerson(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() : "";
 
-		if(isEmpty(brukerId) && isBrukerPerson(journalpost.getAvsenderMottakerType())){
+		if (!isEmpty(brukerId)) {
+			return pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId);
+		} else if (!isEmpty(avsenderMottakerId)) {
 			log.info("Journalposten har ikke brukerId. Bruker AvsenderMottakerId for å hente ut personIdent");
-			brukerId = journalpost.getAvsenderMottakerId();
+			return pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(avsenderMottakerId);
 		}
-		return isEmpty(brukerId) ? brukerId : pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId);
+		return "";
 	}
 
-	private boolean isBrukerPerson(String brukertype) {
+	private boolean isBrukerTypePerson(String brukertype) {
 		return PERSON.name().equalsIgnoreCase(brukertype);
 	}
 
-	private boolean isBrukerOrganisasjon(String brukertype) {
+	private boolean isBrukerTypeOrganisasjon(String brukertype) {
 		return ORGANISASJON.name().equalsIgnoreCase(brukertype);
 	}
 }
