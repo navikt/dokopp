@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 @Builder
 public class JournalpostResponse {
+	private String journalpostId;
 	private String journalfEnhet;
 	private String tema;
 	private String brukerId;

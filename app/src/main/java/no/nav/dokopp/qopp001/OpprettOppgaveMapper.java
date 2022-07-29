@@ -1,7 +1,8 @@
 package no.nav.dokopp.qopp001;
 
-import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
+import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * @author Erik Bråten, Visma Consulting.
  */
 @Component
+@Slf4j
 public class OpprettOppgaveMapper {
 
 	private static final String GSAK_OPPGAVETYPE_RETURPOST = "RETUR";
@@ -62,23 +64,17 @@ public class OpprettOppgaveMapper {
 		return OPPRETTET_AV_ENHET.equals(responseTo.getJournalfEnhet()) ? null : responseTo.getJournalfEnhet();
 	}
 
-
 	private Map<String, String> mapBruker(JournalpostResponse journalpost) {
-
 		Map<String, String> brukerMap = new HashMap<>();
 		validateBrukerType(journalpost);
 		String aktoerId = mapAktoerId(journalpost);
 		String orgnr = mapOrgnr(journalpost);
 
-
 		if (!isEmpty(aktoerId)) {
 			brukerMap.put(AKTOER_ID, aktoerId);
-		} else if(!isEmpty(orgnr)){
+		} else if (!isEmpty(orgnr)) {
 			brukerMap.put(ORGNR, orgnr);
-		} else {
-			return brukerMap;
 		}
-
 		return brukerMap;
 	}
 
@@ -91,30 +87,43 @@ public class OpprettOppgaveMapper {
 
 	//Sjekk at brukerType eller avsenderMottakerType er enten person eller organisasjon
 	private void validateBrukerType(JournalpostResponse journalpost) {
-		if (!isBrukerPerson(journalpost.getBrukertype()) && !isBrukerPerson(journalpost.getAvsenderMottakerType()) &&
-				!isBrukerOrganisasjon(journalpost.getBrukertype()) && !isBrukerOrganisasjon(journalpost.getAvsenderMottakerType())) {
+		if (!isBrukerTypePerson(journalpost.getBrukertype()) && !isBrukerTypePerson(journalpost.getAvsenderMottakerType()) &&
+				!isBrukerTypeOrganisasjon(journalpost.getBrukertype()) && !isBrukerTypeOrganisasjon(journalpost.getAvsenderMottakerType())) {
 			throw new UkjentBrukertypeException("Ukjent brukertype er ikke støttet.");
 		}
 	}
 
 	private String mapOrgnr(JournalpostResponse journalpost) {
-		return isBrukerOrganisasjon(journalpost.getBrukertype()) ? journalpost.getBrukerId() :
-				isBrukerOrganisasjon(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() :
-						"";
+		String brukerOrgnr = isBrukerTypeOrganisasjon(journalpost.getBrukertype()) ? journalpost.getBrukerId() : "";
+		String avsenderMottakerOrgnr = isBrukerTypeOrganisasjon(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() : "";
+
+		if (!isEmpty(brukerOrgnr)) {
+			return brukerOrgnr;
+		} else if (!isEmpty(avsenderMottakerOrgnr)) {
+			log.info("JournalpostId={} har ikke brukerId. Bruker avsenderMottakerId for å hente ut orgnr", journalpost.getJournalpostId());
+			return avsenderMottakerOrgnr;
+		}
+		return "";
 	}
 
 	private String mapAktoerId(JournalpostResponse journalpost) {
-		String brukerId = isBrukerPerson(journalpost.getBrukertype()) ? journalpost.getBrukerId() :
-				isBrukerPerson(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() :
-						"";
-		return isEmpty(brukerId) ? brukerId : pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId);
+		String brukerId = isBrukerTypePerson(journalpost.getBrukertype()) ? journalpost.getBrukerId() : "";
+		String avsenderMottakerId = isBrukerTypePerson(journalpost.getAvsenderMottakerType()) ? journalpost.getAvsenderMottakerId() : "";
+
+		if (!isEmpty(brukerId)) {
+			return pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(brukerId);
+		} else if (!isEmpty(avsenderMottakerId)) {
+			log.info("JournalpostId={} har ikke brukerId. Bruker AvsenderMottakerId for å hente ut personIdent", journalpost.getJournalpostId());
+			return pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(avsenderMottakerId);
+		}
+		return "";
 	}
 
-	private boolean isBrukerPerson(String brukertype) {
+	private boolean isBrukerTypePerson(String brukertype) {
 		return PERSON.name().equalsIgnoreCase(brukertype);
 	}
 
-	private boolean isBrukerOrganisasjon(String brukertype) {
+	private boolean isBrukerTypeOrganisasjon(String brukertype) {
 		return ORGANISASJON.name().equalsIgnoreCase(brukertype);
 	}
 }
