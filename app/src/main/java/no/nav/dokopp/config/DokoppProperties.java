@@ -14,6 +14,7 @@ public class DokoppProperties {
 
 	private final Proxy proxy = new Proxy();
 	private final Endpoints endpoints = new Endpoints();
+	private final DokCert cert = new DokCert();
 
 	@Data
 	@Validated
@@ -57,5 +58,16 @@ public class DokoppProperties {
 		 */
 		@NotEmpty
 		private String scope;
+	}
+
+	@Data
+	@Validated
+	public class DokCert {
+		@NotEmpty
+		private String keystore;
+		@NotEmpty
+		private String keystorealias;
+		@NotEmpty
+		private String password;
 	}
 }

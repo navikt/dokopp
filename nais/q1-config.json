@@ -17,7 +17,7 @@
   "DOKOPP_ENDPOINTS_OPPGAVE": "https://oppgave.nais.preprod.local/api/v1/oppgaver",
   "DOKOPP_ENDPOINTS_STS": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
   "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
-  "SRVDOKOPPCERT": "/certificate/data/dev/srvdokopp",
+  "DOKOPPCERT": "/certificate/data/dev/srvdokopp",
   "INGRESSES": [
     "https://dokopp-q1.dev.intern.nav.no"
   ]

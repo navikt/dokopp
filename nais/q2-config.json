@@ -17,7 +17,7 @@
   "DOKOPP_ENDPOINTS_PDL": "https://pdl-api.dev.intern.nav.no/graphql",
   "DOKOPP_ENDPOINTS_OPPGAVE": "https://oppgave-q2.nais.preprod.local/api/v1/oppgaver",
   "DOKOPP_ENDPOINTS_STS": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
-  "SRVDOKOPPCERT": "/certificate/data/dev/srvdokopp",
+  "DOKOPPCERT": "/certificate/data/dev/srvdokopp",
   "INGRESSES": [
     "https://dokopp.dev.intern.nav.no"
   ]
