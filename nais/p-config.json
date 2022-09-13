@@ -4,6 +4,8 @@
   "MQGATEWAY01_PORT": "1414",
   "MQGATEWAY01_NAME": "MPLS01",
   "DOKOPP_CHANNEL_NAME": "P_DOKOPP",
+  "DOKOPP_CHANNEL_SECURENAME": "P_DOKOPP_SECURE",
+  "DOKOPP_CHANNEL_ENABLETLS": "true",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.P_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.P_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
   "DOKOPP_PROXY_HOST": "webproxy.nais",
@@ -15,6 +17,7 @@
   "DOKOPP_ENDPOINTS_OPPGAVE": "https://oppgave.nais.adeo.no/api/v1/oppgaver",
   "DOKOPP_ENDPOINTS_STS": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "SRVDOKOPP": "/serviceuser/data/prod/srvdokopp",
+  "SRVDOKOPPCERT": "/certificate/data/prod/srvdokopp",
   "INGRESSES": [
     "https://dokopp.intern.nav.no"
   ]

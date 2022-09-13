@@ -15,6 +15,10 @@ spec:
       value: {{ MQGATEWAY01_NAME }}
     - name: DOKOPP_CHANNEL_NAME
       value: {{ DOKOPP_CHANNEL_NAME }}
+    - name: DOKOPP_CHANNEL_SECURENAME
+      value: {{ DOKOPP_CHANNEL_SECURENAME }}
+    - name: DOKOPP_CHANNEL_ENABLETLS
+      value: "{{ DOKOPP_CHANNEL_ENABLETLS }}"
     - name: DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME
       value: {{ DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME }}
     - name: DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME
@@ -65,6 +69,8 @@ spec:
     paths:
       - kvPath: {{ SRVDOKOPP }}
         mountPath: /var/run/secrets/nais.io/srvdokopp
+      - kvPath: { { SRVDOKOPPCERT } }
+        mountPath: /var/run/secrets/nais.io/certificate/srvdokprod
   azure:
     application:
       enabled: true
