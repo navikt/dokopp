@@ -69,7 +69,7 @@ spec:
     paths:
       - kvPath: {{ SRVDOKOPP }}
         mountPath: /var/run/secrets/nais.io/srvdokopp
-      - kvPath: { { DOKOPPCERT } }
+      - kvPath: {{ DOKOPPCERT }}
         mountPath: /var/run/secrets/nais.io/certificate/srvdokopp
   azure:
     application:
