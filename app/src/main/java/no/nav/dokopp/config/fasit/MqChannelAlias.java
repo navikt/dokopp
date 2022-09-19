@@ -19,4 +19,6 @@ import javax.validation.constraints.NotEmpty;
 public class MqChannelAlias {
 	@NotEmpty
 	private String name;
+	private String securename;
+	private boolean enabletls;
 }

@@ -27,7 +27,7 @@ public class DokoppConfigSetter {
 			if(System.getenv(APP_TRUSTSTORE_PASSWORD) == null) {
 				throw new IllegalStateException("ENV APP_TRUSTSTORE_PASSWORD was not supplied");
 			}
-			System.setProperty(TRUSTSTOREPASSWORD, System.getenv(APP_TRUSTSTORE_PASSWORD));
+			System.setProperty("javax.net.ssl.keyStorePassword", System.getenv("DOKOPPCERT_PASSWORD"));
 		}
 	}
 

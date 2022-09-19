@@ -4,6 +4,8 @@
   "MQGATEWAY01_PORT": "1413",
   "MQGATEWAY01_NAME": "MQLS01",
   "DOKOPP_CHANNEL_NAME": "Q2_DOKOPP",
+  "DOKOPP_CHANNEL_SECURENAME": "Q2_DOKOPP_SECURE",
+  "DOKOPP_CHANNEL_ENABLETLS": "true",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
   "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
@@ -15,6 +17,7 @@
   "DOKOPP_ENDPOINTS_PDL": "https://pdl-api.dev.intern.nav.no/graphql",
   "DOKOPP_ENDPOINTS_OPPGAVE": "https://oppgave-q2.nais.preprod.local/api/v1/oppgaver",
   "DOKOPP_ENDPOINTS_STS": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
+  "DOKOPPCERT": "/certificate/data/dev/srvdokopp",
   "INGRESSES": [
     "https://dokopp.dev.intern.nav.no"
   ]
