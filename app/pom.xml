@@ -11,8 +11,6 @@
 	</parent>
 
 	<artifactId>app</artifactId>
-	<packaging>jar</packaging>
-	<name>dokopp :: app</name>
 
 	<dependencies>
 		<dependency>
