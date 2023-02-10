@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.6</version>
+		<version>2.7.8</version>
 	</parent>
 
 	<groupId>no.nav.dokopp</groupId>
@@ -32,11 +32,13 @@
 		<cxf.version>3.5.5</cxf.version>
 
 		<opprettoppgave-tjenestespesifikasjon-v1.version>1.1.1</opprettoppgave-tjenestespesifikasjon-v1.version>
-		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>3.2.0
+		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>2-b9013e7
 		</arkiverdokumentproduksjon-tjenestespesifikasjon.version>
 
 		<!-- Test dependencies -->
 		<spring-cloud-contract-wiremock.version>3.1.5</spring-cloud-contract-wiremock.version>
+		<!-- plugins -->
+		<maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -77,7 +79,6 @@
 				<groupId>no.nav.tjenester.brevogarkiv</groupId>
 				<artifactId>arkiverdokumentproduksjon-tjenestespesifikasjon</artifactId>
 				<version>${arkiverdokumentproduksjon-tjenestespesifikasjon.version}</version>
-				<classifier>jaxws</classifier>
 			</dependency>
 			<dependency>
 				<groupId>no.nav.dok</groupId>
@@ -122,8 +123,9 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-toolchains-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>${maven-toolchains-plugin.version}</version>
 				<executions>
 					<execution>
 						<goals>
