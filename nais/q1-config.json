@@ -12,10 +12,10 @@
   "DOKOPP_PROXY_PORT": "8088",
   "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token",
   "DOKOPP_ENDPOINTS_SAF_SCOPE": "api://dev-fss.teamdokumenthandtering.saf-q1/.default",
-  "DOKOPP_ENDPOINTS_SAF_URL": "https://saf-q1.dev.adeo.no/graphql",
+  "DOKOPP_ENDPOINTS_SAF_URL": "https://saf-q1.dev.intern.nav.no/graphql",
   "DOKOPP_ENDPOINTS_PDL": "https://pdl-api-q1.dev.intern.nav.no/graphql",
-  "DOKOPP_ENDPOINTS_OPPGAVE": "https://oppgave.nais.preprod.local/api/v1/oppgaver",
-  "DOKOPP_ENDPOINTS_STS": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
+  "DOKOPP_ENDPOINTS_OPPGAVE": "https://oppgave-q1.dev.intern.nav.no/api/v1/oppgaver",
+  "DOKOPP_ENDPOINTS_STS": "https://security-token-service.dev.adeo.no/rest/v1/sts/token",
   "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
   "DOKOPPCERT": "/certificate/data/dev/srvdokopp",
   "INGRESSES": [
