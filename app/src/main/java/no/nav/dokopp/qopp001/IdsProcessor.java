@@ -8,9 +8,6 @@ import org.slf4j.MDC;
 
 import java.util.UUID;
 
-/**
- * @author Erik Bråten, Visma Consulting.
- */
 public class IdsProcessor implements Processor {
 
 	@Override

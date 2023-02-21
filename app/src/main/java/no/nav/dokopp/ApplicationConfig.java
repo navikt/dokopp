@@ -17,9 +17,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.retry.annotation.EnableRetry;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @EnableRetry
 @EnableJms
 @EnableConfigurationProperties({

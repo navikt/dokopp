@@ -17,10 +17,6 @@ import static no.nav.dokopp.qopp001.domain.BrukerType.ORGANISASJON;
 import static no.nav.dokopp.qopp001.domain.BrukerType.PERSON;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-
-/**
- * @author Erik Bråten, Visma Consulting.
- */
 @Component
 @Slf4j
 public class OpprettOppgaveMapper {

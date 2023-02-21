@@ -15,9 +15,6 @@ import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
 import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
 import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @Service
 public class Tjoark110SettJournalpostAttributter {
 	private final ArkiverDokumentproduksjonV1 arkiverDokumentproduksjonV1;

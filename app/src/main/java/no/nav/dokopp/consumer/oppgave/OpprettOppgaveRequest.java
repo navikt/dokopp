@@ -3,9 +3,6 @@ package no.nav.dokopp.consumer.oppgave;
 import lombok.Builder;
 import lombok.Value;
 
-/**
- * @author Erik Bråten, Visma Consulting.
- */
 @Value
 @Builder(toBuilder = true)
 public class OpprettOppgaveRequest {

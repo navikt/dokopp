@@ -22,11 +22,6 @@ import static no.nav.dokopp.util.MDCOperations.MDC_CONSUMER_ID;
 import static no.nav.dokopp.util.MDCOperations.MDC_USER_ID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-/**
- * Soap-handler that appends CallId and AppId to SOAP Header for outgoing requests
- *
- * @author Roar Bjurstrom, Visma Consulting.
- */
 public class MDCUsernameTokenOutHandler implements SOAPHandler<SOAPMessageContext> {
 	
 	private static final Logger log = LoggerFactory.getLogger(MDCUsernameTokenOutHandler.class.getName());

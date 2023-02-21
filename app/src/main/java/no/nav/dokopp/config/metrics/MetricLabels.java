@@ -1,8 +1,5 @@
 package no.nav.dokopp.config.metrics;
 
-/**
- * @author Jakob A. Libak, NAV.
- */
 public class MetricLabels {
 
 	public static final String TYPE_TECHNICAL_EXCEPTION = "technical";

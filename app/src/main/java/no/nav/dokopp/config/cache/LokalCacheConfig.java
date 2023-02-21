@@ -12,9 +12,6 @@ import org.springframework.context.annotation.Primary;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Configuration
 @EnableCaching
 public class LokalCacheConfig {

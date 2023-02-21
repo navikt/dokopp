@@ -1,8 +1,5 @@
 package no.nav.dokopp.constants;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 public final class HeaderConstants {
 
 	public static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";

@@ -12,9 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 public class Qopp001ServiceTest {
 
 	private final SafJournalpostConsumer safHentJournalpostInfo = Mockito.mock(SafJournalpostConsumer.class);

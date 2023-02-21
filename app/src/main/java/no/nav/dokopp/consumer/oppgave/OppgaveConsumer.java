@@ -32,9 +32,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 
-/**
- * @author Erik Bråten, Visma Consulting.
- */
 @Component
 public class OppgaveConsumer implements Oppgave {
 

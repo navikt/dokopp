@@ -57,9 +57,6 @@ import static org.hamcrest.core.Is.is;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @ExtendWith(SpringExtension.class)
 @Import({JmsTestConfig.class, ApplicationItestConfig.class})
 @SpringBootTest(classes = {Application.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

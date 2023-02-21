@@ -12,11 +12,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Abstract helper class for Cxf Endpoints
- *
- * @author Andreas Skomedal, Visma Consulting.
- */
 public abstract class AbstractCxfEndpointConfig {
 	public static final int DEFAULT_TIMEOUT = 30_000;
 

@@ -1,8 +1,5 @@
 package no.nav.dokopp.exception;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 public class DokoppTechnicalException extends RuntimeException {
 
 	public DokoppTechnicalException(String message) {
