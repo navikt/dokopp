@@ -7,8 +7,6 @@ import javax.security.auth.callback.CallbackHandler;
 
 /**
  * Sets the password for the Usernametoken WS-Security
- *
- * @author Joakim Bjørnstad, Visma Consulting
  */
 public class SystemuserPasswordCallback implements CallbackHandler {
 

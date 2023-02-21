@@ -1,11 +1,7 @@
 package no.nav.dokopp.constants;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 public class DomainConstants {
 	public static final String APP_NAME = "dokopp";
-	public static final String BEARER_PREFIX = "Bearer ";
 
 	public static final String BEHANDLE_RETURPOST = "BEHANDLE_RETURPOST";
 	public static final String ARKIVSYSTEM_JOARK = "JOARK";

@@ -21,9 +21,6 @@ import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
 import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @Slf4j
 @Service
 public class Qopp001Service {

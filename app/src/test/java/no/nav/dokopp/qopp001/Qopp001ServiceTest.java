@@ -1,6 +1,5 @@
 package no.nav.dokopp.qopp001;
 
-import no.nav.dokopp.constants.DomainConstants;
 import no.nav.dokopp.consumer.saf.SafJournalpostConsumer;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
@@ -8,13 +7,12 @@ import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppga
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
+import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 public class Qopp001ServiceTest {
 
 	private final SafJournalpostConsumer safHentJournalpostInfo = Mockito.mock(SafJournalpostConsumer.class);
@@ -23,7 +21,7 @@ public class Qopp001ServiceTest {
 	@Test
 	public void shouldThrowAvsluttBehandlingOgKastMeldingExceptionWhenUgyldigArkivSystem() {
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(DomainConstants.BEHANDLE_RETURPOST);
+		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST);
 		opprettOppgave.setArkivKode("1");
 
 		assertThrows(AvsluttBehandlingOgKastMeldingException.class, () -> qopp001Service.qopp001("1", opprettOppgave));
@@ -32,8 +30,8 @@ public class Qopp001ServiceTest {
 	@Test
 	public void shouldThrowAvsluttBehandlingOgKastMeldingExceptionWhenUgyldigArkivKode() {
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(DomainConstants.BEHANDLE_RETURPOST);
-		opprettOppgave.setArkivSystem(DomainConstants.ARKIVSYSTEM_JOARK);
+		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST);
+		opprettOppgave.setArkivSystem(ARKIVSYSTEM_JOARK);
 
 		assertThrows(AvsluttBehandlingOgKastMeldingException.class, () -> qopp001Service.qopp001("1", opprettOppgave));
 	}
@@ -43,8 +41,8 @@ public class Qopp001ServiceTest {
 		when(safHentJournalpostInfo.hentJournalpost(any(String.class))).thenReturn(createHentJournalpostInfoResponse());
 
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(DomainConstants.BEHANDLE_RETURPOST);
-		opprettOppgave.setArkivSystem(DomainConstants.ARKIVSYSTEM_JOARK);
+		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST);
+		opprettOppgave.setArkivSystem(ARKIVSYSTEM_JOARK);
 		opprettOppgave.setArkivKode("1");
 
 		assertThrows(ReturpostAlleredeFlaggetException.class, () -> qopp001Service.qopp001("1", opprettOppgave));

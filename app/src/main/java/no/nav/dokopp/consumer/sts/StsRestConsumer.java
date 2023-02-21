@@ -20,9 +20,6 @@ import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokopp.constants.RetryConstants.MULTIPLIER_SHORT;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @Component
 public class StsRestConsumer {
 

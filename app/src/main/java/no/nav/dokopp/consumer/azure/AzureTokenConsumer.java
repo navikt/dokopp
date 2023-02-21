@@ -32,6 +32,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Profile({"nais", "local"})
 public class AzureTokenConsumer {
 	private static final String AZURE_TOKEN_INSTANCE = "azuretoken";
+
 	private final RestTemplate restTemplate;
 	private final AzureProperties azureProperties;
 

@@ -17,9 +17,6 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.Queue;
 
-/**
- * @author Sigurd Midttun, Visma Consulting.
- */
 @Slf4j
 @Component
 public class Qopp001Route extends RouteBuilder {

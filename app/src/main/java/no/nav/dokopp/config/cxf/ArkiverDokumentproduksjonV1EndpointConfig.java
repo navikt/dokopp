@@ -14,9 +14,6 @@ import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Configuration
 public class ArkiverDokumentproduksjonV1EndpointConfig extends AbstractCxfEndpointConfig {
 	

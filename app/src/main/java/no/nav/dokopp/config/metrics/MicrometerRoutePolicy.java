@@ -23,9 +23,6 @@ import org.apache.camel.Route;
 import org.apache.camel.support.RoutePolicySupport;
 import org.apache.camel.support.processor.validation.SchemaValidationException;
 
-/**
- * @author Ugur Alpay Cenar, Visma Consulting.
- */
 public class MicrometerRoutePolicy extends RoutePolicySupport {
 	private final MeterRegistry meterRegistry;
 	private Timer.Sample timerSample;

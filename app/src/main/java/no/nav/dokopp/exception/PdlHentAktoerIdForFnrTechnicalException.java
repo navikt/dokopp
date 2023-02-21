@@ -5,8 +5,4 @@ public class PdlHentAktoerIdForFnrTechnicalException extends DokoppTechnicalExce
 	public PdlHentAktoerIdForFnrTechnicalException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
-	public PdlHentAktoerIdForFnrTechnicalException(String message) {
-		super(message);
-	}
 }
