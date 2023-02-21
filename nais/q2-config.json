@@ -1,5 +1,8 @@
 {
   "APP_NAME": "dokopp",
+  "INGRESSES": [
+    "https://dokopp.dev.intern.nav.no"
+  ],
   "MQGATEWAY01_HOSTNAME": "b27apvl219.preprod.local",
   "MQGATEWAY01_PORT": "1413",
   "MQGATEWAY01_NAME": "MQLS01",
@@ -18,7 +21,5 @@
   "DOKOPP_ENDPOINTS_STS": "https://security-token-service.dev.adeo.no/rest/v1/sts/token",
   "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
   "DOKOPPCERT": "/certificate/data/dev/srvdokopp",
-  "INGRESSES": [
-    "https://dokopp.dev.intern.nav.no"
-  ]
+  "APPDYNAMICS": "/apikey/appdynamics/dev"
 }

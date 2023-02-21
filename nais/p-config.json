@@ -1,5 +1,8 @@
 {
   "APP_NAME": "dokopp",
+  "INGRESSES": [
+    "https://dokopp.intern.nav.no"
+  ],
   "MQGATEWAY01_HOSTNAME": "mpls01.adeo.no",
   "MQGATEWAY01_PORT": "1414",
   "MQGATEWAY01_NAME": "MPLS01",
@@ -18,7 +21,5 @@
   "DOKOPP_ENDPOINTS_STS": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "SRVDOKOPP": "/serviceuser/data/prod/srvdokopp",
   "DOKOPPCERT": "/certificate/data/prod/srvdokopp",
-  "INGRESSES": [
-    "https://dokopp.intern.nav.no"
-  ]
+  "APPDYNAMICS": "/apikey/appdynamics/prod"
 }

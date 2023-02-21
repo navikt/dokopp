@@ -1,8 +1,6 @@
 package no.nav.dokopp.qopp001;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokopp.config.metrics.MicrometerRoutePolicy;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
@@ -10,7 +8,6 @@ import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppga
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
-import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.support.processor.validation.SchemaValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,17 +25,14 @@ public class Qopp001Route extends RouteBuilder {
 	private final Queue qopp001;
 	private final Queue qopp001FunksjonellFeil;
 	private final Qopp001Service qopp001Service;
-	private final MeterRegistry meterRegistry;
 
 	@Autowired
 	public Qopp001Route(Queue qopp001,
 						Queue qopp001FunksjonellFeil,
-						Qopp001Service qopp001Service,
-						MeterRegistry meterRegistry) {
+						Qopp001Service qopp001Service) {
 		this.qopp001 = qopp001;
 		this.qopp001Service = qopp001Service;
 		this.qopp001FunksjonellFeil = qopp001FunksjonellFeil;
-		this.meterRegistry = meterRegistry;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -74,7 +68,6 @@ public class Qopp001Route extends RouteBuilder {
 				"&errorHandlerLogStackTrace=false" +
 				"&errorHandlerLoggingLevel=DEBUG")
 				.routeId(SERVICE_ID)
-				.routePolicy(new MicrometerRoutePolicy(meterRegistry))
 				.setProperty(PROPERTY_ORIGINAL_MESSAGE, simple("${body}"))
 				.process(new IdsProcessor())
 				.to("validator:xsd/opprett_oppgave.xsd")
