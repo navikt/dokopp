@@ -5,5 +5,5 @@ import lombok.Value;
 @Value
 public class OpprettOppgaveResponse {
 
-	private final Integer id;
+	Integer id;
 }

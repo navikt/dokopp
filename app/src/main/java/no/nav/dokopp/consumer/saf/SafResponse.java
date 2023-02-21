@@ -32,22 +32,22 @@ public class SafResponse {
 		@Value
 		@Builder
 		public static class AvsenderMottaker {
-			private String id;
-			private String type;
+			String id;
+			String type;
 		}
 
 		@Value
 		@Builder
 		public static class Sak {
-			private String arkivsaksnummer;
-			private String arkivsaksystem;
+			String arkivsaksnummer;
+			String arkivsaksystem;
 		}
 
 		@Value
 		@Builder
 		public static class Bruker {
-			private String id;
-			private String type;
+			String id;
+			String type;
 		}
 	}
 

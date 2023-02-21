@@ -87,15 +87,17 @@ public class PdlGraphQLConsumer {
         final HashMap<String, Object> variables = new HashMap<>();
         variables.put("ident", aktoerId);
         return PdlRequest.builder()
-                .query("query($ident: ID!) {\n" +
-                        "  hentIdenter(ident: $ident, historikk: false, grupper: AKTORID) {\n" +
-                        "    identer {\n" +
-                        "      ident\n" +
-                        "      historisk\n" +
-                        "      gruppe\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}\n")
+                .query("""
+                        query($ident: ID!) {
+                          hentIdenter(ident: $ident, historikk: false, grupper: AKTORID) {
+                            identer {
+                              ident
+                              historisk
+                              gruppe
+                            }
+                          }
+                        }
+                        """)
                 .variables(variables)
                 .build();
     }

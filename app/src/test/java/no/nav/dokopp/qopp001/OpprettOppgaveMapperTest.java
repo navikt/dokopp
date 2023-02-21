@@ -1,6 +1,5 @@
 package no.nav.dokopp.qopp001;
 
-import no.nav.dokopp.constants.DomainConstants;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
@@ -11,6 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
+import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
+import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -282,8 +283,8 @@ public class OpprettOppgaveMapperTest {
 
 	private OpprettOppgave createOpprettOppgave() {
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(DomainConstants.BEHANDLE_RETURPOST);
-		opprettOppgave.setArkivSystem(DomainConstants.ARKIVSYSTEM_JOARK);
+		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST);
+		opprettOppgave.setArkivSystem(ARKIVSYSTEM_JOARK);
 		opprettOppgave.setArkivKode(JOURNALPOST_ID);
 		return opprettOppgave;
 	}

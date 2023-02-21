@@ -14,9 +14,11 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 public class SafJournalpostMapper {
 
 	public static JournalpostResponse map(SafResponse.SafJournalpost safJournalpost, String journalpostId) {
+
 		SafResponse.SafJournalpost.Bruker bruker = safJournalpost.getBruker();
 		SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker = safJournalpost.getAvsenderMottaker();
 		SafResponse.SafJournalpost.Sak sak = safJournalpost.getSak();
+
 		return JournalpostResponse.builder()
 				.journalpostId(journalpostId)
 				.journalfEnhet(safJournalpost.getJournalfoerendeEnhet())
@@ -45,6 +47,8 @@ public class SafJournalpostMapper {
 	}
 
 	enum BrukerType {
-		ORGNR, AKTOERID, FNR
+		ORGNR,
+		AKTOERID,
+		FNR
 	}
 }

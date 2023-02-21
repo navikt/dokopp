@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class SettJournalpostAttributterRequestTo {
+
 	private final String journalpostId;
 	private int antallRetur;
 }

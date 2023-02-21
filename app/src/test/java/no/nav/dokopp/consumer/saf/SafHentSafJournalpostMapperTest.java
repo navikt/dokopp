@@ -26,7 +26,7 @@ public class SafHentSafJournalpostMapperTest {
 
 	@Test
 	public void shouldMap() {
-		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0"),JOURNALPOSTID);
+		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0"), JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is(BRUKER_ID));
 		assertThat(response.getBrukertype(), is(PERSON));
 		assertNull(response.getAvsenderMottakerId());
@@ -35,7 +35,7 @@ public class SafHentSafJournalpostMapperTest {
 	}
 
 	@Test
-	public void shouldMapBrukerOgAvsenderMottakerSatt(){
+	public void shouldMapBrukerOgAvsenderMottakerSatt() {
 		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), createAvsenderMottaker(ORGNR), "0"), JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is(BRUKER_ID));
 		assertThat(response.getBrukertype(), is(PERSON));
@@ -44,7 +44,7 @@ public class SafHentSafJournalpostMapperTest {
 	}
 
 	@Test
-	public void shouldMapWhenBrukerNullAndAvsenderMottaker(){
+	public void shouldMapWhenBrukerNullAndAvsenderMottaker() {
 		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(null, createAvsenderMottaker(ORGNR), "0"), JOURNALPOSTID);
 		assertNull(response.getBrukerId());
 		assertNull(response.getBrukertype());
@@ -53,7 +53,7 @@ public class SafHentSafJournalpostMapperTest {
 	}
 
 	@Test
-	public void shouldMapWhenAvsenderMottakerNull(){
+	public void shouldMapWhenAvsenderMottakerNull() {
 		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0"), JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is(BRUKER_ID));
 		assertThat(response.getBrukertype(), is(PERSON));
@@ -62,7 +62,7 @@ public class SafHentSafJournalpostMapperTest {
 	}
 
 	@Test
-	public void shouldMapWhenSakNull(){
+	public void shouldMapWhenSakNull() {
 		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "0", null), JOURNALPOSTID);
 		assertThat(response.getBrukerId(), is(BRUKER_ID));
 		assertThat(response.getBrukertype(), is(PERSON));
@@ -72,19 +72,19 @@ public class SafHentSafJournalpostMapperTest {
 	}
 
 	@Test
-	public void shouldMapWhenAntallReturNull(){
+	public void shouldMapWhenAntallReturNull() {
 		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, null), JOURNALPOSTID);
 		assertNull(response.getAntallRetur());
 	}
 
 	@Test
-	public void shouldMapWhenAntallReturisNumber(){
+	public void shouldMapWhenAntallReturisNumber() {
 		JournalpostResponse response = SafJournalpostMapper.map(createJournalpost(createBruker(FNR), null, "1"), JOURNALPOSTID);
 		assertThat(response.getAntallRetur(), is(1));
 	}
 
 	@Test
-	public void shouldMapBrukerWithTrailingSpaces(){
+	public void shouldMapBrukerWithTrailingSpaces() {
 		SafResponse.SafJournalpost.Bruker bruker = SafResponse.SafJournalpost.Bruker.builder()
 				.type(FNR)
 				.id("9999999999 ").build();
@@ -94,7 +94,7 @@ public class SafHentSafJournalpostMapperTest {
 	}
 
 	@Test
-	public void shouldAvsenderMottakerWithTrailingSpaces(){
+	public void shouldAvsenderMottakerWithTrailingSpaces() {
 		SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker = SafResponse.SafJournalpost.AvsenderMottaker.builder()
 				.type(FNR)
 				.id("9999999999 ").build();
@@ -117,7 +117,7 @@ public class SafHentSafJournalpostMapperTest {
 		assertThat(response.getBrukertype(), is(ORGANISASJON));
 	}
 
-	private void validateJournalpost(JournalpostResponse response){
+	private void validateJournalpost(JournalpostResponse response) {
 		assertThat(response.getJournalpostId(), is(JOURNALPOSTID));
 		assertThat(response.getJournalfEnhet(), is(JOURNALFOERENDE_ENHET));
 		assertThat(response.getTema(), is(TEMA_DAG));
@@ -129,11 +129,11 @@ public class SafHentSafJournalpostMapperTest {
 	public SafResponse.SafJournalpost createJournalpost(SafResponse.SafJournalpost.Bruker bruker,
 														SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker,
 														String antallRetur) {
-		return createJournalpost(bruker, avsenderMottaker,antallRetur, createSak());
+		return createJournalpost(bruker, avsenderMottaker, antallRetur, createSak());
 
 	}
 
-	
+
 	public SafResponse.SafJournalpost createJournalpost(SafResponse.SafJournalpost.Bruker bruker,
 														SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker,
 														String antallRetur,

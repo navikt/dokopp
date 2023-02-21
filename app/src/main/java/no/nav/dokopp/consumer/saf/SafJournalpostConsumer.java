@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -34,6 +32,8 @@ import static java.util.Collections.singletonMap;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALLID;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @Component
@@ -66,7 +66,7 @@ public class SafJournalpostConsumer {
 	public JournalpostResponse hentJournalpost(String journalpostId) {
 		try {
 			final SafRequest hentJournalpostRequest = createHentJournalpostRequest(journalpostId);
-			final SafResponse safResponse = restTemplate.exchange(safUri, HttpMethod.POST, new HttpEntity<>(hentJournalpostRequest, createHeaders()), SafResponse.class).getBody();
+			final SafResponse safResponse = restTemplate.exchange(safUri, POST, new HttpEntity<>(hentJournalpostRequest, createHeaders()), SafResponse.class).getBody();
 
 			List<SafResponse.SafError> errors = safResponse.getErrors();
 			return (errors == null || errors.isEmpty()) ? SafJournalpostMapper.map(safResponse.getData().getJournalpost(), journalpostId) : handleSafError(errors, journalpostId);
@@ -82,7 +82,7 @@ public class SafJournalpostConsumer {
 	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		TokenResponse azureToken = azureTokenConsumer.getClientCredentialToken(safScope);
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setContentType(APPLICATION_JSON);
 		headers.setBearerAuth(azureToken.getAccess_token());
 		headers.add(NAV_CALLID, MDC.get(NAV_CALL_ID));
 		return headers;
