@@ -1,7 +1,5 @@
 package no.nav.dokopp.consumer.oppgave;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
@@ -19,15 +17,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 
-import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS;
-import static no.nav.dokopp.config.metrics.MetricLabels.LABEL_PROCESS_CALLED;
-import static no.nav.dokopp.config.metrics.MicrometerMetrics.REQUEST_LATENCY_TIMER_BUILDER;
 import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
 import static no.nav.dokopp.constants.HeaderConstants.X_CORRELATION_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
-import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
@@ -36,11 +30,9 @@ public class OppgaveConsumer implements Oppgave {
 	private final RestTemplate restTemplate;
 	private final String oppgaveoppgaverUrl;
 	private final StsRestConsumer stsRestConsumer;
-	private final MeterRegistry meterRegistry;
 
 	public OppgaveConsumer(RestTemplateBuilder restTemplateBuilder,
 						   StsRestConsumer stsRestConsumer,
-						   MeterRegistry meterRegistry,
 						   DokoppProperties dokoppProperties) {
 		this.restTemplate = restTemplateBuilder
 				.setReadTimeout(Duration.ofSeconds(20))
@@ -48,12 +40,10 @@ public class OppgaveConsumer implements Oppgave {
 				.build();
 		this.oppgaveoppgaverUrl = dokoppProperties.getEndpoints().getOppgave();
 		this.stsRestConsumer = stsRestConsumer;
-		this.meterRegistry = meterRegistry;
 	}
 
 	@Retryable(include = OpprettOppgaveTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT))
 	public Integer opprettOppgave(OpprettOppgaveRequest opprettOppgaveRequest) {
-		Timer.Sample sample = Timer.start(meterRegistry);
 		try {
 			HttpEntity<OpprettOppgaveRequest> request = new HttpEntity<>(opprettOppgaveRequest, createHeaders());
 			OpprettOppgaveResponse oppgaveResponse = restTemplate.postForObject(oppgaveoppgaverUrl, request, OpprettOppgaveResponse.class);
@@ -64,10 +54,6 @@ public class OppgaveConsumer implements Oppgave {
 		} catch (HttpServerErrorException e) {
 			throw new OpprettOppgaveTechnicalException(String.format("Teknisk feil ved kall mot Oppgave:opprettOppgave: %s",
 					e.getMessage()), e);
-		} finally {
-			sample.stop(REQUEST_LATENCY_TIMER_BUILDER.tags(LABEL_PROCESS, SERVICE_ID,
-					LABEL_PROCESS_CALLED, "Oppgave::oppgaver:opprettOppgave")
-					.register(meterRegistry));
 		}
 	}
 
