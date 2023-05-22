@@ -30,6 +30,8 @@ public class OpprettOppgaveMapper {
 	private static final String ORGNR = "orgnr";
 	private static final String GOSYS = "FS22";
 	private static final String GSAK = "FS19";
+	private static final String TEMA_FAR = "FAR";
+	private static final String TEMA_BID = "BID";
 	private static final List<String> GOSYS_APPIDS = Arrays.asList(GOSYS, GSAK);
 
 	private final PdlGraphQLConsumer pdlGraphQLConsumer;
@@ -51,7 +53,7 @@ public class OpprettOppgaveMapper {
 				.orgnr(brukerMap.get(ORGNR))
 				.prioritet(GSAK_PRIORITETKODE_LAV)
 				.saksreferanse(mapSaksreferanse(journalpost))
-				.tema(journalpost.getTema())
+				.tema(mapTema(journalpost.getTema()))
 				.tildeltEnhetsnr(hentJournalfEnhet(journalpost))
 				.build();
 	}
@@ -72,6 +74,14 @@ public class OpprettOppgaveMapper {
 			brukerMap.put(ORGNR, orgnr);
 		}
 		return brukerMap;
+	}
+
+	private String mapTema(String tema) {
+		if (tema.equals(TEMA_FAR)) {
+			return TEMA_BID;
+		}
+
+		return tema;
 	}
 
 	private String mapSaksreferanse(JournalpostResponse journalpostResponse) {
