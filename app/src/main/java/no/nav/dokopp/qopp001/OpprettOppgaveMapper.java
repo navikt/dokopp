@@ -77,7 +77,7 @@ public class OpprettOppgaveMapper {
 	}
 
 	private String mapTema(String tema) {
-		if (tema.equals(TEMA_FAR)) {
+		if (TEMA_FAR.equals(tema)) {
 			return TEMA_BID;
 		}
 
