@@ -33,7 +33,6 @@ public class Qopp001Service {
 	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
 	private final SafJournalpostConsumer safJournalpostConsumer;
 
-	@Autowired
 	public Qopp001Service(Oppgave oppgave,
 						  OpprettOppgaveMapper opprettOppgaveMapper,
 						  Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter,
@@ -61,29 +60,33 @@ public class Qopp001Service {
 	private void behandleReturpostOppgave(String journalpostId, OpprettOppgave opprettOppgave, JournalpostResponse journalpostResponse) {
 		final String fagomrade = journalpostResponse.getTema();
 		final String journalfoerendeEnhet = journalpostResponse.getJournalfEnhet();
+
 		if (FAGOMRAADE_STO.equalsIgnoreCase(fagomrade)) {
 			log.info("qopp001 lager ikke oppgave i Gosys for journalpostId={} da den er returpost fra fagområde={} og ikke vil bli behandlet.",
 					journalpostId, fagomrade);
 		} else {
 			OpprettOppgaveRequest opprettOppgaveRequest = opprettOppgaveMapper.map(journalpostResponse, opprettOppgave);
+			String temaPaaOpprettetOppgave = opprettOppgaveRequest.getTema();
+
 			try {
 				Integer oppgaveId = oppgave.opprettOppgave(opprettOppgaveRequest);
 				log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={}.",
-						oppgaveId, fagomrade, journalpostId);
+						oppgaveId, temaPaaOpprettetOppgave, journalpostId);
 			} catch (OpprettOppgaveFunctionalException e) {
 				if (MASKINELL_ENHET.equals(journalfoerendeEnhet)) {
 					log.warn("qopp001 klarte ikke å opprette oppgave i Gosys for journalpostId={}, fagområde={}. Maskinell enhet 9999.",
-							journalpostId, fagomrade);
+							journalpostId, temaPaaOpprettetOppgave);
 					throw e;
 				} else {
 					log.info("qopp001 klarte ikke å opprette oppgave i Gosys for journalpostId={}, fagområde={} på første forsøk med journalførendeEnhet={}. Forsøker på nytt med tildeltEnhetsnummer=null",
-							journalpostId, fagomrade, journalfoerendeEnhet);
+							journalpostId, temaPaaOpprettetOppgave, journalfoerendeEnhet);
 					Integer oppgaveId = oppgave.opprettOppgave(opprettOppgaveRequest.toBuilder().tildeltEnhetsnr(null).build());
 					log.info("qopp001 har opprettet oppgave i Gosys med oppgaveId={}, fagområde={} for returpost med journalpostId={} og tildeltEnhetsnummer=null.",
-							oppgaveId, fagomrade, journalpostId);
+							oppgaveId, temaPaaOpprettetOppgave, journalpostId);
 				}
 			}
 		}
+
 		tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, ANTALL_RETUR));
 		log.info("qopp001 har flagget journalpost med journalpostId={} som returpost.", journalpostId);
 	}
