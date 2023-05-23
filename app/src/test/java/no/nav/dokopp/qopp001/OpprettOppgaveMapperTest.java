@@ -3,19 +3,22 @@ package no.nav.dokopp.qopp001;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
-import no.nav.dokopp.qopp001.domain.BrukerType;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
 import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
 import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
+import static no.nav.dokopp.qopp001.domain.BrukerType.ORGANISASJON;
+import static no.nav.dokopp.qopp001.domain.BrukerType.PERSON;
+import static no.nav.dokopp.qopp001.domain.BrukerType.UKJENT;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,6 +36,8 @@ public class OpprettOppgaveMapperTest {
 	private static final String FAGSYSTEM_GOSYS = "FS22";
 	private static final String FAGOMRAADE_IAR = "IAR";
 	private static final String FAGOMRAADE_HJE = "HJE";
+	private static final String FAGOMRAADE_FAR = "FAR";
+	private static final String FAGOMRAADE_BID = "BID";
 	private static final String PRIORITETKODE_LAV = "LAV";
 	private static final String OPPGAVETYPE_RETURPOST = "RETUR";
 	private static final String ENHETS_ID = "9999";
@@ -44,6 +49,7 @@ public class OpprettOppgaveMapperTest {
 	@Test
 	public void shouldOpprettOppgaveGosys() {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
+
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithPersonAndPensjon(),
 				createOpprettOppgave());
 
@@ -56,6 +62,7 @@ public class OpprettOppgaveMapperTest {
 	@Test
 	public void shouldMapWithBothBrukerAndAvsenderMottaker() {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
+
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerAndAvsenderMottaker(),
 				createOpprettOppgave());
 
@@ -83,8 +90,19 @@ public class OpprettOppgaveMapperTest {
 	}
 
 	@Test
+	public void shouldMapTemaFarToTemaBid() {
+		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
+
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithTemaFar(),
+				createOpprettOppgave());
+
+		assertOpprettOppgaveRequestWithTemaFar(request);
+	}
+
+	@Test
 	public void shouldOpprettOppgaveWithSaksnummerWhenFagomraadeIsGosys() {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
+
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithPersonAndGosys(),
 				createOpprettOppgave());
 
@@ -95,6 +113,7 @@ public class OpprettOppgaveMapperTest {
 	public void shouldOpprettOppgaveWithOrgnr() {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
+
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithOrganisasjon(),
 				createOpprettOppgave());
 
@@ -105,8 +124,10 @@ public class OpprettOppgaveMapperTest {
 	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrNullWhenJournalfEnhetEr9999(){
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
+
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithEnhet9999(),
 				createOpprettOppgave());
+
 		assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrNull(request);
 	}
 
@@ -114,8 +135,10 @@ public class OpprettOppgaveMapperTest {
 	public void shouldOpprettetOppgaveAndSetTildeltEnhetsnrWithJournalfEnhetWhenNot9999(){
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
+
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithOrganisasjon(),
 				createOpprettOppgave());
+
 		assertOpprettOppgaveRequestWithOrganisasjon(request);
 	}
 
@@ -123,8 +146,10 @@ public class OpprettOppgaveMapperTest {
 	public void shouldOpprettetOppgaveSetTildeltEnhetsnrNullWhenJournalfEnhetIsNull(){
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
+
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithJournalEnhetNull(),
 				createOpprettOppgave());
+
 		assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrNull(request);
 	}
 
@@ -133,15 +158,16 @@ public class OpprettOppgaveMapperTest {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for ukjent brukertype."));
 
-		Exception e = Assertions.assertThrows(UkjentBrukertypeException.class, () -> opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettOppgave()));
-		Assertions.assertEquals("Ukjent brukertype er ikke støttet.", e.getMessage());
+		Exception e = assertThrows(UkjentBrukertypeException.class, () -> opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettOppgave()));
+
+		assertEquals("Ukjent brukertype er ikke støttet.", e.getMessage());
 	}
 
 	private JournalpostResponse createHentJournalpostInfoResponseToWithBrukerAndAvsenderMottaker() {
 		return JournalpostResponse.builder()
 				.brukerId(FNR)
-				.brukertype(BrukerType.PERSON.name())
-				.avsenderMottakerId(BrukerType.ORGANISASJON.name())
+				.brukertype(PERSON.name())
+				.avsenderMottakerId(ORGANISASJON.name())
 				.avsenderMottakerId(ORGNR)
 				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
@@ -149,11 +175,12 @@ public class OpprettOppgaveMapperTest {
 				.saksnummer(SAKSNUMMER)
 				.build();
 	}
+
 	private JournalpostResponse createHentJournalpostInfoResponseToWithBrukerisNullAndAvsenderMottaker() {
 		return JournalpostResponse.builder()
 				.brukerId(null)
 				.brukertype(null)
-				.avsenderMottakerType(BrukerType.ORGANISASJON.name())
+				.avsenderMottakerType(ORGANISASJON.name())
 				.avsenderMottakerId(ORGNR)
 				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
@@ -161,12 +188,24 @@ public class OpprettOppgaveMapperTest {
 				.saksnummer(SAKSNUMMER)
 				.build();
 	}
+
 	private JournalpostResponse createHentJournalpostInfoResponseToWithPersonAndPensjon() {
 		return JournalpostResponse.builder()
 				.brukerId(FNR)
-				.brukertype(BrukerType.PERSON.name())
+				.brukertype(PERSON.name())
 				.tema(FAGOMRAADE_HJE)
 				.fagsystem(FAGSYSTEM_PEN)
+				.journalfEnhet(JOURNALF_ENHET)
+				.saksnummer(SAKSNUMMER)
+				.build();
+	}
+
+	private JournalpostResponse createHentJournalpostInfoResponseToWithTemaFar() {
+		return JournalpostResponse.builder()
+				.brukerId(FNR)
+				.brukertype(PERSON.name())
+				.tema(FAGOMRAADE_FAR)
+				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
 				.saksnummer(SAKSNUMMER)
 				.build();
@@ -175,7 +214,7 @@ public class OpprettOppgaveMapperTest {
 	private JournalpostResponse createHentJournalpostInfoResponseToWithPersonAndGosys() {
 		return JournalpostResponse.builder()
 				.brukerId(FNR)
-				.brukertype(BrukerType.PERSON.name())
+				.brukertype(PERSON.name())
 				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
@@ -186,7 +225,7 @@ public class OpprettOppgaveMapperTest {
 	private JournalpostResponse createHentJournalpostInfoResponseToWithOrganisasjon() {
 		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
-				.brukertype(BrukerType.ORGANISASJON.name())
+				.brukertype(ORGANISASJON.name())
 				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
@@ -197,7 +236,7 @@ public class OpprettOppgaveMapperTest {
 	private JournalpostResponse createHentJournalpostInfoResponseToWithJournalEnhetNull() {
 		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
-				.brukertype(BrukerType.ORGANISASJON.name())
+				.brukertype(ORGANISASJON.name())
 				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(null)
@@ -208,7 +247,7 @@ public class OpprettOppgaveMapperTest {
 	private JournalpostResponse createHentJournalpostInfoResponseToWithUkjent() {
 		return JournalpostResponse.builder()
 				.brukerId(FNR)
-				.brukertype(BrukerType.UKJENT.name())
+				.brukertype(UKJENT.name())
 				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(JOURNALF_ENHET)
@@ -219,7 +258,7 @@ public class OpprettOppgaveMapperTest {
 	private JournalpostResponse createHentJournalpostInfoResponseToWithEnhet9999() {
 		return JournalpostResponse.builder()
 				.brukerId(ORGNR)
-				.brukertype(BrukerType.ORGANISASJON.name())
+				.brukertype(ORGANISASJON.name())
 				.tema(FAGOMRAADE_IAR)
 				.fagsystem(FAGSYSTEM_GOSYS)
 				.journalfEnhet(ENHETS_ID)
@@ -232,6 +271,14 @@ public class OpprettOppgaveMapperTest {
 		assertNull(request.getOrgnr());
 		assertThat(request.getTema(), is(FAGOMRAADE_HJE));
 		assertNull(request.getSaksreferanse());
+		assertOpprettOppgaveRequest(request);
+	}
+
+	private void assertOpprettOppgaveRequestWithTemaFar(OpprettOppgaveRequest request) {
+		assertThat(request.getAktoerId(), is(AKTOER_ID));
+		assertNull(request.getOrgnr());
+		assertThat(request.getTema(), is(FAGOMRAADE_BID));
+		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
 		assertOpprettOppgaveRequest(request);
 	}
 
