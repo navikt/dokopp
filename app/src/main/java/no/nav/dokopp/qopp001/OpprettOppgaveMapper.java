@@ -80,7 +80,7 @@ public class OpprettOppgaveMapper {
 		String tema = journalpost.getTema();
 
 		if (TEMA_FAR.equalsIgnoreCase(tema)) {
-			log.info("qopp001 har mappet tema FAR til tema BID for journalpostId={}", journalpost.getJournalpostId());
+			log.info("qopp001 har mappet tema FAR til tema BID for journalpostId={} siden Oppgave ikke støtter opprettelse av oppgaver på tema FAR", journalpost.getJournalpostId());
 			return TEMA_BID;
 		}
 
