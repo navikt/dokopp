@@ -53,7 +53,7 @@ public class OpprettOppgaveMapper {
 				.orgnr(brukerMap.get(ORGNR))
 				.prioritet(GSAK_PRIORITETKODE_LAV)
 				.saksreferanse(mapSaksreferanse(journalpost))
-				.tema(mapTema(journalpost.getTema()))
+				.tema(mapTema(journalpost))
 				.tildeltEnhetsnr(hentJournalfEnhet(journalpost))
 				.build();
 	}
@@ -76,8 +76,11 @@ public class OpprettOppgaveMapper {
 		return brukerMap;
 	}
 
-	private String mapTema(String tema) {
-		if (TEMA_FAR.equals(tema)) {
+	private String mapTema(JournalpostResponse journalpost) {
+		String tema = journalpost.getTema();
+
+		if (TEMA_FAR.equalsIgnoreCase(tema)) {
+			log.info("qopp001 har mappet tema FAR til tema BID for journalpostId={} siden Oppgave ikke støtter opprettelse av oppgaver på tema FAR", journalpost.getJournalpostId());
 			return TEMA_BID;
 		}
 
