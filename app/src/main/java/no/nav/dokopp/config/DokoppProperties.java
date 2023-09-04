@@ -11,19 +11,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class DokoppProperties {
 
-	private final Proxy proxy = new Proxy();
 	private final Endpoints endpoints = new Endpoints();
-
-	@Data
-	@Validated
-	public static class Proxy {
-		private String host;
-		private int port;
-
-		public boolean isSet() {
-			return (host != null && !host.equals(""));
-		}
-	}
 
 	@Data
 	@Validated
