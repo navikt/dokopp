@@ -1,21 +1,20 @@
 package no.nav.dokopp.qopp001.itest;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.RedeliveryPolicy;
-import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.command.ActiveMQQueue;
-import org.apache.activemq.jms.pool.PooledConnectionFactory;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Queue;
+import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
+import org.messaginghub.pooled.jms.JmsPoolConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Queue;
-
 @Profile("itest")
 @Configuration
 public class JmsTestConfig {
+	public static final String QOPP001_BQ = "qopp001Bq";
 
 	@Bean
 	public Queue qopp001(@Value("${dokopp.qopp001.opprett.oppgave.queuename}") String qopp001QueueName) {
@@ -29,27 +28,23 @@ public class JmsTestConfig {
 
 	@Bean
 	public Queue backoutQueue() {
-		return new ActiveMQQueue("ActiveMQ.DLQ");
+		return new ActiveMQQueue(QOPP001_BQ);
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
-	public BrokerService broker() {
-		BrokerService service = new BrokerService();
-		service.setPersistent(false);
-
-		return service;
+	public EmbeddedActiveMQ activeMQServer() {
+		EmbeddedActiveMQ embeddedActiveMQ = new EmbeddedActiveMQ();
+		embeddedActiveMQ.setConfigResourcePath("artemis-server.xml");
+		return embeddedActiveMQ;
 	}
 
 	@Bean
-	public ConnectionFactory activemqConnectionFactory() {
-		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://localhost?create=false");
-		RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-		redeliveryPolicy.setMaximumRedeliveries(0);
-		activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);
-
-		PooledConnectionFactory pooledFactory = new PooledConnectionFactory();
+	public ConnectionFactory activemqConnectionFactory(EmbeddedActiveMQ embeddedActiveMQ) {
+		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://0");
+		JmsPoolConnectionFactory pooledFactory = new JmsPoolConnectionFactory();
 		pooledFactory.setConnectionFactory(activeMQConnectionFactory);
 		pooledFactory.setMaxConnections(1);
 		return pooledFactory;
 	}
+
 }

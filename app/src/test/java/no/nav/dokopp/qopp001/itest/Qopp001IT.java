@@ -4,10 +4,11 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
+import jakarta.jms.Queue;
+import jakarta.jms.TextMessage;
+import jakarta.xml.bind.JAXBElement;
 import no.nav.dokopp.Application;
 import no.nav.dokopp.qopp001.Qopp001Service;
-import org.apache.activemq.command.ActiveMQTextMessage;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,10 +25,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import wiremock.org.apache.commons.io.IOUtils;
 
-import javax.jms.Queue;
-import javax.jms.TextMessage;
-import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -96,7 +95,7 @@ public class Qopp001IT {
 	public void setupBefore() {
 		resetAllRequests();
 		Cache stsCache = cacheManager.getCache(STS_CACHE);
-		if(stsCache != null) {
+		if (stsCache != null) {
 			stsCache.clear();
 		}
 	}
@@ -577,7 +576,7 @@ public class Qopp001IT {
 
 	private void sendStringMessage(Queue queue, final String message, String callId) {
 		jmsTemplate.send(queue, session -> {
-			TextMessage msg = new ActiveMQTextMessage();
+			TextMessage msg = session.createTextMessage();
 			msg.setText(message);
 			msg.setStringProperty(MDC_CALL_ID, callId);
 			return msg;

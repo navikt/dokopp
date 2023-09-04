@@ -1,28 +1,28 @@
 
 package no.nav.dokopp.config;
 
-import com.ibm.mq.jms.MQConnectionFactory;
-import com.ibm.mq.jms.MQQueue;
-import com.ibm.msg.client.jms.JmsConstants;
+import com.ibm.mq.jakarta.jms.MQConnectionFactory;
+import com.ibm.mq.jakarta.jms.MQQueue;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSException;
+import jakarta.jms.Queue;
 import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
-import org.apache.activemq.jms.pool.PooledConnectionFactory;
+import org.messaginghub.pooled.jms.JmsPoolConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Queue;
 import javax.net.ssl.SSLSocketFactory;
 
 import static com.ibm.mq.constants.CMQC.MQENC_NATIVE;
-import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_CHARACTER_SET;
-import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_ENCODING;
-import static com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CM_CLIENT;
+import static com.ibm.msg.client.jakarta.jms.JmsConstants.JMS_IBM_CHARACTER_SET;
+import static com.ibm.msg.client.jakarta.jms.JmsConstants.JMS_IBM_ENCODING;
+import static com.ibm.msg.client.jakarta.wmq.common.CommonConstants.WMQ_CM_CLIENT;
+
 
 @Configuration
 @Profile("nais")
@@ -48,7 +48,8 @@ public class JmsConfig {
 		return createConnectionFactory(mqGatewayAlias, mqChannelAlias, serviceuserAlias);
 	}
 
-	private PooledConnectionFactory createConnectionFactory(final MqGatewayAlias mqGatewayAlias, final MqChannelAlias mqChannelAlias, final ServiceuserAlias serviceuserAlias) throws JMSException {
+	private JmsPoolConnectionFactory createConnectionFactory(final MqGatewayAlias mqGatewayAlias,
+															 final MqChannelAlias mqChannelAlias, final ServiceuserAlias serviceuserAlias) throws JMSException, JMSException {
 		MQConnectionFactory connectionFactory = new MQConnectionFactory();
 		connectionFactory.setHostName(mqGatewayAlias.getHostname());
 		connectionFactory.setPort(mqGatewayAlias.getPort());
@@ -57,7 +58,6 @@ public class JmsConfig {
 		connectionFactory.setCCSID(UTF_8_WITH_PUA);
 		connectionFactory.setIntProperty(JMS_IBM_ENCODING, MQENC_NATIVE);
 		connectionFactory.setIntProperty(JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA);
-		connectionFactory.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true);
 		if (mqChannelAlias.isEnabletls()) {
 			connectionFactory.setSSLCipherSuite(ANY_TLS13_OR_HIGHER);
 			SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
@@ -72,11 +72,10 @@ public class JmsConfig {
 		adapter.setUsername(serviceuserAlias.getUsername());
 		adapter.setPassword(serviceuserAlias.getPassword());
 
-		PooledConnectionFactory pooledFactory = new PooledConnectionFactory();
+		JmsPoolConnectionFactory pooledFactory = new JmsPoolConnectionFactory();
 		pooledFactory.setConnectionFactory(adapter);
 		pooledFactory.setMaxConnections(10);
-		pooledFactory.setMaximumActiveSessionPerConnection(10);
-
+		pooledFactory.setMaxSessionsPerConnection(10);
 		return pooledFactory;
 	}
 }

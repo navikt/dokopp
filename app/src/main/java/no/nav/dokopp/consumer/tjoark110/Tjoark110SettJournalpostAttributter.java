@@ -8,6 +8,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import static java.lang.Long.valueOf;
 import static no.nav.dokopp.qopp001.Qopp001Route.SERVICE_ID;
 
 @Service
@@ -18,7 +19,7 @@ public class Tjoark110SettJournalpostAttributter {
 	public Tjoark110SettJournalpostAttributter(ArkiverDokumentproduksjonV1 arkiverDokumentproduksjonV1) {
 		this.arkiverDokumentproduksjonV1 = arkiverDokumentproduksjonV1;
 	}
-	
+
 	@Retryable(value = DokoppTechnicalException.class, backoff = @Backoff(delay = 500))
 	public void settJournalpostAttributter(SettJournalpostAttributterRequestTo settJournalpostAttributterRequestTo) {
 		try {
@@ -28,11 +29,13 @@ public class Tjoark110SettJournalpostAttributter {
 					.getJournalpostId(), e);
 		}
 	}
-	
+
 	private SettJournalpostAttributterRequest mapRequest(SettJournalpostAttributterRequestTo settJournalpostAttributterRequestTo) {
-		return new SettJournalpostAttributterRequest()
-				.withEndretAvNavn(SERVICE_ID)
-				.withJournalpostIdListe(Long.valueOf(settJournalpostAttributterRequestTo.getJournalpostId()))
-				.withAntallReturpost(settJournalpostAttributterRequestTo.getAntallRetur());
+		SettJournalpostAttributterRequest settJournalpostAttributterRequest = new SettJournalpostAttributterRequest();
+		settJournalpostAttributterRequest.setEndretAvNavn(SERVICE_ID);
+		settJournalpostAttributterRequest.getJournalpostIdListe().add(valueOf(settJournalpostAttributterRequestTo.getJournalpostId()));
+		settJournalpostAttributterRequest.setAntallReturpost(settJournalpostAttributterRequestTo.getAntallRetur());
+
+		return settJournalpostAttributterRequest;
 	}
 }
