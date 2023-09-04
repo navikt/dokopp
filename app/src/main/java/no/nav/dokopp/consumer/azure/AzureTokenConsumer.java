@@ -2,18 +2,11 @@ package no.nav.dokopp.consumer.azure;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
-import no.nav.dokopp.config.DokoppProperties;
-import org.apache.http.HttpHost;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -37,31 +30,12 @@ public class AzureTokenConsumer {
 	private final AzureProperties azureProperties;
 
 	public AzureTokenConsumer(AzureProperties azureProperties,
-							  RestTemplateBuilder restTemplateBuilder,
-							  HttpClientConnectionManager httpClientConnectionManager,
-							  DokoppProperties dokoppProperties) {
-		final CloseableHttpClient httpClient = createHttpClient(dokoppProperties.getProxy(), httpClientConnectionManager);
+							  RestTemplateBuilder restTemplateBuilder) {
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(Duration.ofSeconds(3))
 				.setReadTimeout(Duration.ofSeconds(20))
-				.requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
 				.build();
 		this.azureProperties = azureProperties;
-	}
-
-	private CloseableHttpClient createHttpClient(DokoppProperties.Proxy proxy,
-												 HttpClientConnectionManager httpClientConnectionManager) {
-		if (proxy.isSet()) {
-			final HttpHost proxyHost = new HttpHost(proxy.getHost(), proxy.getPort());
-			return HttpClients.custom()
-					.setRoutePlanner(new DefaultProxyRoutePlanner(proxyHost))
-					.setConnectionManager(httpClientConnectionManager)
-					.build();
-		} else {
-			return HttpClients.custom()
-					.setConnectionManager(httpClientConnectionManager)
-					.build();
-		}
 	}
 
 

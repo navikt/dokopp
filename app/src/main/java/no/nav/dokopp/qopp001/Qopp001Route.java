@@ -1,5 +1,6 @@
 package no.nav.dokopp.qopp001;
 
+import jakarta.jms.Queue;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.DokoppFunctionalException;
@@ -11,8 +12,6 @@ import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.support.processor.validation.SchemaValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.jms.Queue;
 
 @Slf4j
 @Component

@@ -1,17 +1,17 @@
 package no.nav.dokopp.config.cxf;
 
+import jakarta.xml.soap.SOAPElement;
+import jakarta.xml.soap.SOAPException;
+import jakarta.xml.soap.SOAPHeader;
+import jakarta.xml.ws.ProtocolException;
+import jakarta.xml.ws.handler.MessageContext;
+import jakarta.xml.ws.handler.soap.SOAPHandler;
+import jakarta.xml.ws.handler.soap.SOAPMessageContext;
 import no.nav.dokopp.util.MDCOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.ws.ProtocolException;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +23,7 @@ import static no.nav.dokopp.util.MDCOperations.MDC_USER_ID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class MDCUsernameTokenOutHandler implements SOAPHandler<SOAPMessageContext> {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(MDCUsernameTokenOutHandler.class.getName());
 
 	public static final String URI_NO_NAV_APPLIKASJONSRAMMEVERK = "uri:no.nav.applikasjonsrammeverk";
@@ -31,11 +31,11 @@ public class MDCUsernameTokenOutHandler implements SOAPHandler<SOAPMessageContex
 	private static final QName CALLID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDC_CALL_ID);
 	private static final QName CONSUMER_ID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDC_CONSUMER_ID);
 	private static final QName USER_ID_QNAME = new QName(URI_NO_NAV_APPLIKASJONSRAMMEVERK, MDC_USER_ID);
-	
+
 	@Override
 	public boolean handleMessage(SOAPMessageContext context) {
 		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-		
+
 		if (outbound) {
 			String callId = MDCOperations.getFromMDC(MDC_CALL_ID);
 			if (isEmpty(callId)) {
@@ -43,23 +43,23 @@ public class MDCUsernameTokenOutHandler implements SOAPHandler<SOAPMessageContex
 				callId = MDCOperations.generateCallId();
 			}
 			appendToSoapHeader(context, CALLID_QNAME, callId);
-			
+
 			String appId = MDCOperations.getFromMDC(APP_ID);
 			if (isEmpty(appId)) {
 				log.debug("appId is null, using default");
 				appId = DEFAULT_APP_ID;
 			}
 			appendToSoapHeader(context, APP_ID_QNAME, appId);
-			
+
 			String consumerId = MDCOperations.getFromMDC(MDC_CONSUMER_ID);
 			appendToSoapHeader(context, CONSUMER_ID_QNAME, consumerId);
-			
+
 			String userId = MDCOperations.getFromMDC(MDC_USER_ID);
 			appendToSoapHeader(context, USER_ID_QNAME, userId);
 		}
 		return true;
 	}
-	
+
 	private void appendToSoapHeader(SOAPMessageContext context, QName qName, String value) {
 		try {
 			SOAPHeader header = context.getMessage().getSOAPPart().getEnvelope().getHeader();
@@ -70,17 +70,17 @@ public class MDCUsernameTokenOutHandler implements SOAPHandler<SOAPMessageContex
 			throw new ProtocolException(e);
 		}
 	}
-	
+
 	@Override
 	public boolean handleFault(SOAPMessageContext context) {
 		return true;
 	}
-	
+
 	@Override
 	public void close(MessageContext context) {
 		//Nothing to close
 	}
-	
+
 	@Override
 	public Set<QName> getHeaders() {
 		return new HashSet<>() {
@@ -92,5 +92,5 @@ public class MDCUsernameTokenOutHandler implements SOAPHandler<SOAPMessageContex
 			}
 		};
 	}
-	
+
 }

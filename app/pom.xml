@@ -50,10 +50,6 @@
 			<artifactId>jakarta.xml.ws-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-spring-boot-starter-jaxws</artifactId>
 		</dependency>
@@ -66,14 +62,13 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-jms-pool</artifactId>
+			<groupId>org.messaginghub</groupId>
+			<artifactId>pooled-jms</artifactId>
 		</dependency>
-		<!-- IBM MQ 8 Series is backwards compatible with older versions.-->
-		<!-- Please see http://www-01.ibm.com/support/docview.wss?uid=swg21312967-->
+
 		<dependency>
 			<groupId>com.ibm.mq</groupId>
-			<artifactId>com.ibm.mq.allclient</artifactId>
+			<artifactId>com.ibm.mq.jakarta.client</artifactId>
 		</dependency>
 
 		<!--Caching-->
@@ -105,7 +100,7 @@
 
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-spring-boot2</artifactId>
+			<artifactId>resilience4j-spring-boot3</artifactId>
 		</dependency>
 
 		<!--Logging-->
@@ -121,30 +116,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-broker</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
-			<groupId>org.xmlunit</groupId>
-			<artifactId>xmlunit-core</artifactId>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>artemis-jakarta-server</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.xmlunit</groupId>
-			<artifactId>xmlunit-legacy</artifactId>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-contract-wiremock</artifactId>
@@ -153,13 +135,11 @@
 	</dependencies>
 
 	<build>
+		<finalName>app</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<finalName>app</finalName>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

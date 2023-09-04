@@ -1,30 +1,17 @@
 package no.nav.dokopp.config;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Data
 @ConfigurationProperties("dokopp")
 @Validated
 public class DokoppProperties {
 
-	private final Proxy proxy = new Proxy();
 	private final Endpoints endpoints = new Endpoints();
-
-	@Data
-	@Validated
-	public static class Proxy {
-		private String host;
-		private int port;
-
-		public boolean isSet() {
-			return (host != null && !host.equals(""));
-		}
-	}
 
 	@Data
 	@Validated

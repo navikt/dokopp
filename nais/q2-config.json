@@ -11,8 +11,6 @@
   "DOKOPP_CHANNEL_ENABLETLS": "true",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
-  "DOKOPP_PROXY_HOST": "webproxy.nais",
-  "DOKOPP_PROXY_PORT": "8088",
   "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token",
   "DOKOPP_ENDPOINTS_SAF_SCOPE": "api://dev-fss.teamdokumenthandtering.saf/.default",
   "DOKOPP_ENDPOINTS_SAF_URL": "https://saf-q2.dev.intern.nav.no/graphql",
