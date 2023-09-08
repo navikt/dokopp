@@ -32,7 +32,7 @@
 		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>5-1ace39e</arkiverdokumentproduksjon-tjenestespesifikasjon.version>
 
 		<!-- Test dependencies -->
-		<spring-cloud-contract-wiremock.version>4.0.3</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>4.0.4</spring-cloud-contract-wiremock.version>
 
 		<!-- plugins -->
 		<maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>
