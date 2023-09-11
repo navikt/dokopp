@@ -7,9 +7,9 @@ on:
       - master
 
 jobs:
-  permissions:
-    contents: read
-    packages: write
   build:
+    permissions:
+      contents: read
+      packages: write
     uses: navikt/dok-workflows/.github/workflows/build-deploy-main.yml@main
     secrets: inherit
