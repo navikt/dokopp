@@ -1,6 +1,5 @@
 package no.nav.dokopp;
 
-import no.nav.dokopp.config.CoreConfig;
 import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1EndpointConfig;
 import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
@@ -33,7 +32,6 @@ import org.springframework.retry.annotation.EnableRetry;
 		Tjoark110SettJournalpostAttributter.class,
 		Qopp001Service.class,
 		Qopp001Route.class,
-		CoreConfig.class
 })
 @Configuration
 public class ApplicationConfig {

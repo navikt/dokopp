@@ -10,35 +10,32 @@ import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
+import static no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.ArkiverDokumentproduksjonServiceV1.ArkiverDokumentproduksjonPortV1;
+import static no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.ArkiverDokumentproduksjonServiceV1.SERVICE;
+
 @Configuration
 public class ArkiverDokumentproduksjonV1EndpointConfig extends AbstractCxfEndpointConfig {
-	
-	private static final String NAMESPACE = "http://nav.no/tjeneste/domene/brevogarkiv/arkiverdokumentproduksjon/v1/";
-	
-	private static final QName SERVICE_QNAME = new QName(NAMESPACE, "ArkiverDokumentproduksjonService_v1");
-	private static final QName PORT_QNAME = new QName(NAMESPACE, "ArkiverDokumentproduksjonPort_v1");
-	
-	private static final String WSDL_URL = "wsdl/no/nav/tjeneste/domene/brevogarkiv/arkiverdokumentproduksjon/v1/arkiverdokumentproduksjon.wsdl";
-	
+
+	private static final String WSDL_URL = "wsdl/arkiverdokumentproduksjon.wsdl";
+
 	@Bean
 	public ArkiverDokumentproduksjonV1 arkiverDokumentproduksjonPort(ArkiverDokumentproduksjonV1Alias arkiverDokumentproduksjonV1Alias, ServiceuserAlias serviceuserAlias) {
 		setWsdlUrl(WSDL_URL);
-		setServiceName(SERVICE_QNAME);
-		setEndpointName(PORT_QNAME);
+		setServiceName(SERVICE);
+		setEndpointName(ArkiverDokumentproduksjonPortV1);
 		setAdress(arkiverDokumentproduksjonV1Alias.getEndpointurl());
 		setReceiveTimeout(arkiverDokumentproduksjonV1Alias.getReadtimeoutms());
 		setConnectTimeout(arkiverDokumentproduksjonV1Alias.getConnecttimeoutms());
 		addFeature(new WSAddressingFeature());
 		addOutInterceptor(wss4JOutInterceptor(serviceuserAlias));
 		addHandler(new MDCUsernameTokenOutHandler());
-		
+
 		return createPort(ArkiverDokumentproduksjonV1.class);
 	}
-	
+
 	private WSS4JOutInterceptor wss4JOutInterceptor(ServiceuserAlias serviceuserAlias) {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
