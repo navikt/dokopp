@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Import;
 import static java.lang.System.getenv;
 import static java.lang.System.setProperty;
 
+@Import({
+		ApplicationConfig.class
+})
 @SpringBootApplication
 public class Application {
 
