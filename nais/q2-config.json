@@ -17,6 +17,7 @@
   "DOKOPP_ENDPOINTS_PDL": "https://pdl-api.dev.intern.nav.no/graphql",
   "DOKOPP_ENDPOINTS_OPPGAVE": "https://oppgave.dev.intern.nav.no/api/v1/oppgaver",
   "DOKOPP_ENDPOINTS_STS": "https://security-token-service.dev.adeo.no/rest/v1/sts/token",
+  "ARKIVERDOKUMENTPRODUKSJON_V1_ENDPOINTURL": "https://dokarkiv.dev.intern.nav.no/services/arkiverdokumentproduksjon/v1",
   "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
   "DOKOPPCERT": "/certificate/data/dev/srvdokopp",
   "APPDYNAMICS": "/apikey/appdynamics/dev"
