@@ -3,16 +3,19 @@ package no.nav.dokopp.qopp001;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
+import no.nav.dokopp.qopp001.domain.OppgaveType;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDate;
 
 import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
-import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
 import static no.nav.dokopp.qopp001.domain.BrukerType.ORGANISASJON;
 import static no.nav.dokopp.qopp001.domain.BrukerType.PERSON;
 import static no.nav.dokopp.qopp001.domain.BrukerType.UKJENT;
+import static no.nav.dokopp.qopp001.domain.OppgaveType.BEHANDLE_RETURPOST;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -51,7 +54,7 @@ public class OpprettOppgaveMapperTest {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
 
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithPersonAndPensjon(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertOpprettOppgaveRequestWithPersonAndPensjon(request);
 	}
@@ -64,7 +67,7 @@ public class OpprettOppgaveMapperTest {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
 
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerAndAvsenderMottaker(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertThat(request.getAktoerId(), is(AKTOER_ID));
 		assertNull(request.getOrgnr());
@@ -79,7 +82,7 @@ public class OpprettOppgaveMapperTest {
 	@Test
 	public void shouldMapWithBrukerNullAvsenderMottakerOrganisasjon() {
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerisNullAndAvsenderMottaker(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertNull(request.getAktoerId());
 		assertThat(request.getOrgnr(), is(ORGNR));
@@ -89,12 +92,21 @@ public class OpprettOppgaveMapperTest {
 		assertOpprettOppgaveRequest(request);
 	}
 
+	@ParameterizedTest
+	@CsvSource(value ={"BEHANDLE_RETURPOST;Returpost", "BEHANDLE_MANGLENDE_ADRESSE;Distribusjon feilet, mottaker mangler postadresse"}, delimiter = ';')
+	public void shouldcreateRightOppgave(String oppgaveType, String oppgaveBeskrivelse){
+		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerisNullAndAvsenderMottaker(),
+				createOpprettOppgave(OppgaveType.valueOf(oppgaveType)));
+
+		assertThat(request.getBeskrivelse(), is(oppgaveBeskrivelse));
+	}
+
 	@Test
 	public void shouldMapTemaFarToTemaBid() {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
 
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithTemaFar(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertOpprettOppgaveRequestWithTemaFar(request);
 	}
@@ -104,7 +116,7 @@ public class OpprettOppgaveMapperTest {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(FNR)).thenReturn(AKTOER_ID);
 
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithPersonAndGosys(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertOpprettOppgaveRequestWithPersonAndGosys(request);
 	}
@@ -115,7 +127,7 @@ public class OpprettOppgaveMapperTest {
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
 
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithOrganisasjon(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertOpprettOppgaveRequestWithOrganisasjon(request);
 	}
@@ -126,7 +138,7 @@ public class OpprettOppgaveMapperTest {
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
 
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithEnhet9999(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrNull(request);
 	}
@@ -137,7 +149,7 @@ public class OpprettOppgaveMapperTest {
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
 
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithOrganisasjon(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertOpprettOppgaveRequestWithOrganisasjon(request);
 	}
@@ -148,7 +160,7 @@ public class OpprettOppgaveMapperTest {
 				new RuntimeException("Skal ikke kalle PDL for orgnr."));
 
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithJournalEnhetNull(),
-				createOpprettOppgave());
+				createOpprettReturpostOppgave());
 
 		assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrNull(request);
 	}
@@ -158,7 +170,7 @@ public class OpprettOppgaveMapperTest {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for ukjent brukertype."));
 
-		Exception e = assertThrows(UkjentBrukertypeException.class, () -> opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettOppgave()));
+		Exception e = assertThrows(UkjentBrukertypeException.class, () -> opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettReturpostOppgave()));
 
 		assertEquals("Ukjent brukertype er ikke støttet.", e.getMessage());
 	}
@@ -328,9 +340,13 @@ public class OpprettOppgaveMapperTest {
 		assertThat(request.getPrioritet(), is(PRIORITETKODE_LAV));
 	}
 
-	private OpprettOppgave createOpprettOppgave() {
+	private OpprettOppgave createOpprettReturpostOppgave() {
+		return createOpprettOppgave(BEHANDLE_RETURPOST);
+	}
+
+	private OpprettOppgave createOpprettOppgave(OppgaveType oppgaveType){
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST);
+		opprettOppgave.setOppgaveType(oppgaveType.toString());
 		opprettOppgave.setArkivSystem(ARKIVSYSTEM_JOARK);
 		opprettOppgave.setArkivKode(JOURNALPOST_ID);
 		return opprettOppgave;

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
+import no.nav.dokopp.qopp001.domain.OppgaveType;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,8 @@ public class OpprettOppgaveMapper {
 
 	private static final String GSAK_OPPGAVETYPE_RETURPOST = "RETUR";
 	private static final String GSAK_PRIORITETKODE_LAV = "LAV";
-	private static final String OPPGAVEBESKRIVELSE = "Returpost";
+	private static final String OPPGAVEBESKRIVELSE_RETURPOST = "Returpost";
+	private static final String OPPGAVEBESKRIVELSE_MANGLENDE_ADRESSE = "Distribusjon feilet, mottaker mangler postadresse";
 	private static final String OPPRETTET_AV_ENHET = "9999";
 	private static final int ANTALL_DAGER_AKTIV = 14;
 	private static final String AKTOER_ID = "aktoerId";
@@ -45,7 +47,7 @@ public class OpprettOppgaveMapper {
 		return OpprettOppgaveRequest.builder()
 				.aktivDato(LocalDate.now().toString())
 				.aktoerId(brukerMap.get(AKTOER_ID))
-				.beskrivelse(OPPGAVEBESKRIVELSE)
+				.beskrivelse(mapBeskrivelse(opprettOppgave.getOppgaveType()))
 				.fristFerdigstillelse(LocalDate.now().plusDays(ANTALL_DAGER_AKTIV).toString())
 				.journalpostId(opprettOppgave.getArkivKode())
 				.oppgavetype(GSAK_OPPGAVETYPE_RETURPOST)
@@ -56,6 +58,13 @@ public class OpprettOppgaveMapper {
 				.tema(mapTema(journalpost))
 				.tildeltEnhetsnr(hentJournalfEnhet(journalpost))
 				.build();
+	}
+
+	private String mapBeskrivelse(String oppgaveType){
+		return switch (OppgaveType.valueOf(oppgaveType)){
+			case BEHANDLE_RETURPOST -> OPPGAVEBESKRIVELSE_RETURPOST;
+			case BEHANDLE_MANGLENDE_ADRESSE -> OPPGAVEBESKRIVELSE_MANGLENDE_ADRESSE;
+		};
 	}
 
 	private String hentJournalfEnhet(JournalpostResponse responseTo) {

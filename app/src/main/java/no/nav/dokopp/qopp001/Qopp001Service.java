@@ -10,15 +10,17 @@ import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
+import no.nav.dokopp.qopp001.domain.OppgaveType;
 import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
 import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Handler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumSet;
+
 import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
-import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
 import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
+import static org.apache.commons.lang3.EnumUtils.isValidEnum;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
@@ -92,8 +94,8 @@ public class Qopp001Service {
 	}
 
 	private void validateOppgaveTypeAndArkivsystem(OpprettOppgave opprettOppgave) {
-		if (!BEHANDLE_RETURPOST.equals(opprettOppgave.getOppgaveType())) {
-			throw new UgyldigInputverdiException("oppgaveType må være BEHANDLE_RETURPOST. oppgaveType=" + opprettOppgave.getOppgaveType());
+		if (!isValidEnum(OppgaveType.class, opprettOppgave.getOppgaveType())) {
+			throw new UgyldigInputverdiException(String.format("oppgaveType må være en gyldig oppgavetype. Gyldige oppgavetyper=%s. Input-oppgaveType=%s", EnumSet.allOf(OppgaveType.class), opprettOppgave.getOppgaveType()));
 		}
 
 		if (!ARKIVSYSTEM_JOARK.equals(opprettOppgave.getArkivSystem()) || isBlank(opprettOppgave.getArkivKode())) {

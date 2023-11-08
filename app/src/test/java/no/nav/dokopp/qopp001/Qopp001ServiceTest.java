@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
-import static no.nav.dokopp.constants.DomainConstants.BEHANDLE_RETURPOST;
+import static no.nav.dokopp.qopp001.domain.OppgaveType.BEHANDLE_RETURPOST;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -21,7 +21,7 @@ public class Qopp001ServiceTest {
 	@Test
 	public void shouldThrowAvsluttBehandlingOgKastMeldingExceptionWhenUgyldigArkivSystem() {
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST);
+		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST.toString());
 		opprettOppgave.setArkivKode("1");
 
 		assertThrows(AvsluttBehandlingOgKastMeldingException.class, () -> qopp001Service.qopp001("1", opprettOppgave));
@@ -30,7 +30,7 @@ public class Qopp001ServiceTest {
 	@Test
 	public void shouldThrowAvsluttBehandlingOgKastMeldingExceptionWhenUgyldigArkivKode() {
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST);
+		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST.toString());
 		opprettOppgave.setArkivSystem(ARKIVSYSTEM_JOARK);
 
 		assertThrows(AvsluttBehandlingOgKastMeldingException.class, () -> qopp001Service.qopp001("1", opprettOppgave));
@@ -41,7 +41,7 @@ public class Qopp001ServiceTest {
 		when(safHentJournalpostInfo.hentJournalpost(any(String.class))).thenReturn(createHentJournalpostInfoResponse());
 
 		OpprettOppgave opprettOppgave = new OpprettOppgave();
-		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST);
+		opprettOppgave.setOppgaveType(BEHANDLE_RETURPOST.toString());
 		opprettOppgave.setArkivSystem(ARKIVSYSTEM_JOARK);
 		opprettOppgave.setArkivKode("1");
 

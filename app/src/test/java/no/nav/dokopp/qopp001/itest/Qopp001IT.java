@@ -14,6 +14,8 @@ import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -105,8 +107,9 @@ public class Qopp001IT {
 	 * HVIS kall mot TJOARK110 går ok SÅ skal input og output behandles som angitt i behandlingssteg
 	 * HVIS kall mot BehandleOppgave_v1 er ok SÅ skal input og output behandles som angitt i behandlingssteg
 	 */
-	@Test
-	public void shouldOppretteOppgaveGosys() throws Exception {
+	@ParameterizedTest
+	@CsvSource({"qopp001_happy_returpost.xml","qopp001_happy_manglende_adresse.xml"})
+	public void shouldOppretteOppgaveGosys(String inputFilename) throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
 		stubFor(post(urlMatching("/saf"))
@@ -122,7 +125,7 @@ public class Qopp001IT {
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_happy.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/"+inputFilename), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			// vent på siste API-kall før videre verifisering
@@ -158,7 +161,7 @@ public class Qopp001IT {
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_happy.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			// vent på siste API-kall før videre verifisering
@@ -194,7 +197,7 @@ public class Qopp001IT {
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_pensjon.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == null)]"))));
@@ -213,7 +216,7 @@ public class Qopp001IT {
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_organisasjon.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
@@ -235,7 +238,7 @@ public class Qopp001IT {
 						.withBodyFile("saf/safGraphQlResponse-fagomraade_STO.json")));
 		stubGetSecurityToken();
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			assertThat(listAppender.list.size(), is(3));
@@ -275,7 +278,7 @@ public class Qopp001IT {
 						.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 						.withBodyFile("oppgaver/opprett_oppgave_happy.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			// vent på siste API-kall før videre verifisering
@@ -305,12 +308,12 @@ public class Qopp001IT {
 						.withStatus(HttpStatus.BAD_REQUEST.value())
 						.withBodyFile("oppgaver/opprett_oppgave_nedlagt_enhet.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 		verify(1, postRequestedFor(urlEqualTo("/oppgaver")));
 	}
@@ -322,12 +325,12 @@ public class Qopp001IT {
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-ukjent.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
@@ -357,12 +360,12 @@ public class Qopp001IT {
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-journalpostIkkeFunnet.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
@@ -373,12 +376,12 @@ public class Qopp001IT {
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-ingenBruker.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
@@ -392,12 +395,12 @@ public class Qopp001IT {
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-internalServerError.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(backoutQueue);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 		verify(exactly(3), postRequestedFor(urlEqualTo("/saf")));
 	}
@@ -422,12 +425,12 @@ public class Qopp001IT {
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_happy.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(backoutQueue);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
@@ -445,12 +448,12 @@ public class Qopp001IT {
 				.withBodyFile("pdl/pdl-happy.json")));
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(backoutQueue);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
@@ -472,12 +475,12 @@ public class Qopp001IT {
 				.withBodyFile("pdl/pdl-happy.json")));
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
@@ -504,7 +507,7 @@ public class Qopp001IT {
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-returpostFlagget.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")))
 		);
@@ -521,12 +524,12 @@ public class Qopp001IT {
 		stubFor(post("/pdl").willReturn(
 				aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
@@ -540,12 +543,12 @@ public class Qopp001IT {
 		stubFor(post("/pdl").willReturn(
 				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(backoutQueue);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
@@ -558,12 +561,12 @@ public class Qopp001IT {
 		stubFor(get("/securitytoken?grant_type=client_credentials&scope=openid").willReturn(
 				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy.xml"), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(backoutQueue);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy.xml")));
+					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
 	}
 
