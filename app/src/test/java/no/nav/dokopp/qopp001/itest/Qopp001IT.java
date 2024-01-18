@@ -11,6 +11,7 @@ import no.nav.dokopp.Application;
 import no.nav.dokopp.qopp001.Qopp001Service;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,9 @@ import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
 import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -291,7 +294,7 @@ public class Qopp001IT {
 	}
 
 	@Test
-	void shouldNotOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFailsAndEnhet9999() throws IOException {
+	void shouldDiscardMessageAndNotOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFailsAndEnhet9999() throws IOException {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
 		stubFor(post(urlMatching("/saf"))
@@ -310,11 +313,13 @@ public class Qopp001IT {
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
-		await().atMost(10, SECONDS)
+		assertThrows(ConditionTimeoutException.class, () ->
+				await().during(2, SECONDS)
 				.untilAsserted(() -> {
 					String response = receive(qopp001FunksjonellFeil);
-					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
-				});
+					// Om alt fungerer som forventet blokker den over fordi køen er tom, og vi når aldri den under
+					assertThat("Denne skal være null, men vi asserter motsatt sånn at den ytre asserten skal feile om det blir feil", response, notNullValue());
+				}), "await skal få timeout pga. blocking read på det som skal være en tom kø (qdok001_funk_feil)");
 		verify(1, postRequestedFor(urlEqualTo("/oppgaver")));
 	}
 
