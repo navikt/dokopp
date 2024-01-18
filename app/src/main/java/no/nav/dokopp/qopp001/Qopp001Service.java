@@ -76,9 +76,9 @@ public class Qopp001Service {
 						oppgaveId, temaPaaOpprettetOppgave, journalpostId);
 			} catch (OpprettOppgaveFunctionalException e) {
 				if (MASKINELL_ENHET.equals(journalfoerendeEnhet)) {
-					log.warn("qopp001 klarte ikke å opprette oppgave i Gosys for journalpostId={}, fagområde={}. Maskinell enhet 9999.",
+					log.warn("qopp001 klarte ikke å opprette oppgave i Gosys for journalpostId={}, fagområde={}. Maskinell enhet 9999. Det er forventet at det kan skje, og meldingen forkastes uten ytterligere behandling.",
 							journalpostId, temaPaaOpprettetOppgave);
-					throw e;
+					return;
 				} else {
 					log.info("qopp001 klarte ikke å opprette oppgave i Gosys for journalpostId={}, fagområde={} på første forsøk med journalførendeEnhet={}. Forsøker på nytt med tildeltEnhetsnummer=null",
 							journalpostId, temaPaaOpprettetOppgave, journalfoerendeEnhet);
