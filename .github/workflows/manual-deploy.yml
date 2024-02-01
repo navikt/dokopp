@@ -13,17 +13,12 @@ on:
           - prod
           - q1
           - q2
-      tag:
-        description: 'Git tag'
-        required: true
-        type: string
-        default: 'Replace with tag'
 
 jobs:
   deploy-prod:
-    uses: navikt/dok-workflows/.github/workflows/deploy-nais-app.yml@4c0ad577af27947d8d3e876a40039d206f5a9e26
+    uses: navikt/dok-workflows/.github/workflows/deploy-nais-app.yml@master
     secrets: inherit
     with:
-      build-tag: ${{github.event.inputs.tag}}
+      build-tag: ${{github.ref_name}}
       nav-cluster: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
       nav-environment: ${{github.event.inputs.environment}}
