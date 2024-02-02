@@ -9,21 +9,20 @@ on:
         default: 'q2'
         type: choice
         options:
-          - none
           - prod
           - q1
           - q2
-      tag:
-        description: 'Git tag'
+      ref_name:
+        description: 'Git ref, branch or tag'
         required: true
         type: string
-        default: 'Replace with tag'
+        default: 'Replace with tag or branch'
 
 jobs:
   deploy-prod:
-    uses: navikt/dok-workflows/.github/workflows/deploy-nais-app.yml@master
+    uses: navikt/dok-workflows/.github/workflows/deploy-nais-app-with-custom-checkout.yml@702b8b0a6accd55ab4f513cf74f016a163a62fa8
     secrets: inherit
     with:
-      build-tag: ${{github.event.inputs.tag}}
+      build-tag: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name) && github.ref_name || github.event.inputs.ref_name}}
       nav-cluster: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
       nav-environment: ${{github.event.inputs.environment}}
