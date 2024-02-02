@@ -22,7 +22,7 @@ on:
 
 jobs:
   deploy-env:
-    uses: navikt/dok-workflows/.github/workflows/deploy-nais-app-with-custom-checkout.yml@702b8b0a6accd55ab4f513cf74f016a163a62fa8
+    uses: navikt/dok-workflows/.github/workflows/deploy-nais-app-with-custom-checkout.yml@master
     secrets: inherit
     with:
       build-tag: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name)) && github.ref_name || inputs.ref_name}}
