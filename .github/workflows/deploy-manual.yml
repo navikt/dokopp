@@ -20,8 +20,8 @@ on:
         default: 'Replace with tag or branch'
 
 env:
-  DEPLOY_REF: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name)) && github.ref_name || inputs.ref_name}
-  DEPLOY_CLUSTER: ${{github.event.inputs.environment == 'p' && 'prod-fss' || 'dev-fss' }}
+  DEPLOY_REF: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name)) && github.ref_name || inputs.ref_name}}
+  DEPLOY_CLUSTER: ${{github.event.inputs.environment == 'p' && 'prod-fss' || 'dev-fss'}}
 
 jobs:
   deploy-env:
