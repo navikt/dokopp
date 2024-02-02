@@ -1,4 +1,4 @@
-name: Manual deployment of ref to environment
+run-name: Manual deploy of {{env.DEPLOY_REF}} to ${{inputs.environment}} by @${{github.actor}}
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         default: 'q2'
         type: choice
         options:
-          - prod
+          - p
           - q1
           - q2
       ref_name:
@@ -18,11 +18,15 @@ on:
         type: string
         default: 'Replace with tag or branch'
 
+env:
+  DEPLOY_REF: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name)) && github.ref_name || inputs.ref_name}
+  DEPLOY_CLUSTER: ${{github.event.inputs.environment == 'p' && 'prod-fss' || 'dev-fss' }}
+
 jobs:
   deploy-env:
     uses: navikt/dok-workflows/.github/workflows/deploy-nais-app-with-custom-checkout.yml@702b8b0a6accd55ab4f513cf74f016a163a62fa8
     secrets: inherit
     with:
-      build-tag: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name)) && github.ref_name || github.event.inputs.ref_name}}
-      nav-cluster: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
-      nav-environment: ${{github.event.inputs.environment}}
+      build-tag: ${{env.DEPLOY_REF}}
+      nav-cluster: ${{env.DEPLOY_CLUSTER}}
+      nav-environment: ${{inputs.environment}}
