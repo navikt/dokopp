@@ -1,3 +1,4 @@
+name: Manual deployment of ref to environment
 run-name: Manual deploy of {{env.DEPLOY_REF}} to ${{inputs.environment}} by @${{github.actor}}
 
 on:
