@@ -1,4 +1,4 @@
-name: Manual deployment of tag to environment
+name: Manual deployment of ref to environment
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
           - q1
           - q2
       ref_name:
-        description: 'Git ref, branch or tag'
+        description: 'Git ref_name. branch or tag'
         required: true
         type: string
         default: 'Replace with tag or branch'
@@ -23,6 +23,6 @@ jobs:
     uses: navikt/dok-workflows/.github/workflows/deploy-nais-app-with-custom-checkout.yml@702b8b0a6accd55ab4f513cf74f016a163a62fa8
     secrets: inherit
     with:
-      build-tag: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name) && github.ref_name || github.event.inputs.ref_name}}
+      build-tag: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name)) && github.ref_name || github.event.inputs.ref_name}}
       nav-cluster: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
       nav-environment: ${{github.event.inputs.environment}}
