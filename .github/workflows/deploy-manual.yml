@@ -1,4 +1,6 @@
 name: Manual deployment of ref to environment
+# run-name kan kun referere til github og inputs kontekstene
+run-name: Manual deploy of ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name)) && github.ref_name || inputs.ref_name}} to ${{inputs.environment}} by @${{github.actor}}
 
 on:
   workflow_dispatch:
@@ -21,8 +23,6 @@ on:
 env:
   DEPLOY_REF: ${{(contains(fromJson('["tag", "branch"]'), github.ref_type) && !contains(fromJson('["main", "master"]'), github.ref_name)) && github.ref_name || inputs.ref_name}}
   DEPLOY_CLUSTER: ${{github.event.inputs.environment == 'p' && 'prod-fss' || 'dev-fss'}}
-
-run-name: Manual deploy of {{env.DEPLOY_REF}} to ${{inputs.environment}} by @${{github.actor}}
 
 jobs:
   deploy-env:
