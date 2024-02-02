@@ -19,7 +19,7 @@ on:
         default: 'Replace with tag or branch'
 
 jobs:
-  deploy-prod:
+  deploy-env:
     uses: navikt/dok-workflows/.github/workflows/deploy-nais-app-with-custom-checkout.yml@702b8b0a6accd55ab4f513cf74f016a163a62fa8
     secrets: inherit
     with:
