@@ -2,103 +2,105 @@ package no.nav.dokopp.consumer.pdl;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
-import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.Consumer;
 
-import static java.util.Objects.requireNonNull;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
+import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_PDL;
+import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Slf4j
 @Component
 public class PdlGraphQLConsumer {
-    private static final String HEADER_PDL_NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
-    private final RestTemplate restTemplate;
-    private final StsRestConsumer stsConsumer;
-    private final String pdlUrl;
+	private static final String HEADER_PDL_BEHANDLINGSNUMMER = "behandlingsnummer";
+	// https://behandlingskatalog.nais.adeo.no/process/purpose/ARKIVPLEIE/756fd557-b95e-4b20-9de9-6179fb8317e6
+	private static final String ARKIVPLEIE_BEHANDLINGSNUMMER = "B315";
+	private static final String PERSON_IKKE_FUNNET_CODE = "not_found";
+	private static final String HEADER_PDL_NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
 
-    public PdlGraphQLConsumer(RestTemplateBuilder restTemplateBuilder,
-                              StsRestConsumer stsConsumer,
-                              DokoppProperties dokoppProperties) {
-        this.restTemplate = restTemplateBuilder
-                .setConnectTimeout(Duration.ofSeconds(3))
-                .setReadTimeout(Duration.ofSeconds(20))
-                .build();
-        this.stsConsumer = stsConsumer;
-        this.pdlUrl = dokoppProperties.getEndpoints().getPdl();
-    }
+	private final WebClient webClient;
 
-    @Retryable(include = HttpServerErrorException.class)
-    public String hentAktoerIdForFolkeregisterident(final String personnummer) {
-        try {
-            final UriComponents uri = UriComponentsBuilder.fromHttpUrl(pdlUrl).build();
-            final String serviceuserToken = "Bearer " + stsConsumer.getOidcToken();
-            final RequestEntity<PdlRequest> requestEntity = RequestEntity.post(uri.toUri())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .header(HttpHeaders.AUTHORIZATION, serviceuserToken)
-                    .header(HEADER_PDL_NAV_CONSUMER_TOKEN, serviceuserToken)
-                    .header(NAV_CALL_ID, MDC.get(NAV_CALL_ID))
-                    .body(mapRequest(personnummer));
-            final PdlHentIdenterResponse pdlHentIdenterResponse = requireNonNull(restTemplate.exchange(requestEntity, PdlHentIdenterResponse.class).getBody());
-            if (pdlHentIdenterResponse.getErrors() == null || pdlHentIdenterResponse.getErrors().isEmpty()) {
-                return getAktorIdFromResponse(pdlHentIdenterResponse);
-            } else {
-                throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra PDL." + pdlHentIdenterResponse.getErrors());
-            }
-        } catch (HttpClientErrorException e) {
-            throw new PdlHentAktoerIdForFnrFunctionalException("Funksjonell feil ved kall mot PDL.", e);
-        } catch (HttpServerErrorException e) {
-            throw new PdlHentAktoerIdForFnrTechnicalException("Teknisk feil ved kall mot PDL.", e);
-        }
-    }
+	public PdlGraphQLConsumer(WebClient webClient,
+							  DokoppProperties dokoppProperties) {
+		this.webClient = webClient.mutate()
+				.baseUrl(dokoppProperties.getEndpoints().getPdl().getUrl())
+				.defaultHeaders(httpHeaders -> {
+					httpHeaders.set(HEADER_PDL_BEHANDLINGSNUMMER, ARKIVPLEIE_BEHANDLINGSNUMMER);
+					httpHeaders.setContentType(APPLICATION_JSON);
+					httpHeaders.set(NAV_CALL_ID, MDC.get(MDC_CALL_ID));
+				})
+				.build();
+	}
 
-    private String getAktorIdFromResponse(PdlHentIdenterResponse pdlHentIdenterResponse){
-        return Optional.ofNullable(pdlHentIdenterResponse.getData())
-                .map(PdlHentIdenterResponse.PdlHentIdenterData::getHentIdenter)
-                .map(PdlHentIdenterResponse.PdlIdenter::getIdenter)
-                .flatMap(identer -> identer.stream()
-                        .filter(it -> it.getGruppe() == IdentType.AKTORID)
-                        .filter(it -> !it.isHistorisk())
-                        .map(PdlHentIdenterResponse.PdlIdentTo::getIdent)
-                        .findFirst())
-                .orElseThrow(()-> {
-                    throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra PDL. Respons fra PDL inneholdt ikke gjeldende aktørid");
-                });
-    }
+	@Retryable(retryFor = HttpServerErrorException.class)
+	public String hentAktoerIdForFolkeregisterident(final String personnummer) {
+		return webClient.post()
+				.uri("/graphql")
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_PDL))
+				.bodyValue(mapRequest(personnummer))
+				.retrieve()
+				.bodyToMono(PdlHentIdenterResponse.class)
+				.doOnError(handlePdlErrors())
+				.mapNotNull(this::getAktorIdFromResponse)
+				.block();
+	}
 
-    private PdlRequest mapRequest(final String aktoerId) {
-        final HashMap<String, Object> variables = new HashMap<>();
-        variables.put("ident", aktoerId);
-        return PdlRequest.builder()
-                .query("""
-                        query($ident: ID!) {
-                          hentIdenter(ident: $ident, historikk: false, grupper: AKTORID) {
-                            identer {
-                              ident
-                              historisk
-                              gruppe
-                            }
-                          }
-                        }
-                        """)
-                .variables(variables)
-                .build();
-    }
+	private String getAktorIdFromResponse(PdlHentIdenterResponse pdlHentIdenterResponse) {
+		if (pdlHentIdenterResponse.getErrors() == null || pdlHentIdenterResponse.getErrors().isEmpty()) {
+			return Optional.ofNullable(pdlHentIdenterResponse.getData())
+					.map(PdlHentIdenterResponse.PdlHentIdenterData::getHentIdenter)
+					.map(PdlHentIdenterResponse.PdlIdenter::getIdenter)
+					.flatMap(identer -> identer.stream()
+							.filter(it -> it.getGruppe() == IdentType.AKTORID)
+							.filter(it -> !it.isHistorisk())
+							.map(PdlHentIdenterResponse.PdlIdentTo::getIdent)
+							.findFirst()).orElseThrow(() -> new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra PDL. Respons fra PDL inneholdt ikke gjeldende aktørid"));
+		} else {
+			if (PERSON_IKKE_FUNNET_CODE.equals(pdlHentIdenterResponse.getErrors().get(0).getExtensions().getCode())) {
+				throw new PdlHentAktoerIdForFnrFunctionalException("Fant ikke person i Persondataløsningen (PDL).");
+			}
+			throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid for folkeregisterident i pdl. " + pdlHentIdenterResponse.getErrors());
+		}
+
+
+	}
+
+	private PdlRequest mapRequest(final String aktoerId) {
+		final HashMap<String, Object> variables = new HashMap<>();
+		variables.put("ident", aktoerId);
+		return PdlRequest.builder()
+				.query("""
+						query($ident: ID!) {
+						  hentIdenter(ident: $ident, historikk: false, grupper: AKTORID) {
+						    identer {
+						      ident
+						      historisk
+						      gruppe
+						    }
+						  }
+						}
+						""")
+				.variables(variables)
+				.build();
+	}
+
+	private Consumer<Throwable> handlePdlErrors() {
+		return error -> {
+			if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
+				throw new PdlHentAktoerIdForFnrFunctionalException("Kall mot pdl feilet funksjonelt.", error);
+			}
+		};
+	}
 }

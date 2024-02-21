@@ -26,7 +26,9 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import wiremock.org.apache.commons.io.IOUtils;
 
@@ -42,6 +44,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingXPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.removeAllMappings;
 import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -59,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFORE_METHOD;
 
 @Import({JmsTestConfig.class, ApplicationItestConfig.class})
 @SpringBootTest(classes = {Application.class}, webEnvironment = RANDOM_PORT)
@@ -119,8 +123,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(aResponse()
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
@@ -136,7 +140,7 @@ public class Qopp001IT {
 		});
 
 		verify(1, getRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-		verify(1, postRequestedFor(urlEqualTo("/pdl")));
+		verify(1, postRequestedFor(urlEqualTo("/pdl/graphql")));
 		verify(postRequestedFor(urlEqualTo("/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.tildeltEnhetsnr == '" + JOURNALF_ENHET_ID + "')]"))
@@ -155,8 +159,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happyAvsenderMottaker.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(aResponse()
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
@@ -172,7 +176,7 @@ public class Qopp001IT {
 		});
 
 		verify(1, getRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-		verify(1, postRequestedFor(urlEqualTo("/pdl")));
+		verify(1, postRequestedFor(urlEqualTo("/pdl/graphql")));
 		verify(postRequestedFor(urlEqualTo("/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.tildeltEnhetsnr == '" + JOURNALF_ENHET_ID + "')]"))
@@ -191,8 +195,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-pensjon.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(aResponse()
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
@@ -214,7 +218,7 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-organisasjon.json")));
-		stubGetSecurityToken();
+		stubSecurityTokens();
 		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_organisasjon.json")));
@@ -228,19 +232,17 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldNotOppretteOppgaveWithFagomraadeSTO() throws Exception {
-		Logger fooLogger = (Logger) LoggerFactory.getLogger(Qopp001Service.class);
-		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-		listAppender.start();
-		fooLogger.addAppender(listAppender);
-
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
 		stubFor(post(urlMatching("/saf"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-fagomraade_STO.json")));
-		stubGetSecurityToken();
-
+		stubSecurityTokens();
+		Logger fooLogger = (Logger) LoggerFactory.getLogger(Qopp001Service.class);
+		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+		listAppender.start();
+		fooLogger.addAppender(listAppender);
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
@@ -260,8 +262,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(aResponse()
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
@@ -301,8 +303,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy_maskin.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(aResponse()
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
@@ -421,8 +423,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(aResponse()
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
@@ -446,8 +448,8 @@ public class Qopp001IT {
 	public void shouldThrowTechnicalExceptionOpprettOppgave() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(aResponse()
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
@@ -473,8 +475,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(aResponse()
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
@@ -525,8 +527,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(
 				aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -544,8 +546,8 @@ public class Qopp001IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubGetSecurityToken();
-		stubFor(post("/pdl").willReturn(
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(
 				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -558,14 +560,15 @@ public class Qopp001IT {
 	}
 
 	@Test
-	public void shouldThrowStsTechnicalException() throws Exception {
+	//Det kan virke som Azure-clienten cacher azure-tokenet slik at vi aldri får internal server error fra azure uten dirties context.
+	@DirtiesContext(methodMode = BEFORE_METHOD)
+	public void shouldThrowAzureTechnicalException() throws Exception {
+		stubFor(post("/azure_token").willReturn(
+				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 		stubFor(post(urlMatching("/saf"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubFor(get("/securitytoken?grant_type=client_credentials&scope=openid").willReturn(
-				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
-
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS)
@@ -575,11 +578,63 @@ public class Qopp001IT {
 				});
 	}
 
-	private void stubGetSecurityToken() {
+	@Test
+	public void shouldNotOppretteOppgaveWhenPdlBadRequest() throws Exception {
+		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark110/tjoark110_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happyAvsenderMottaker.json")));
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
+				.withStatus(HttpStatus.OK.value())
+				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
+				.withBodyFile("pdl/pdl-bad-request.json")));
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String response = receive(qopp001FunksjonellFeil);
+			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
+		});
+
+	}
+
+	@Test
+	public void shouldNotOppretteOppgaveWhenPdlIngenIdenter() throws Exception {
+		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark110/tjoark110_happy.xml")));
+		stubFor(post(urlMatching("/saf"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happyAvsenderMottaker.json")));
+		stubSecurityTokens();
+		stubFor(post("/pdl/graphql").willReturn(aResponse()
+				.withStatus(HttpStatus.OK.value())
+				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
+				.withBodyFile("pdl/pdl-ingen-identer.json")));
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			// vent på siste API-kall før videre verifisering
+			String response = receive(qopp001FunksjonellFeil);
+			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
+		});
+
+	}
+
+	private void stubSecurityTokens() {
 		stubFor(get("/securitytoken?grant_type=client_credentials&scope=openid").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("securitytoken/stsResponse-happy.json")));
+		stubFor(post("/azure_token")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+						.withBodyFile("azure/token_response_dummy.json")));
 	}
 
 	private void sendStringMessage(Queue queue, final String message, String callId) {

@@ -1,0 +1,16 @@
+{
+  "errors": [
+    {
+      "message": "Validation error of type FieldUndefined: Field 'ideasdnter' in type 'Identliste' is undefined @ 'hentIdenter/ideasdnter'",
+      "locations": [
+        {
+          "line": 1,
+          "column": 78
+        }
+      ],
+      "extensions": {
+        "classification": "ValidationError"
+      }
+    }
+  ]
+}
