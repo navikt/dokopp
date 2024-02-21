@@ -3,10 +3,10 @@ package no.nav.dokopp.consumer.pdl;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
-import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
 import org.slf4j.MDC;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -28,7 +28,6 @@ public class PdlGraphQLConsumer {
 	// https://behandlingskatalog.nais.adeo.no/process/purpose/ARKIVPLEIE/756fd557-b95e-4b20-9de9-6179fb8317e6
 	private static final String ARKIVPLEIE_BEHANDLINGSNUMMER = "B315";
 	private static final String PERSON_IKKE_FUNNET_CODE = "not_found";
-	private static final String HEADER_PDL_NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
 
 	private final WebClient webClient;
 
@@ -39,7 +38,6 @@ public class PdlGraphQLConsumer {
 				.defaultHeaders(httpHeaders -> {
 					httpHeaders.set(HEADER_PDL_BEHANDLINGSNUMMER, ARKIVPLEIE_BEHANDLINGSNUMMER);
 					httpHeaders.setContentType(APPLICATION_JSON);
-					httpHeaders.set(NAV_CALL_ID, MDC.get(MDC_CALL_ID));
 				})
 				.build();
 	}
@@ -48,6 +46,9 @@ public class PdlGraphQLConsumer {
 	public String hentAktoerIdForFolkeregisterident(final String personnummer) {
 		return webClient.post()
 				.uri("/graphql")
+				.headers(httpHeaders -> {
+					httpHeaders.set(NAV_CALL_ID, MDC.get(MDC_CALL_ID));
+				})
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_PDL))
 				.bodyValue(mapRequest(personnummer))
 				.retrieve()
@@ -58,7 +59,7 @@ public class PdlGraphQLConsumer {
 	}
 
 	private String getAktorIdFromResponse(PdlHentIdenterResponse pdlHentIdenterResponse) {
-		if (pdlHentIdenterResponse.getErrors() == null || pdlHentIdenterResponse.getErrors().isEmpty()) {
+		if (CollectionUtils.isEmpty(pdlHentIdenterResponse.getErrors())) {
 			return Optional.ofNullable(pdlHentIdenterResponse.getData())
 					.map(PdlHentIdenterResponse.PdlHentIdenterData::getHentIdenter)
 					.map(PdlHentIdenterResponse.PdlIdenter::getIdenter)
