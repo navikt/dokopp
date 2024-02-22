@@ -102,7 +102,7 @@ public class PdlGraphQLConsumer {
 		return error -> {
 			if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
 				throw new PdlHentAktoerIdForFnrFunctionalException("Kall mot pdl feilet funksjonelt.", error);
-			} else if (error instanceof WebClientResponseException response && response.getStatusCode().is5xxServerError()) {{
+			} else if (error instanceof WebClientResponseException response && response.getStatusCode().is5xxServerError()) {
 				throw new PdlHentAktoerIdForFnrTechnicalException("Ukjent teknisk feil mot pdl", error);
 			}
 		};
