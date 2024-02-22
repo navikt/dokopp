@@ -78,7 +78,7 @@ public class AzureOAuthEnabledWebClientConfig {
 	}
 
 	@Bean
-	List<ClientRegistration> clientRegistration(AzureProperties azureTokenProperties, DokoppProperties dokSikkerhetsnettProperties) {
+	List<ClientRegistration> clientRegistration(AzureProperties azureTokenProperties, DokoppProperties dokoppProperties) {
 		return List.of(
 				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_PDL)
 						.tokenUri(azureTokenProperties.tokenUrl())
@@ -86,7 +86,7 @@ public class AzureOAuthEnabledWebClientConfig {
 						.clientSecret(azureTokenProperties.clientSecret())
 						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
 						.authorizationGrantType(CLIENT_CREDENTIALS)
-						.scope(dokSikkerhetsnettProperties.getEndpoints().getPdl().getScope())
+						.scope(dokoppProperties.getEndpoints().getPdl().getScope())
 						.build()
 		);
 	}

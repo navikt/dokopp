@@ -3,6 +3,7 @@ package no.nav.dokopp.consumer.pdl;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
+import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
 import org.slf4j.MDC;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -42,7 +43,7 @@ public class PdlGraphQLConsumer {
 				.build();
 	}
 
-	@Retryable(retryFor = HttpServerErrorException.class)
+	@Retryable(retryFor = PdlHentAktoerIdForFnrTechnicalException.class)
 	public String hentAktoerIdForFolkeregisterident(final String personnummer) {
 		return webClient.post()
 				.uri("/graphql")
@@ -101,6 +102,8 @@ public class PdlGraphQLConsumer {
 		return error -> {
 			if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
 				throw new PdlHentAktoerIdForFnrFunctionalException("Kall mot pdl feilet funksjonelt.", error);
+			} else if (error instanceof WebClientResponseException response && response.getStatusCode().is5xxServerError()) {{
+				throw new PdlHentAktoerIdForFnrTechnicalException("Ukjent teknisk feil mot pdl", error);
 			}
 		};
 	}
