@@ -27,6 +27,7 @@
 		<logstash-logback-encode.version>7.4</logstash-logback-encode.version>
 		<resilience4j.version>2.2.0</resilience4j.version>
 		<cxf.version>4.0.3</cxf.version>
+		<context-propagation.version>1.1.0</context-propagation.version>
 
 		<opprettoppgave-tjenestespesifikasjon-v1.version>2-3843acc</opprettoppgave-tjenestespesifikasjon-v1.version>
 		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>5-1ace39e</arkiverdokumentproduksjon-tjenestespesifikasjon.version>
@@ -78,6 +79,11 @@
 				<groupId>net.logstash.logback</groupId>
 				<artifactId>logstash-logback-encoder</artifactId>
 				<version>${logstash-logback-encode.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>context-propagation</artifactId>
+				<version>${context-propagation.version}</version>
 			</dependency>
 			<!-- test -->
 			<dependency>

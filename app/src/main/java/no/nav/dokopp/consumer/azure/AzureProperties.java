@@ -8,14 +8,12 @@ import org.springframework.validation.annotation.Validated;
 /**
  * Konfigurert av naiserator. https://doc.nais.io/security/auth/azure-ad/#runtime-variables-credentials
  */
-@Data
-@ConfigurationProperties("azure.app")
 @Validated
-public class AzureProperties {
-	@NotEmpty
-	private String tokenUrl;
-	@NotEmpty
-	private String clientId;
-	@NotEmpty
-	private String clientSecret;
+@ConfigurationProperties(prefix = "azure.app")
+public record AzureProperties(
+		@NotEmpty String tokenUrl,
+		@NotEmpty String clientId,
+		@NotEmpty String clientSecret
+) {
+	public static final String CLIENT_REGISTRATION_PDL = "azure-pdl";
 }
