@@ -23,11 +23,8 @@ public class DokoppProperties {
 		@NotNull
 		private AzureEndpoint pdl;
 
-		@NotEmpty
-		private String oppgave;
-
-		@NotEmpty
-		private String sts;
+		@NotNull
+		private AzureEndpoint oppgave;
 	}
 
 

@@ -16,4 +16,6 @@ public record AzureProperties(
 		@NotEmpty String clientSecret
 ) {
 	public static final String CLIENT_REGISTRATION_PDL = "azure-pdl";
+	public static final String CLIENT_REGISTRATION_OPPGAVE = "azure-oppgave";
+	public static final String CLIENT_REGISTRATION_SAF= "azure-saf";
 }

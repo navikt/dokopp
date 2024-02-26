@@ -21,7 +21,9 @@ import java.time.Duration;
 import java.util.List;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_OPPGAVE;
 import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_PDL;
+import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_SAF;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.CLIENT_CREDENTIALS;
 import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
 
@@ -87,6 +89,22 @@ public class AzureOAuthEnabledWebClientConfig {
 						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
 						.authorizationGrantType(CLIENT_CREDENTIALS)
 						.scope(dokoppProperties.getEndpoints().getPdl().getScope())
+						.build(),
+				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_OPPGAVE)
+						.tokenUri(azureTokenProperties.tokenUrl())
+						.clientId(azureTokenProperties.clientId())
+						.clientSecret(azureTokenProperties.clientSecret())
+						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
+						.authorizationGrantType(CLIENT_CREDENTIALS)
+						.scope(dokoppProperties.getEndpoints().getOppgave().getScope())
+						.build(),
+				ClientRegistration.withRegistrationId(CLIENT_REGISTRATION_SAF)
+						.tokenUri(azureTokenProperties.tokenUrl())
+						.clientId(azureTokenProperties.clientId())
+						.clientSecret(azureTokenProperties.clientSecret())
+						.clientAuthenticationMethod(CLIENT_SECRET_BASIC)
+						.authorizationGrantType(CLIENT_CREDENTIALS)
+						.scope(dokoppProperties.getEndpoints().getSaf().getScope())
 						.build()
 		);
 	}

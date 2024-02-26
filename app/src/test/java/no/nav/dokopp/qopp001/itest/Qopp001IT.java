@@ -20,8 +20,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
@@ -38,13 +36,10 @@ import java.io.InputStream;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingXPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.removeAllMappings;
 import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -52,7 +47,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static no.nav.dokopp.config.cache.LokalCacheConfig.STS_CACHE;
 import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -92,9 +86,6 @@ public class Qopp001IT {
 	@Autowired
 	private Queue backoutQueue;
 
-	@Autowired
-	private CacheManager cacheManager;
-
 	@BeforeAll
 	public static void beforeClass() {
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
@@ -103,10 +94,6 @@ public class Qopp001IT {
 	@BeforeEach
 	public void setupBefore() {
 		resetAllRequests();
-		Cache stsCache = cacheManager.getCache(STS_CACHE);
-		if (stsCache != null) {
-			stsCache.clear();
-		}
 	}
 
 	/**
@@ -115,33 +102,37 @@ public class Qopp001IT {
 	 * HVIS kall mot BehandleOppgave_v1 er ok SÅ skal input og output behandles som angitt i behandlingssteg
 	 */
 	@ParameterizedTest
-	@CsvSource({"qopp001_happy_returpost.xml","qopp001_happy_manglende_adresse.xml"})
+	//Resetter contexten da det ikke blir gjort et nytt kall til Azure fordi oAuth2AuthorizedClientManager gjør noe automagisk caching av tokenet.
+	//Dette gjør at asserten av antall kall til Azure blir feil da vi gjenbruker "gamle" tokens
+	//Har ikke funnet ut av hvordan vi kan cleare denne cachen, eller resette clientRegistrationRepository'et
+	@DirtiesContext(methodMode = BEFORE_METHOD)
+	@CsvSource({"qopp001_happy_returpost.xml", "qopp001_happy_manglende_adresse.xml"})
 	public void shouldOppretteOppgaveGosys(String inputFilename) throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
-		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+		stubFor(post("/api/v1/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_happy.json")));
 
-		sendStringMessage(qopp001, classpathToString("qopp001/"+inputFilename), CALLID);
+		sendStringMessage(qopp001, classpathToString("qopp001/" + inputFilename), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			// vent på siste API-kall før videre verifisering
 			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 		});
 
-		verify(1, getRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
+		verify(3, postRequestedFor(urlEqualTo("/azure_token")));
 		verify(1, postRequestedFor(urlEqualTo("/pdl/graphql")));
-		verify(postRequestedFor(urlEqualTo("/oppgaver"))
+		verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.tildeltEnhetsnr == '" + JOURNALF_ENHET_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == '" + SAKS_REFERANSE + "')]"))
@@ -152,19 +143,23 @@ public class Qopp001IT {
 	}
 
 	@Test
+	//Resetter contexten da det ikke blir gjort et nytt kall til Azure fordi oAuth2AuthorizedClientManager gjør noe automagisk caching av tokenet.
+	//Dette gjør at asserten av antall kall til Azure blir feil da vi gjenbruker "gamle" tokens
+	//Har ikke funnet ut av hvordan vi kan cleare denne cachen, eller resette clientRegistrationRepository'et
+	@DirtiesContext(methodMode = BEFORE_METHOD)
 	public void shouldOppretteOppgaveGosysMedAvsenderMottaker() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happyAvsenderMottaker.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
-		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+		stubFor(post("/api/v1/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_happy.json")));
 
@@ -175,9 +170,9 @@ public class Qopp001IT {
 			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 		});
 
-		verify(1, getRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
+		verify(3, postRequestedFor(urlEqualTo("/azure_token")));
 		verify(1, postRequestedFor(urlEqualTo("/pdl/graphql")));
-		verify(postRequestedFor(urlEqualTo("/oppgaver"))
+		verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.tildeltEnhetsnr == '" + JOURNALF_ENHET_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == '" + SAKS_REFERANSE + "')]"))
@@ -191,22 +186,22 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWithSaksreferanseWhenFagomradeNotGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-pensjon.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
-		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+		stubFor(post("/api/v1/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_pensjon.json")));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/oppgaver"))
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == null)]"))));
 	}
 
@@ -214,18 +209,18 @@ public class Qopp001IT {
 	public void shouldOppretteOppgaveWithOrgnrGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-organisasjon.json")));
-		stubSecurityTokens();
-		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+		stubAzureToken();
+		stubFor(post("/api/v1/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_organisasjon.json")));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/oppgaver"))
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
 				.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]"))));
 	}
@@ -234,11 +229,11 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWithFagomraadeSTO() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-fagomraade_STO.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		Logger fooLogger = (Logger) LoggerFactory.getLogger(Qopp001Service.class);
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
 		listAppender.start();
@@ -250,7 +245,7 @@ public class Qopp001IT {
 			assertThat(listAppender.list.get(0).getFormattedMessage(), is("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId=123456."));
 			assertThat(listAppender.list.get(1).getFormattedMessage(), is("qopp001 lager ikke oppgave i Gosys for journalpostId=123456 da den er returpost fra fagområde=STO og ikke vil bli behandlet."));
 			assertThat(listAppender.list.get(2).getFormattedMessage(), is("qopp001 har flagget journalpost med journalpostId=123456 som returpost."));
-			verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")));
+			verify(exactly(0), postRequestedFor(urlEqualTo("/api/v1/oppgaver")));
 		});
 	}
 
@@ -258,16 +253,16 @@ public class Qopp001IT {
 	void shouldOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFails() throws IOException {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
-		stubFor(post("/oppgaver")
+		stubFor(post("/api/v1/oppgaver")
 				.inScenario(SCENARIO_NEDLAGT_ENHET)
 				.whenScenarioStateIs(Scenario.STARTED)
 				.willReturn(aResponse()
@@ -275,7 +270,7 @@ public class Qopp001IT {
 						.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 						.withBodyFile("oppgaver/opprett_oppgave_nedlagt_enhet.json"))
 				.willSetStateTo("Nytt forsøk med tildeltEnhetsnummer=null"));
-		stubFor(post("/oppgaver")
+		stubFor(post("/api/v1/oppgaver")
 				.inScenario(SCENARIO_NEDLAGT_ENHET)
 				.whenScenarioStateIs("Nytt forsøk med tildeltEnhetsnummer=null")
 				.willReturn(aResponse()
@@ -290,8 +285,8 @@ public class Qopp001IT {
 			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 		});
 
-		verify(2, postRequestedFor(urlEqualTo("/oppgaver")));
-		verify(postRequestedFor(urlEqualTo("/oppgaver"))
+		verify(2, postRequestedFor(urlEqualTo("/api/v1/oppgaver")));
+		verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.tildeltEnhetsnr == null)]")));
 	}
 
@@ -299,16 +294,16 @@ public class Qopp001IT {
 	void shouldDiscardMessageAndNotOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFailsAndEnhet9999() throws IOException {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy_maskin.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
-		stubFor(post("/oppgaver")
+		stubFor(post("/api/v1/oppgaver")
 				.willReturn(aResponse()
 						.withStatus(HttpStatus.BAD_REQUEST.value())
 						.withBodyFile("oppgaver/opprett_oppgave_nedlagt_enhet.json")));
@@ -317,17 +312,17 @@ public class Qopp001IT {
 
 		assertThrows(ConditionTimeoutException.class, () ->
 				await().during(2, SECONDS)
-				.untilAsserted(() -> {
-					String response = receive(qopp001FunksjonellFeil);
-					// Om alt fungerer som forventet blokker den over fordi køen er tom, og vi når aldri den under
-					assertThat("Denne skal være null, men vi asserter motsatt sånn at den ytre asserten skal feile om det blir feil", response, notNullValue());
-				}), "await skal få timeout pga. blocking read på det som skal være en tom kø (qdok001_funk_feil)");
-		verify(1, postRequestedFor(urlEqualTo("/oppgaver")));
+						.untilAsserted(() -> {
+							String response = receive(qopp001FunksjonellFeil);
+							// Om alt fungerer som forventet blokker den over fordi køen er tom, og vi når aldri den under
+							assertThat("Denne skal være null, men vi asserter motsatt sånn at den ytre asserten skal feile om det blir feil", response, notNullValue());
+						}), "await skal få timeout pga. blocking read på det som skal være en tom kø (qdok001_funk_feil)");
+		verify(1, postRequestedFor(urlEqualTo("/api/v1/oppgaver")));
 	}
 
 	@Test
 	public void shouldThrowUkjentBrukertypeException() throws Exception {
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-ukjent.json")));
@@ -362,7 +357,7 @@ public class Qopp001IT {
 	 */
 	@Test
 	public void shouldThrowJournalpostIkkeFunnetException() throws Exception {
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-journalpostIkkeFunnet.json")));
@@ -378,7 +373,7 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowUkjentBrukertypeExceptionWhenNoBrukerAndAvsenderMottaker() throws Exception {
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-ingenBruker.json")));
@@ -397,7 +392,7 @@ public class Qopp001IT {
 	 */
 	@Test
 	public void shouldThrowTechnicalExceptionSAF() throws Exception {
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-internalServerError.json")));
@@ -409,7 +404,7 @@ public class Qopp001IT {
 					String response = receive(backoutQueue);
 					assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 				});
-		verify(exactly(3), postRequestedFor(urlEqualTo("/saf")));
+		verify(exactly(3), postRequestedFor(urlEqualTo("/saf/graphql")));
 	}
 
 	/**
@@ -419,16 +414,16 @@ public class Qopp001IT {
 	public void shouldThrowTechnicalExceptionTjoark110() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_internalServerError.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
-		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+		stubFor(post("/api/v1/oppgaver").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("oppgaver/opprett_oppgave_happy.json")));
 
@@ -446,14 +441,16 @@ public class Qopp001IT {
 	 */
 	@Test
 	public void shouldThrowTechnicalExceptionOpprettOppgave() throws Exception {
-		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
-				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubSecurityTokens();
+		stubAzureToken();
+		stubFor(post(urlMatching("/saf/graphql"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-happy.json")));
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
-		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
+		stubFor(post("/api/v1/oppgaver").willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
@@ -471,16 +468,16 @@ public class Qopp001IT {
 	public void shouldThrowSikkerhetsbegrensningExceptionGosys() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
 				.withBodyFile("pdl/pdl-happy.json")));
-		stubFor(post("/oppgaver").willReturn(aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
+		stubFor(post("/api/v1/oppgaver").willReturn(aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
@@ -509,25 +506,25 @@ public class Qopp001IT {
 	@Test
 	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturpostReturnedFromSaf() throws Exception {
 		resetAllRequests();
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-returpostFlagget.json")));
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() -> verify(exactly(0), postRequestedFor(urlEqualTo("/oppgaver")))
+		await().atMost(10, SECONDS).untilAsserted(() -> verify(exactly(0), postRequestedFor(urlEqualTo("/api/v1/oppgaver")))
 		);
 		verify(exactly(0), postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 	}
 
 	@Test
 	public void shouldThrowAktoerHentAktoerIdForFnrFunctionalException() throws Exception {
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(
 				aResponse().withStatus(HttpStatus.FORBIDDEN.value())));
 
@@ -542,11 +539,11 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowAktoerHentAktoerIdForFnrTechnicalException() throws Exception {
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(
 				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
 
@@ -560,12 +557,14 @@ public class Qopp001IT {
 	}
 
 	@Test
-	//Det kan virke som Azure-clienten cacher azure-tokenet slik at vi aldri får internal server error fra azure uten dirties context.
+	//Resetter contexten da det ikke blir gjort et nytt kall til Azure fordi oAuth2AuthorizedClientManager gjør noe automagisk caching av tokenet.
+	//Dette gjør at asserten av antall kall til Azure blir feil da vi gjenbruker "gamle" tokens
+	//Har ikke funnet ut av hvordan vi kan cleare denne cachen, eller resette clientRegistrationRepository'et
 	@DirtiesContext(methodMode = BEFORE_METHOD)
 	public void shouldThrowAzureTechnicalException() throws Exception {
 		stubFor(post("/azure_token").willReturn(
 				aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happy.json")));
@@ -582,11 +581,11 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWhenPdlBadRequest() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happyAvsenderMottaker.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
@@ -605,11 +604,11 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWhenPdlIngenIdenter() throws Exception {
 		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
 				.withBodyFile("tjoark110/tjoark110_happy.xml")));
-		stubFor(post(urlMatching("/saf"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("saf/safGraphQlResponse-happyAvsenderMottaker.json")));
-		stubSecurityTokens();
+		stubAzureToken();
 		stubFor(post("/pdl/graphql").willReturn(aResponse()
 				.withStatus(HttpStatus.OK.value())
 				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
@@ -625,11 +624,7 @@ public class Qopp001IT {
 
 	}
 
-	private void stubSecurityTokens() {
-		stubFor(get("/securitytoken?grant_type=client_credentials&scope=openid").willReturn(aResponse()
-				.withStatus(HttpStatus.OK.value())
-				.withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType())
-				.withBodyFile("securitytoken/stsResponse-happy.json")));
+	private void stubAzureToken() {
 		stubFor(post("/azure_token")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
