@@ -1,69 +1,71 @@
 package no.nav.dokopp.consumer.oppgave;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
-import no.nav.dokopp.consumer.sts.StsRestConsumer;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.OpprettOppgaveTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.time.Duration;
+import java.util.function.Consumer;
 
 import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
 import static no.nav.dokopp.constants.HeaderConstants.X_CORRELATION_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
+import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_OPPGAVE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Component
+@Slf4j
 public class OppgaveConsumer implements Oppgave {
 
-	private final RestTemplate restTemplate;
-	private final String oppgaveoppgaverUrl;
-	private final StsRestConsumer stsRestConsumer;
+	private final WebClient webClient;
 
-	public OppgaveConsumer(RestTemplateBuilder restTemplateBuilder,
-						   StsRestConsumer stsRestConsumer,
+	public OppgaveConsumer(WebClient webClient,
 						   DokoppProperties dokoppProperties) {
-		this.restTemplate = restTemplateBuilder
-				.setReadTimeout(Duration.ofSeconds(20))
-				.setConnectTimeout(Duration.ofSeconds(5))
+		this.webClient = webClient.mutate()
+				.baseUrl(dokoppProperties.getEndpoints().getOppgave().getUrl())
+				.defaultHeaders(httpHeaders -> {
+					httpHeaders.setContentType(APPLICATION_JSON);
+					httpHeaders.add(NAV_CONSUMER_ID, APP_NAME);
+				})
 				.build();
-		this.oppgaveoppgaverUrl = dokoppProperties.getEndpoints().getOppgave();
-		this.stsRestConsumer = stsRestConsumer;
 	}
 
-	@Retryable(include = OpprettOppgaveTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT))
+	@Retryable(retryFor = OpprettOppgaveTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT))
 	public Integer opprettOppgave(OpprettOppgaveRequest opprettOppgaveRequest) {
-		try {
-			HttpEntity<OpprettOppgaveRequest> request = new HttpEntity<>(opprettOppgaveRequest, createHeaders());
-			OpprettOppgaveResponse oppgaveResponse = restTemplate.postForObject(oppgaveoppgaverUrl, request, OpprettOppgaveResponse.class);
-			return oppgaveResponse.getId();
-		} catch (HttpClientErrorException e) {
-			throw new OpprettOppgaveFunctionalException(String.format("Funksjonell feil ved kall mot Oppgave:opprettOppgave: %s",
-					e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			throw new OpprettOppgaveTechnicalException(String.format("Teknisk feil ved kall mot Oppgave:opprettOppgave: %s",
-					e.getMessage()), e);
-		}
+		return webClient.post()
+				.uri("/api/v1/oppgaver")
+				.headers(httpHeaders -> {
+					httpHeaders.add(NAV_CALL_ID, MDC.get(NAV_CALL_ID));
+					httpHeaders.add(X_CORRELATION_ID, MDC.get(NAV_CALL_ID));
+				})
+				.attributes(clientRegistrationId(CLIENT_REGISTRATION_OPPGAVE))
+				.bodyValue(opprettOppgaveRequest)
+				.retrieve()
+				.bodyToMono(OpprettOppgaveResponse.class)
+				.doOnError(handleOppgaveErrors())
+				.mapNotNull(OpprettOppgaveResponse::getId)
+				.block();
 	}
 
-	private HttpHeaders createHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(APPLICATION_JSON);
-		headers.setBearerAuth(stsRestConsumer.getOidcToken());
-		headers.add(NAV_CONSUMER_ID, APP_NAME);
-		headers.add(NAV_CALL_ID, MDC.get(NAV_CALL_ID));
-		headers.add(X_CORRELATION_ID, MDC.get(NAV_CALL_ID));
-		return headers;
+	private Consumer<Throwable> handleOppgaveErrors() {
+		return error -> {
+			if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
+				throw new OpprettOppgaveFunctionalException(String.format("Funksjonell feil ved kall mot Oppgave:opprettOppgave: %s",
+						error.getMessage()), error);
+			} else if (error instanceof WebClientResponseException response && response.getStatusCode().is5xxServerError()) {
+				throw new OpprettOppgaveTechnicalException(String.format("Teknisk feil ved kall mot Oppgave:opprettOppgave: %s",
+						error.getMessage()), error);
+			}
+		};
 	}
 }
