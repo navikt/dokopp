@@ -41,14 +41,15 @@ public class SafJournalpostConsumer {
 								  DokoppProperties dokoppProperties) {
 		this.webClient = webClient.mutate()
 				.baseUrl(dokoppProperties.getEndpoints().getSaf().getUrl())
+				.defaultHeaders(httpHeaders -> httpHeaders.setContentType(APPLICATION_JSON))
 				.build();
 	}
 
 	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = BACKOFF_MULTIPLIER))
 	public JournalpostResponse hentJournalpost(String journalpostId) {
 		SafResponse safResponse = webClient.post()
-				.uri("/graphql")
-				.headers(httpHeaders -> createHeaders())
+								.uri("/graphql")
+				.headers(httpHeaders -> httpHeaders.add(NAV_CALLID, MDC.get(NAV_CALL_ID)))
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_SAF))
 				.bodyValue(createHentJournalpostRequest(journalpostId))
 				.retrieve()
@@ -62,8 +63,6 @@ public class SafJournalpostConsumer {
 
 	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(APPLICATION_JSON);
-		headers.add(NAV_CALLID, MDC.get(NAV_CALL_ID));
 		return headers;
 	}
 
