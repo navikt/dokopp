@@ -1,5 +1,6 @@
 package no.nav.dokopp.consumer.oppgave;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.OpprettOppgaveTechnicalException;
@@ -23,6 +24,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Component
+@Slf4j
 public class OppgaveConsumer implements Oppgave {
 
 	private final WebClient webClient;
@@ -31,6 +33,10 @@ public class OppgaveConsumer implements Oppgave {
 						   DokoppProperties dokoppProperties) {
 		this.webClient = webClient.mutate()
 				.baseUrl(dokoppProperties.getEndpoints().getOppgave().getUrl())
+				.defaultHeaders(httpHeaders -> {
+					httpHeaders.setContentType(APPLICATION_JSON);
+					httpHeaders.add(NAV_CONSUMER_ID, APP_NAME);
+				})
 				.build();
 	}
 
@@ -38,7 +44,10 @@ public class OppgaveConsumer implements Oppgave {
 	public Integer opprettOppgave(OpprettOppgaveRequest opprettOppgaveRequest) {
 		return webClient.post()
 				.uri("/api/v1/oppgaver")
-				.headers(httpHeaders -> createHeaders())
+				.headers(httpHeaders -> {
+					httpHeaders.add(NAV_CALL_ID, MDC.get(NAV_CALL_ID));
+					httpHeaders.add(X_CORRELATION_ID, MDC.get(NAV_CALL_ID));
+				})
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_OPPGAVE))
 				.bodyValue(opprettOppgaveRequest)
 				.retrieve()
@@ -46,15 +55,6 @@ public class OppgaveConsumer implements Oppgave {
 				.doOnError(handleOppgaveErrors())
 				.mapNotNull(OpprettOppgaveResponse::getId)
 				.block();
-	}
-
-	private HttpHeaders createHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(APPLICATION_JSON);
-		headers.add(NAV_CONSUMER_ID, APP_NAME);
-		headers.add(NAV_CALL_ID, MDC.get(NAV_CALL_ID));
-		headers.add(X_CORRELATION_ID, MDC.get(NAV_CALL_ID));
-		return headers;
 	}
 
 	private Consumer<Throwable> handleOppgaveErrors() {
