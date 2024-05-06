@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.1</version>
+		<version>3.2.5</version>
 	</parent>
 
 	<groupId>no.nav.dokopp</groupId>
@@ -20,23 +20,23 @@
 	</modules>
 
 	<properties>
-		<java.version>17</java.version>
+		<java.version>21</java.version>
 
-		<camel.version>4.3.0</camel.version>
-		<ibm.mq.client.version>9.3.4.1</ibm.mq.client.version>
+		<camel.version>4.5.0</camel.version>
+		<ibm.mq.client.version>9.3.5.1</ibm.mq.client.version>
 		<logstash-logback-encode.version>7.4</logstash-logback-encode.version>
 		<resilience4j.version>2.2.0</resilience4j.version>
-		<cxf.version>4.0.3</cxf.version>
-		<context-propagation.version>1.1.0</context-propagation.version>
+		<cxf.version>4.0.4</cxf.version>
+		<context-propagation.version>1.1.1</context-propagation.version>
 
 		<opprettoppgave-tjenestespesifikasjon-v1.version>2-3843acc</opprettoppgave-tjenestespesifikasjon-v1.version>
-		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>5-1ace39e</arkiverdokumentproduksjon-tjenestespesifikasjon.version>
+		<arkiverdokumentproduksjon-tjenestespesifikasjon.version>6-e6ddb71</arkiverdokumentproduksjon-tjenestespesifikasjon.version>
 
 		<!-- Test dependencies -->
-		<spring-cloud-contract-wiremock.version>4.1.0</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>4.1.2</spring-cloud-contract-wiremock.version>
 
 		<!-- plugins -->
-		<maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>
+		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
 	</properties>
 
 	<dependencyManagement>
