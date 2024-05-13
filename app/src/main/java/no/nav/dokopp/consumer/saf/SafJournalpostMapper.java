@@ -3,6 +3,8 @@ package no.nav.dokopp.consumer.saf;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.qopp001.JournalpostResponse;
 
+import java.util.List;
+
 import static no.nav.dokopp.consumer.saf.SafJournalpostMapper.BrukerType.AKTOERID;
 import static no.nav.dokopp.consumer.saf.SafJournalpostMapper.BrukerType.FNR;
 import static no.nav.dokopp.consumer.saf.SafJournalpostMapper.BrukerType.ORGNR;
@@ -30,7 +32,22 @@ public class SafJournalpostMapper {
 				.avsenderMottakerId((avsenderMottaker == null || isEmpty(avsenderMottaker.getId())) ? null : avsenderMottaker.getId().trim())
 				.avsenderMottakerType(avsenderMottaker == null ? null : mapBrukerType(avsenderMottaker.getType()))
 				.antallRetur(mapAntallRetur(safJournalpost.getAntallRetur()))
+				.skjerming(safJournalpost.getSkjerming() != null)
+				.hoveddokumentSkjerming(finnSkjermingForDokumenter(safJournalpost.getDokumenter()))
 				.build();
+	}
+
+	private static boolean finnSkjermingForDokumenter(List<SafResponse.SafJournalpost.SafDokument> dokumenter) {
+		if (dokumenter == null || dokumenter.isEmpty()) {
+			return false;
+		}
+		var dokument = dokumenter.get(0);
+		if (dokument.getSkjerming() != null) {
+			return true;
+		}
+		return dokument.getDokumentvarianter().stream()
+				.filter(safDokumentVariant -> "ARKIV".equalsIgnoreCase(safDokumentVariant.getVariantformat()))
+				.anyMatch(safArkivDokumentVariant -> safArkivDokumentVariant.getSkjerming() != null);
 	}
 
 	private static Integer mapAntallRetur(String antallRetur) {

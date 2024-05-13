@@ -16,6 +16,8 @@ public class JournalpostResponse {
 	private Integer antallRetur;
 	private String avsenderMottakerId;
 	private String avsenderMottakerType;
+	private Boolean skjerming;
+	private Boolean hoveddokumentSkjerming;
 
 	public boolean isAlleredeRegistrertReturpost() {
 		return antallRetur != null && antallRetur > 0;

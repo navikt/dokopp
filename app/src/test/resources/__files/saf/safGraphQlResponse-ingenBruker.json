@@ -8,7 +8,27 @@
       "sak": {
         "arkivsaksnummer": "1",
         "arkivsaksystem": "FS22"
-      }
+      },
+      "skjerming": null,
+      "dokumenter": [
+        {
+          "skjerming": null,
+          "dokumentvarianter": [
+            {
+              "variantformat": "ORIGINAL",
+              "skjerming": null
+            },
+            {
+              "variantformat": "ARKIV",
+              "skjerming": null
+            },
+            {
+              "variantformat": "FULLVERSJON",
+              "skjerming": null
+            }
+          ]
+        }
+      ]
     }
   }
 }

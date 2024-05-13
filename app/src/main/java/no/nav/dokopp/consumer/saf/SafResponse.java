@@ -28,6 +28,22 @@ public class SafResponse {
 		private Sak sak;
 		private Bruker bruker;
 		private AvsenderMottaker avsenderMottaker;
+		private String skjerming;
+		private List<SafDokument> dokumenter;
+
+		@Value
+		@Builder
+		public static class SafDokument {
+			String skjerming;
+			List<SafDokumentVariant> dokumentvarianter;
+
+			@Value
+			@Builder
+			public static class SafDokumentVariant {
+				String variantformat;
+				String skjerming;
+			}
+		}
 
 		@Value
 		@Builder
