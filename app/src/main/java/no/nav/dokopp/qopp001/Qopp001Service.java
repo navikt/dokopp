@@ -63,7 +63,7 @@ public class Qopp001Service {
 		final String fagomrade = journalpostResponse.getTema();
 		final String journalfoerendeEnhet = journalpostResponse.getJournalfEnhet();
 
-		if (journalpostResponse.getSkjerming() || journalpostResponse.getHoveddokumentSkjerming()) {
+		if (journalpostResponse.isSkjerming() || journalpostResponse.isHoveddokumentSkjerming()) {
 			log.info("qopp001 lager ikke oppgave for journalpostId={} fagområde={} da den er skjermet og ikke vil bli behandlet. Meldingen forkastes uten ytteligere behandling.",
 					journalpostId, fagomrade);
 			throw new AvsluttBehandlingOgKastMeldingException("Journalposten er skjermet og returpost kan ikke behandles");
