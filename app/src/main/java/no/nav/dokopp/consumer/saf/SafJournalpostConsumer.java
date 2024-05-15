@@ -113,6 +113,14 @@ public class SafJournalpostConsumer {
 						arkivsaksnummer
 						arkivsaksystem
 					}
+					skjerming
+					dokumenter {
+						skjerming
+						dokumentvarianter {
+							variantformat
+							skjerming
+						}
+					}
 				}
 			}
 			""";

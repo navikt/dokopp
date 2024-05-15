@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -245,6 +246,30 @@ public class Qopp001IT {
 			assertThat(listAppender.list.get(0).getFormattedMessage(), is("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId=123456."));
 			assertThat(listAppender.list.get(1).getFormattedMessage(), is("qopp001 lager ikke oppgave i Gosys for journalpostId=123456 da den er returpost fra fagområde=STO og ikke vil bli behandlet."));
 			assertThat(listAppender.list.get(2).getFormattedMessage(), is("qopp001 har flagget journalpost med journalpostId=123456 som returpost."));
+			verify(exactly(0), postRequestedFor(urlEqualTo("/api/v1/oppgaver")));
+		});
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"arkiv", "dokument", "journalpost"})
+	public void shouldNotOppretteOppgaveWhenSkjermet(String skjermingNotNullIn) throws Exception {
+		stubFor(post("/arkiverdokumentproduksjon").willReturn(aResponse().withStatus(HttpStatus.OK.value())
+				.withBodyFile("tjoark110/tjoark110_happy.xml")));
+		stubFor(post(urlMatching("/saf/graphql"))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("saf/safGraphQlResponse-skjerming-" + skjermingNotNullIn + ".json")));
+		stubAzureToken();
+		Logger fooLogger = (Logger) LoggerFactory.getLogger(Qopp001Service.class);
+		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+		listAppender.start();
+		fooLogger.addAppender(listAppender);
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			assertThat(listAppender.list.size(), is(2));
+			assertThat(listAppender.list.get(0).getFormattedMessage(), is("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId=123456."));
+			assertThat(listAppender.list.get(1).getFormattedMessage(), is("qopp001 lager ikke oppgave for journalpostId=123456 fagområde=DAG da den er skjermet og ikke vil bli behandlet. Meldingen forkastes uten ytteligere behandling."));
 			verify(exactly(0), postRequestedFor(urlEqualTo("/api/v1/oppgaver")));
 		});
 	}

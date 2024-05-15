@@ -63,7 +63,11 @@ public class Qopp001Service {
 		final String fagomrade = journalpostResponse.getTema();
 		final String journalfoerendeEnhet = journalpostResponse.getJournalfEnhet();
 
-		if (FAGOMRAADE_STO.equalsIgnoreCase(fagomrade)) {
+		if (journalpostResponse.isSkjerming() || journalpostResponse.isHoveddokumentSkjerming()) {
+			log.info("qopp001 lager ikke oppgave for journalpostId={} fagområde={} da den er skjermet og ikke vil bli behandlet. Meldingen forkastes uten ytteligere behandling.",
+					journalpostId, fagomrade);
+			throw new AvsluttBehandlingOgKastMeldingException("Journalposten er skjermet og returpost kan ikke behandles");
+		} else if (FAGOMRAADE_STO.equalsIgnoreCase(fagomrade)) {
 			log.info("qopp001 lager ikke oppgave i Gosys for journalpostId={} da den er returpost fra fagområde={} og ikke vil bli behandlet.",
 					journalpostId, fagomrade);
 		} else {
@@ -78,7 +82,7 @@ public class Qopp001Service {
 				if (MASKINELL_ENHET.equals(journalfoerendeEnhet)) {
 					log.warn("qopp001 klarte ikke å opprette oppgave i Gosys for journalpostId={}, fagområde={}. Maskinell enhet 9999. Det er forventet at det kan skje, og meldingen forkastes uten ytterligere behandling.",
 							journalpostId, temaPaaOpprettetOppgave);
-					return;
+					throw new AvsluttBehandlingOgKastMeldingException("Journalposten har Maskinell Enhet 9999 og returpost kan ikke behandles");
 				} else {
 					log.info("qopp001 klarte ikke å opprette oppgave i Gosys for journalpostId={}, fagområde={} på første forsøk med journalførendeEnhet={}. Forsøker på nytt med tildeltEnhetsnummer=null",
 							journalpostId, temaPaaOpprettetOppgave, journalfoerendeEnhet);
