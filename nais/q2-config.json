@@ -3,7 +3,7 @@
   "INGRESSES": [
     "https://dokopp.dev.intern.nav.no"
   ],
-  "MQGATEWAY01_HOSTNAME": "b27apvl219.preprod.local",
+  "MQGATEWAY01_HOSTNAME": "mqls01.preprod.local",
   "MQGATEWAY01_PORT": "1413",
   "MQGATEWAY01_NAME": "MQLS01",
   "DOKOPP_CHANNEL_NAME": "Q2_DOKOPP",
