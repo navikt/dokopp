@@ -23,6 +23,7 @@ import static no.nav.dokopp.constants.HeaderConstants.NAV_CALLID;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_SAF;
+import static no.nav.dokopp.consumer.saf.SafJournalpostMapper.map;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
@@ -55,13 +56,15 @@ public class SafJournalpostConsumer {
 				.bodyToMono(SafResponse.class)
 				.doOnError(handleSafErrors(journalpostId))
 				.block();
-		List<SafResponse.SafError> errors = safResponse == null ? null : safResponse.getErrors();
+
 		if (safResponse == null) {
 			throw new SafJournalpostQueryTechnicalException("Kall til saf feilet. data feltet er null");
 		}
-		SafResponse.SafHentJournalpost safResponseData = safResponse.getData();
-		return (errors == null || errors.isEmpty()) ? SafJournalpostMapper.map(safResponseData.getJournalpost(), journalpostId) : handleSafError(errors, journalpostId);
-
+		var errors = safResponse.getErrors();
+		if (errors != null && !errors.isEmpty()) {
+			return handleSafError(errors, journalpostId);
+		}
+		return map(safResponse.getData().getJournalpost(), journalpostId);
 	}
 
 	private SafRequest createHentJournalpostRequest(String journalpostId) {
