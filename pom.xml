@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.5</version>
+		<version>3.3.3</version>
 	</parent>
 
 	<groupId>no.nav.dokopp</groupId>
@@ -22,11 +22,11 @@
 	<properties>
 		<java.version>21</java.version>
 
-		<camel.version>4.5.0</camel.version>
-		<ibm.mq.client.version>9.3.5.1</ibm.mq.client.version>
-		<logstash-logback-encode.version>7.4</logstash-logback-encode.version>
+		<camel.version>4.7.0</camel.version>
+		<ibm.mq.client.version>9.4.0.5</ibm.mq.client.version>
+		<logstash-logback-encode.version>8.0</logstash-logback-encode.version>
 		<resilience4j.version>2.2.0</resilience4j.version>
-		<cxf.version>4.0.4</cxf.version>
+		<cxf.version>4.0.5</cxf.version>
 		<context-propagation.version>1.1.1</context-propagation.version>
 
 		<opprettoppgave-tjenestespesifikasjon-v1.version>2-3843acc</opprettoppgave-tjenestespesifikasjon-v1.version>

@@ -40,6 +40,7 @@ public class OppgaveConsumer implements Oppgave {
 				.build();
 	}
 
+	@Override
 	@Retryable(retryFor = OpprettOppgaveTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT))
 	public Integer opprettOppgave(OpprettOppgaveRequest opprettOppgaveRequest) {
 		return webClient.post()

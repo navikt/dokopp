@@ -7,7 +7,6 @@ import no.nav.dokopp.consumer.saf.exceptions.SafJournalpostQueryTechnicalExcepti
 import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.dokopp.qopp001.JournalpostResponse;
 import org.slf4j.MDC;
-import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -24,6 +23,7 @@ import static no.nav.dokopp.constants.HeaderConstants.NAV_CALLID;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_SAF;
+import static no.nav.dokopp.consumer.saf.SafJournalpostMapper.map;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
@@ -48,7 +48,7 @@ public class SafJournalpostConsumer {
 	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = BACKOFF_MULTIPLIER))
 	public JournalpostResponse hentJournalpost(String journalpostId) {
 		SafResponse safResponse = webClient.post()
-								.uri("/graphql")
+				.uri("/graphql")
 				.headers(httpHeaders -> httpHeaders.add(NAV_CALLID, MDC.get(NAV_CALL_ID)))
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_SAF))
 				.bodyValue(createHentJournalpostRequest(journalpostId))
@@ -56,14 +56,15 @@ public class SafJournalpostConsumer {
 				.bodyToMono(SafResponse.class)
 				.doOnError(handleSafErrors(journalpostId))
 				.block();
-		List<SafResponse.SafError> errors = safResponse == null ? null : safResponse.getErrors();
-		return (errors == null || errors.isEmpty()) ? SafJournalpostMapper.map(safResponse.getData().getJournalpost(), journalpostId) : handleSafError(errors, journalpostId);
 
-	}
-
-	private HttpHeaders createHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		return headers;
+		if (safResponse == null) {
+			throw new SafJournalpostQueryTechnicalException("Kall til saf feilet. data feltet er null");
+		}
+		var errors = safResponse.getErrors();
+		if (errors != null && !errors.isEmpty()) {
+			return handleSafError(errors, journalpostId);
+		}
+		return map(safResponse.getData().getJournalpost(), journalpostId);
 	}
 
 	private SafRequest createHentJournalpostRequest(String journalpostId) {
@@ -81,8 +82,8 @@ public class SafJournalpostConsumer {
 	}
 
 	private JournalpostResponse handleSafError(List<SafResponse.SafError> errors, String journalpostId) {
-		String errorCode = errors.get(0).getExtensions().getCode();
-		String errorMsg = errors.get(0).getMessage();
+		String errorCode = errors.getFirst().getExtensions().getCode();
+		String errorMsg = errors.getFirst().getMessage();
 		if (SERVER_ERROR_CODE.equals(errorCode)) {
 			throw new SafJournalpostQueryTechnicalException(format("Teknisk feil ved kall mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
 		} else if (JP_NOT_FOUND_ERROR_CODE.equals(errorCode)) {
