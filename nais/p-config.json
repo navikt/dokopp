@@ -1,4 +1,4 @@
-{
+  {
   "APP_NAME": "dokopp",
   "INGRESSES": [
     "https://dokopp.intern.nav.no"
@@ -20,6 +20,5 @@
   "DOKOPP_ENDPOINTS_PDL_SCOPE": "api://prod-fss.pdl.pdl-api/.default",
   "DOKOPP_ENDPOINTS_PDL_URL": "http://pdl-api.pdl.svc.nais.local",
   "SRVDOKOPP": "/serviceuser/data/prod/srvdokopp",
-  "DOKOPPCERT": "/certificate/data/prod/srvdokopp",
-  "APPDYNAMICS": "/apikey/appdynamics/prod"
+  "DOKOPPCERT": "/certificate/data/prod/srvdokopp"
 }

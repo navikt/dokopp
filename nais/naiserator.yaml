@@ -78,8 +78,6 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvdokopp
       - kvPath: {{ DOKOPPCERT }}
         mountPath: /var/run/secrets/nais.io/certificate/srvdokopp
-      - kvPath: {{ APPDYNAMICS }}
-        mountPath: /var/run/secrets/nais.io/appdynamics
   azure:
     application:
       enabled: true
