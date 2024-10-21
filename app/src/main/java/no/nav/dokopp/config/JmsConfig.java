@@ -49,7 +49,7 @@ public class JmsConfig {
 	}
 
 	private JmsPoolConnectionFactory createConnectionFactory(final MqGatewayAlias mqGatewayAlias,
-															 final MqChannelAlias mqChannelAlias, final ServiceuserAlias serviceuserAlias) throws JMSException, JMSException {
+															 final MqChannelAlias mqChannelAlias, final ServiceuserAlias serviceuserAlias) throws JMSException {
 		MQConnectionFactory connectionFactory = new MQConnectionFactory();
 		connectionFactory.setHostName(mqGatewayAlias.getHostname());
 		connectionFactory.setPort(mqGatewayAlias.getPort());
@@ -58,14 +58,10 @@ public class JmsConfig {
 		connectionFactory.setCCSID(UTF_8_WITH_PUA);
 		connectionFactory.setIntProperty(JMS_IBM_ENCODING, MQENC_NATIVE);
 		connectionFactory.setIntProperty(JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA);
-		if (mqChannelAlias.isEnabletls()) {
-			connectionFactory.setSSLCipherSuite(ANY_TLS13_OR_HIGHER);
-			SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-			connectionFactory.setSSLSocketFactory(sslSocketFactory);
-			connectionFactory.setChannel(mqChannelAlias.getSecurename());
-		} else {
-			connectionFactory.setChannel(mqChannelAlias.getName());
-		}
+		connectionFactory.setSSLCipherSuite(ANY_TLS13_OR_HIGHER);
+		SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+		connectionFactory.setSSLSocketFactory(sslSocketFactory);
+		connectionFactory.setChannel(mqChannelAlias.getSecurename());
 
 		UserCredentialsConnectionFactoryAdapter adapter = new UserCredentialsConnectionFactoryAdapter();
 		adapter.setTargetConnectionFactory(connectionFactory);

@@ -1,4 +1,4 @@
-  {
+{
   "APP_NAME": "dokopp",
   "INGRESSES": [
     "https://dokopp.intern.nav.no"
@@ -6,9 +6,7 @@
   "MQGATEWAY01_HOSTNAME": "mpls01.adeo.no",
   "MQGATEWAY01_PORT": "1414",
   "MQGATEWAY01_NAME": "MPLS01",
-  "DOKOPP_CHANNEL_NAME": "P_DOKOPP",
   "DOKOPP_CHANNEL_SECURENAME": "P_DOKOPP_SECURE",
-  "DOKOPP_CHANNEL_ENABLETLS": "true",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.P_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.P_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
   "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/oauth2/v2.0/token",
@@ -19,6 +17,5 @@
   "ARKIVERDOKUMENTPRODUKSJON_V1_ENDPOINTURL": "https://dokarkiv.intern.nav.no/services/arkiverdokumentproduksjon/v1",
   "DOKOPP_ENDPOINTS_PDL_SCOPE": "api://prod-fss.pdl.pdl-api/.default",
   "DOKOPP_ENDPOINTS_PDL_URL": "http://pdl-api.pdl.svc.nais.local",
-  "SRVDOKOPP": "/serviceuser/data/prod/srvdokopp",
-  "DOKOPPCERT": "/certificate/data/prod/srvdokopp"
+  "SRVDOKOPP": "/serviceuser/data/prod/srvdokopp"
 }
