@@ -6,9 +6,7 @@
   "MQGATEWAY01_HOSTNAME": "mqls01.preprod.local",
   "MQGATEWAY01_PORT": "1413",
   "MQGATEWAY01_NAME": "MQLS01",
-  "DOKOPP_CHANNEL_NAME": "Q2_DOKOPP",
   "DOKOPP_CHANNEL_SECURENAME": "Q2_DOKOPP_SECURE",
-  "DOKOPP_CHANNEL_ENABLETLS": "true",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.Q2_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
   "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token",
@@ -19,6 +17,5 @@
   "DOKOPP_ENDPOINTS_PDL_SCOPE": "api://dev-fss.pdl.pdl-api/.default",
   "DOKOPP_ENDPOINTS_PDL_URL": "http://pdl-api.pdl.svc.nais.local",
   "ARKIVERDOKUMENTPRODUKSJON_V1_ENDPOINTURL": "https://dokarkiv.dev.intern.nav.no/services/arkiverdokumentproduksjon/v1",
-  "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp",
-  "DOKOPPCERT": "/certificate/data/dev/srvdokopp"
+  "SRVDOKOPP": "/serviceuser/data/dev/srvdokopp"
 }

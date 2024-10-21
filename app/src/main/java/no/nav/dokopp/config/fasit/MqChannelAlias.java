@@ -14,7 +14,5 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class MqChannelAlias {
 	@NotEmpty
-	private String name;
 	private String securename;
-	private boolean enabletls;
 }
