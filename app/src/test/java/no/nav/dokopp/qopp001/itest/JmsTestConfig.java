@@ -9,6 +9,7 @@ import org.messaginghub.pooled.jms.JmsPoolConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 
 @Profile("itest")
@@ -32,14 +33,15 @@ public class JmsTestConfig {
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
-	public EmbeddedActiveMQ activeMQServer() {
+	public EmbeddedActiveMQ embeddedActiveMQ() {
 		EmbeddedActiveMQ embeddedActiveMQ = new EmbeddedActiveMQ();
 		embeddedActiveMQ.setConfigResourcePath("artemis-server.xml");
 		return embeddedActiveMQ;
 	}
 
 	@Bean
-	public ConnectionFactory activemqConnectionFactory(EmbeddedActiveMQ embeddedActiveMQ) {
+	@DependsOn("embeddedActiveMQ")
+	public ConnectionFactory activemqConnectionFactory() {
 		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://0");
 		JmsPoolConnectionFactory pooledFactory = new JmsPoolConnectionFactory();
 		pooledFactory.setConnectionFactory(activeMQConnectionFactory);
