@@ -5,14 +5,11 @@ import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.OpprettOppgaveTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import java.util.function.Consumer;
 
 import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
@@ -53,20 +50,17 @@ public class OppgaveConsumer implements Oppgave {
 				.bodyValue(opprettOppgaveRequest)
 				.retrieve()
 				.bodyToMono(OpprettOppgaveResponse.class)
-				.doOnError(handleOppgaveErrors())
+				.onErrorMap(this::mapOpprettOppgaveError)
 				.mapNotNull(OpprettOppgaveResponse::getId)
 				.block();
 	}
 
-	private Consumer<Throwable> handleOppgaveErrors() {
-		return error -> {
-			if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-				throw new OpprettOppgaveFunctionalException(String.format("Funksjonell feil ved kall mot Oppgave:opprettOppgave: %s",
-						error.getMessage()), error);
-			} else if (error instanceof WebClientResponseException response && response.getStatusCode().is5xxServerError()) {
-				throw new OpprettOppgaveTechnicalException(String.format("Teknisk feil ved kall mot Oppgave:opprettOppgave: %s",
-						error.getMessage()), error);
-			}
-		};
+	private Throwable mapOpprettOppgaveError(Throwable error) {
+		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
+			return new OpprettOppgaveFunctionalException(String.format("Funksjonell feil ved kall mot Oppgave:opprettOppgave: %s",
+					error.getMessage()), error);
+		}
+		return new OpprettOppgaveTechnicalException(String.format("Teknisk feil ved kall mot Oppgave:opprettOppgave: %s",
+				error.getMessage()), error);
 	}
 }
