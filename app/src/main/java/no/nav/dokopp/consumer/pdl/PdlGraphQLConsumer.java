@@ -8,7 +8,6 @@ import org.slf4j.MDC;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -54,7 +53,7 @@ public class PdlGraphQLConsumer {
 				.bodyValue(mapRequest(personnummer))
 				.retrieve()
 				.bodyToMono(PdlHentIdenterResponse.class)
-				.doOnError(handlePdlErrors())
+				.onErrorMap(this::mapPdlError)
 				.mapNotNull(this::getAktorIdFromResponse)
 				.block();
 	}
@@ -75,8 +74,6 @@ public class PdlGraphQLConsumer {
 			}
 			throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid for folkeregisterident i pdl. " + pdlHentIdenterResponse.getErrors());
 		}
-
-
 	}
 
 	private PdlRequest mapRequest(final String aktoerId) {
@@ -98,13 +95,10 @@ public class PdlGraphQLConsumer {
 				.build();
 	}
 
-	private Consumer<Throwable> handlePdlErrors() {
-		return error -> {
-			if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-				throw new PdlHentAktoerIdForFnrFunctionalException("Kall mot pdl feilet funksjonelt.", error);
-			} else if (error instanceof WebClientResponseException response && response.getStatusCode().is5xxServerError()) {
-				throw new PdlHentAktoerIdForFnrTechnicalException("Ukjent teknisk feil mot pdl", error);
-			}
-		};
+	private Throwable mapPdlError(Throwable error) {
+		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
+			return new PdlHentAktoerIdForFnrFunctionalException("Kall mot pdl feilet funksjonelt.", error);
+		}
+		return new PdlHentAktoerIdForFnrTechnicalException("Ukjent teknisk feil mot pdl", error);
 	}
 }

@@ -14,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import static ch.qos.logback.core.recovery.RecoveryCoordinator.BACKOFF_MULTIPLIER;
 import static java.lang.String.format;
@@ -30,10 +29,10 @@ import static org.springframework.security.oauth2.client.web.reactive.function.c
 @Slf4j
 @Component
 public class SafJournalpostConsumer {
-	private final String JP_NOT_FOUND_ERROR_CODE = "not_found";
-	private final String FORBIDDEN_ERROR_CODE = "forbidden";
-	private final String BAD_REQUEST_ERROR_CODE = "bad_request";
-	private final String SERVER_ERROR_CODE = "server_error";
+	private static final String JP_NOT_FOUND_ERROR_CODE = "not_found";
+	private static final String FORBIDDEN_ERROR_CODE = "forbidden";
+	private static final String BAD_REQUEST_ERROR_CODE = "bad_request";
+	private static final String SERVER_ERROR_CODE = "server_error";
 
 	private final WebClient webClient;
 
@@ -54,7 +53,7 @@ public class SafJournalpostConsumer {
 				.bodyValue(createHentJournalpostRequest(journalpostId))
 				.retrieve()
 				.bodyToMono(SafResponse.class)
-				.doOnError(handleSafErrors(journalpostId))
+				.onErrorMap(error -> mapSafError(error, journalpostId))
 				.block();
 
 		if (safResponse == null) {
@@ -84,20 +83,21 @@ public class SafJournalpostConsumer {
 	private JournalpostResponse handleSafError(List<SafResponse.SafError> errors, String journalpostId) {
 		String errorCode = errors.getFirst().getExtensions().getCode();
 		String errorMsg = errors.getFirst().getMessage();
-		if (SERVER_ERROR_CODE.equals(errorCode)) {
-			throw new SafJournalpostQueryTechnicalException(format("Teknisk feil ved kall mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
-		} else if (JP_NOT_FOUND_ERROR_CODE.equals(errorCode)) {
-			throw new SafFunctionalException(format("Fant ingen journalpost med journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
-		} else if (FORBIDDEN_ERROR_CODE.equals(errorCode)) {
-			throw new SafFunctionalException(format("Forbidden i kall mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
-		} else if (BAD_REQUEST_ERROR_CODE.equals(errorCode)) {
-			throw new SafFunctionalException(format("Bad request mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
-		} else {
-			throw new SafFunctionalException(format("Ukjent feil:%s i kall mot SAF for journalpostId=%s, feilmelding:%s", errorCode, journalpostId, errorMsg));
+		switch (errorCode) {
+			case SERVER_ERROR_CODE ->
+					throw new SafJournalpostQueryTechnicalException(format("Teknisk feil ved kall mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
+			case JP_NOT_FOUND_ERROR_CODE ->
+					throw new SafFunctionalException(format("Fant ingen journalpost med journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
+			case FORBIDDEN_ERROR_CODE ->
+					throw new SafFunctionalException(format("Forbidden i kall mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
+			case BAD_REQUEST_ERROR_CODE ->
+					throw new SafFunctionalException(format("Bad request mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
+			case null, default ->
+					throw new SafFunctionalException(format("Ukjent feil:%s i kall mot SAF for journalpostId=%s, feilmelding:%s", errorCode, journalpostId, errorMsg));
 		}
 	}
 
-	private final String JOURNALPOST_QUERY = """
+	private static final String JOURNALPOST_QUERY = """
 			query journalpost($queryJournalpostId: String!) {
 				journalpost(journalpostId: $queryJournalpostId) {
 					journalfoerendeEnhet
@@ -126,15 +126,11 @@ public class SafJournalpostConsumer {
 			}
 			""";
 
-	private Consumer<Throwable> handleSafErrors(String journalpostId) {
-		return error -> {
-			if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-				throw new SafFunctionalException(format("Henting av journalpost=%s feilet med status: %s, feilmelding: %s", journalpostId,
-						((WebClientResponseException) error).getStatusCode(), error.getMessage()));
-			} else if (error instanceof WebClientResponseException response && response.getStatusCode().is5xxServerError()) {
-				throw new SafJournalpostQueryTechnicalException(format("Kall mot SAF feilet for journalpost=%s med status: %s, feilmelding: %s", journalpostId,
-						((WebClientResponseException) error).getStatusCode(), error.getMessage()), error);
-			}
-		};
+	private Throwable mapSafError(Throwable error, String journalpostId) {
+		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
+			return new SafFunctionalException(format("Henting av journalpost=%s feilet med status: %s, feilmelding: %s", journalpostId,
+					response.getStatusCode(), error.getMessage()));
+		}
+		return new SafJournalpostQueryTechnicalException(format("Kall mot SAF feilet teknisk for journalpost=%s", journalpostId), error);
 	}
 }
