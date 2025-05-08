@@ -9,7 +9,6 @@
   "DOKOPP_CHANNEL_SECURENAME": "P_DOKOPP_SECURE",
   "DOKOPP_QOPP001_OPPRETT_OPPGAVE_QUEUENAME": "QA.P_DOKOPP.QOPP001_OPPRETT_OPPGAVE",
   "DOKOPP_QOPP001_FUNKSJONELL_FEIL_QUEUENAME": "QA.P_DOKOPP.QOPP001_FUNKSJONELL_FEIL",
-  "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/oauth2/v2.0/token",
   "DOKOPP_ENDPOINTS_SAF_SCOPE": "api://prod-fss.teamdokumenthandtering.saf/.default",
   "DOKOPP_ENDPOINTS_SAF_URL": "http://saf.teamdokumenthandtering.svc.nais.local",
   "DOKOPP_ENDPOINTS_OPPGAVE_URL": "http://oppgave.oppgavehandtering.svc.nais.local",
