@@ -41,8 +41,6 @@ spec:
       value: {{ DOKOPP_ENDPOINTS_OPPGAVE_URL }}
     - name: DOKOPP_ENDPOINTS_OPPGAVE_SCOPE
       value: {{ DOKOPP_ENDPOINTS_OPPGAVE_SCOPE }}
-    - name: AZURE_APP_TOKEN_URL
-      value: {{ AZURE_APP_TOKEN_URL }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
