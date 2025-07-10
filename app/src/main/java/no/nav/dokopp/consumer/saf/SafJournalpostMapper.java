@@ -1,6 +1,10 @@
 package no.nav.dokopp.consumer.saf;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokopp.consumer.saf.SafResponse.SafJournalpost.AvsenderMottaker;
+import no.nav.dokopp.consumer.saf.SafResponse.SafJournalpost.Bruker;
+import no.nav.dokopp.consumer.saf.SafResponse.SafJournalpost.SafDokument;
+import no.nav.dokopp.consumer.saf.SafResponse.SafJournalpost.Sak;
 import no.nav.dokopp.qopp001.JournalpostResponse;
 
 import java.util.List;
@@ -17,9 +21,9 @@ public class SafJournalpostMapper {
 
 	public static JournalpostResponse map(SafResponse.SafJournalpost safJournalpost, String journalpostId) {
 
-		SafResponse.SafJournalpost.Bruker bruker = safJournalpost.getBruker();
-		SafResponse.SafJournalpost.AvsenderMottaker avsenderMottaker = safJournalpost.getAvsenderMottaker();
-		SafResponse.SafJournalpost.Sak sak = safJournalpost.getSak();
+		Bruker bruker = safJournalpost.getBruker();
+		AvsenderMottaker avsenderMottaker = safJournalpost.getAvsenderMottaker();
+		Sak sak = safJournalpost.getSak();
 
 		return JournalpostResponse.builder()
 				.journalpostId(journalpostId)
@@ -37,17 +41,16 @@ public class SafJournalpostMapper {
 				.build();
 	}
 
-	private static boolean finnSkjermingForDokumenter(List<SafResponse.SafJournalpost.SafDokument> dokumenter) {
-		if (dokumenter == null || dokumenter.isEmpty()) {
-			return false;
+	private static String mapBrukerType(String brukertype) {
+		if (AKTOERID.name().equalsIgnoreCase(brukertype) || FNR.name().equalsIgnoreCase(brukertype)) {
+			return PERSON.name();
 		}
-		var dokument = dokumenter.get(0);
-		if (dokument.getSkjerming() != null) {
-			return true;
+
+		if (ORGNR.name().equalsIgnoreCase(brukertype)) {
+			return ORGANISASJON.name();
 		}
-		return dokument.getDokumentvarianter().stream()
-				.filter(safDokumentVariant -> "ARKIV".equalsIgnoreCase(safDokumentVariant.getVariantformat()))
-				.anyMatch(safArkivDokumentVariant -> safArkivDokumentVariant.getSkjerming() != null);
+
+		return null;
 	}
 
 	private static Integer mapAntallRetur(String antallRetur) {
@@ -58,9 +61,19 @@ public class SafJournalpostMapper {
 		}
 	}
 
-	private static String mapBrukerType(String brukertype) {
-		return (AKTOERID.name().equalsIgnoreCase(brukertype) || FNR.name().equalsIgnoreCase(brukertype)) ? PERSON.name() :
-					ORGNR.name().equalsIgnoreCase(brukertype) ? ORGANISASJON.name() : null;
+	private static boolean finnSkjermingForDokumenter(List<SafDokument> dokumenter) {
+		if (dokumenter == null || dokumenter.isEmpty()) {
+			return false;
+		}
+
+		var dokument = dokumenter.getFirst();
+		if (dokument.getSkjerming() != null) {
+			return true;
+		}
+
+		return dokument.getDokumentvarianter().stream()
+				.filter(safDokumentVariant -> "ARKIV".equalsIgnoreCase(safDokumentVariant.getVariantformat()))
+				.anyMatch(safArkivDokumentVariant -> safArkivDokumentVariant.getSkjerming() != null);
 	}
 
 	enum BrukerType {

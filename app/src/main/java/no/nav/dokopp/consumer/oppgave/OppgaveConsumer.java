@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import static java.lang.String.format;
 import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
@@ -57,10 +58,10 @@ public class OppgaveConsumer implements Oppgave {
 
 	private Throwable mapOpprettOppgaveError(Throwable error) {
 		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-			return new OpprettOppgaveFunctionalException(String.format("Funksjonell feil ved kall mot Oppgave:opprettOppgave: %s",
+			return new OpprettOppgaveFunctionalException(format("Funksjonell feil ved kall mot Oppgave:opprettOppgave: %s",
 					error.getMessage()), error);
 		}
-		return new OpprettOppgaveTechnicalException(String.format("Teknisk feil ved kall mot Oppgave:opprettOppgave: %s",
+		return new OpprettOppgaveTechnicalException(format("Teknisk feil ved kall mot Oppgave:opprettOppgave: %s",
 				error.getMessage()), error);
 	}
 }

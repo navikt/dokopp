@@ -59,10 +59,12 @@ public class SafJournalpostConsumer {
 		if (safResponse == null) {
 			throw new SafJournalpostQueryTechnicalException("Kall til saf feilet. data feltet er null");
 		}
+
 		var errors = safResponse.getErrors();
 		if (errors != null && !errors.isEmpty()) {
 			return handleSafError(errors, journalpostId);
 		}
+
 		return map(safResponse.getData().getJournalpost(), journalpostId);
 	}
 
@@ -128,8 +130,9 @@ public class SafJournalpostConsumer {
 
 	private Throwable mapSafError(Throwable error, String journalpostId) {
 		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-			return new SafFunctionalException(format("Henting av journalpost=%s feilet med status: %s, feilmelding: %s", journalpostId,
-					response.getStatusCode(), error.getMessage()));
+			return new SafFunctionalException(format("Henting av journalpost=%s feilet med status=%s, feilmelding=%s",
+					journalpostId, response.getStatusCode(), error.getMessage())
+			);
 		}
 		return new SafJournalpostQueryTechnicalException(format("Kall mot SAF feilet teknisk for journalpost=%s", journalpostId), error);
 	}

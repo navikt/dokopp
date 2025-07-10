@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 
+import static java.lang.String.format;
 import static no.nav.dokopp.constants.DomainConstants.ARKIVSYSTEM_JOARK;
 import static no.nav.dokopp.qopp001.Qopp001Route.PROPERTY_JOURNALPOST_ID;
 import static org.apache.commons.lang3.EnumUtils.isValidEnum;
@@ -53,7 +54,7 @@ public class Qopp001Service {
 		log.info("qopp001 har hentet journalpostInfo fra Joark for returpost med journalpostId={}.", journalpostId);
 
 		if (journalpostResponse.isAlleredeRegistrertReturpost()) {
-			throw new ReturpostAlleredeFlaggetException("qopp001 har oppdaget at returpost allerede er flagget som antallRetur=" + journalpostResponse.getAntallRetur() + ". Oppretter ikke oppgave i Gosys");
+			throw new ReturpostAlleredeFlaggetException(format("qopp001 har oppdaget at returpost allerede er flagget som antallRetur=%s. Oppretter ikke oppgave i Gosys", journalpostResponse.getAntallRetur()));
 		} else {
 			behandleReturpostOppgave(journalpostId, opprettOppgave, journalpostResponse);
 		}
@@ -99,12 +100,15 @@ public class Qopp001Service {
 
 	private void validateOppgaveTypeAndArkivsystem(OpprettOppgave opprettOppgave) {
 		if (!isValidEnum(OppgaveType.class, opprettOppgave.getOppgaveType())) {
-			throw new UgyldigInputverdiException(String.format("oppgaveType må være en gyldig oppgavetype. Gyldige oppgavetyper=%s. Input-oppgaveType=%s", EnumSet.allOf(OppgaveType.class), opprettOppgave.getOppgaveType()));
+			throw new UgyldigInputverdiException(format("oppgaveType må være en gyldig oppgavetype. Gyldige oppgavetyper=%s. Input-oppgaveType=%s",
+					EnumSet.allOf(OppgaveType.class), opprettOppgave.getOppgaveType())
+			);
 		}
 
 		if (!ARKIVSYSTEM_JOARK.equals(opprettOppgave.getArkivSystem()) || isBlank(opprettOppgave.getArkivKode())) {
-			throw new AvsluttBehandlingOgKastMeldingException("arkivSystem må være JOARK og arkivKode må være satt. arkivSystem=" + opprettOppgave.getArkivSystem() +
-					", arkivKode=" + opprettOppgave.getArkivKode());
+			throw new AvsluttBehandlingOgKastMeldingException(format("arkivSystem må være JOARK og arkivKode må være satt. arkivSystem=%s, arkivKode=%s",
+					opprettOppgave.getArkivSystem(), opprettOppgave.getArkivKode())
+			);
 		}
 	}
 
