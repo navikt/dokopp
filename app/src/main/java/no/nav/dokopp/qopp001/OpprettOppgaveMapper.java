@@ -5,7 +5,7 @@ import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.pdl.PdlGraphQLConsumer;
 import no.nav.dokopp.exception.UkjentBrukertypeException;
 import no.nav.dokopp.qopp001.domain.OppgaveType;
-import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
+import no.nav.opprettoppgave.tjenestespesifikasjon.OpprettOppgave;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
