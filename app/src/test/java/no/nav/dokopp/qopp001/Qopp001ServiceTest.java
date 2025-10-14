@@ -3,7 +3,7 @@ package no.nav.dokopp.qopp001;
 import no.nav.dokopp.consumer.saf.SafJournalpostConsumer;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
-import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
+import no.nav.opprettoppgave.tjenestespesifikasjon.OpprettOppgave;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

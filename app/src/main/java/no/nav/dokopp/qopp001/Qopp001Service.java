@@ -11,7 +11,7 @@ import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.dokopp.qopp001.domain.OppgaveType;
-import no.nav.opprettoppgave.tjenestespesifikasjon.v1.xml.jaxb2.gen.OpprettOppgave;
+import no.nav.opprettoppgave.tjenestespesifikasjon.OpprettOppgave;
 import org.apache.camel.ExchangeProperty;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Service;
