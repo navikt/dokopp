@@ -6,6 +6,15 @@ metadata:
   labels:
     team: teamdokumenthandtering
 spec:
+  envFrom:
+    - secret: dokopp
+  env:
+    - name: JAVA_TRUSTSTORE_OPTIONS
+      value: "-Djavax.net.ssl.trustStore=$(NAV_TRUSTSTORE_PATH)
+              -Djavax.net.ssl.trustStorePassword=$(NAV_TRUSTSTORE_PASSWORD)"
+    - name: JDK_JAVA_OPTIONS
+      value: "-XX:MaxRAMPercentage=75
+              $(JAVA_PROXY_OPTIONS) $(JAVA_TRUSTSTORE_OPTIONS)"
   env:
     - name: MQGATEWAY01_HOSTNAME
       value: {{ MQGATEWAY01_HOSTNAME }}
@@ -69,11 +78,6 @@ spec:
       memory: 256Mi
     limits:
       memory: 512Mi
-  vault:
-    enabled: true
-    paths:
-      - kvPath: {{ SRVDOKOPP }}
-        mountPath: /var/run/secrets/nais.io/srvdokopp
   azure:
     application:
       enabled: true

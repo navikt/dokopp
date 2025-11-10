@@ -15,6 +15,5 @@
   "DOKOPP_ENDPOINTS_OPPGAVE_SCOPE": "api://prod-fss.oppgavehandtering.oppgave/.default",
   "ARKIVERDOKUMENTPRODUKSJON_V1_ENDPOINTURL": "https://dokarkiv.intern.nav.no/services/arkiverdokumentproduksjon/v1",
   "DOKOPP_ENDPOINTS_PDL_SCOPE": "api://prod-fss.pdl.pdl-api/.default",
-  "DOKOPP_ENDPOINTS_PDL_URL": "http://pdl-api.pdl.svc.nais.local",
-  "SRVDOKOPP": "/serviceuser/data/prod/srvdokopp"
+  "DOKOPP_ENDPOINTS_PDL_URL": "http://pdl-api.pdl.svc.nais.local"
 }
