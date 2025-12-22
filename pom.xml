@@ -23,7 +23,7 @@
 		<java.version>21</java.version>
 
 		<camel.version>4.16.0</camel.version>
-		<com.ibm.mq.jakarta.client.version>9.4.4.0</com.ibm.mq.jakarta.client.version>
+		<com.ibm.mq.jakarta.client.version>9.4.4.1</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encode.version>8.1</logstash-logback-encode.version>
 		<cxf.version>4.1.4</cxf.version>
 		<context-propagation.version>1.2.0</context-propagation.version>
