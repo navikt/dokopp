@@ -31,7 +31,7 @@
 		<dok-legacy-tjenestespesifikasjoner.version>43-5bca208</dok-legacy-tjenestespesifikasjoner.version>
 
 		<!-- Test dependencies -->
-		<spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>5.0.1</spring-cloud-contract-wiremock.version>
 
 		<!-- plugins -->
 		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
