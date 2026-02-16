@@ -16,12 +16,8 @@ import static no.nav.dokopp.qopp001.domain.BrukerType.ORGANISASJON;
 import static no.nav.dokopp.qopp001.domain.BrukerType.PERSON;
 import static no.nav.dokopp.qopp001.domain.BrukerType.UKJENT;
 import static no.nav.dokopp.qopp001.domain.OppgaveType.BEHANDLE_RETURPOST;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -69,10 +65,10 @@ public class OpprettOppgaveMapperTest {
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerAndAvsenderMottaker(),
 				createOpprettReturpostOppgave());
 
-		assertThat(request.getAktoerId(), is(AKTOER_ID));
-		assertNull(request.getOrgnr());
-		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
-		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertThat(request.getAktoerId()).isEqualTo(AKTOER_ID);
+		assertThat(request.getOrgnr()).isNull();
+		assertThat(request.getTema()).isEqualTo(FAGOMRAADE_IAR);
+		assertThat(request.getSaksreferanse()).isEqualTo(SAKSNUMMER);
 		assertOpprettOppgaveRequest(request);
 	}
 
@@ -84,11 +80,11 @@ public class OpprettOppgaveMapperTest {
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerisNullAndAvsenderMottaker(),
 				createOpprettReturpostOppgave());
 
-		assertNull(request.getAktoerId());
-		assertThat(request.getOrgnr(), is(ORGNR));
-		assertNull(request.getAktoerId());
-		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
-		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertThat(request.getAktoerId()).isNull();
+		assertThat(request.getOrgnr()).isEqualTo(ORGNR);
+		assertThat(request.getAktoerId()).isNull();
+		assertThat(request.getTema()).isEqualTo(FAGOMRAADE_IAR);
+		assertThat(request.getSaksreferanse()).isEqualTo(SAKSNUMMER);
 		assertOpprettOppgaveRequest(request);
 	}
 
@@ -98,7 +94,7 @@ public class OpprettOppgaveMapperTest {
 		OpprettOppgaveRequest request = opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithBrukerisNullAndAvsenderMottaker(),
 				createOpprettOppgave(OppgaveType.valueOf(oppgaveType)));
 
-		assertThat(request.getBeskrivelse(), is(oppgaveBeskrivelse));
+		assertThat(request.getBeskrivelse()).isEqualTo(oppgaveBeskrivelse);
 	}
 
 	@Test
@@ -170,9 +166,9 @@ public class OpprettOppgaveMapperTest {
 		when(pdlGraphQLConsumer.hentAktoerIdForFolkeregisterident(anyString())).thenThrow(
 				new RuntimeException("Skal ikke kalle PDL for ukjent brukertype."));
 
-		Exception e = assertThrows(UkjentBrukertypeException.class, () -> opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettReturpostOppgave()));
-
-		assertEquals("Ukjent brukertype er ikke støttet.", e.getMessage());
+		assertThatExceptionOfType(UkjentBrukertypeException.class)
+				.isThrownBy(() -> opprettOppgaveMapper.map(createHentJournalpostInfoResponseToWithUkjent(), createOpprettReturpostOppgave()))
+				.withMessage("Ukjent brukertype er ikke støttet.");
 	}
 
 	private JournalpostResponse createHentJournalpostInfoResponseToWithBrukerAndAvsenderMottaker() {
@@ -279,65 +275,65 @@ public class OpprettOppgaveMapperTest {
 	}
 
 	private void assertOpprettOppgaveRequestWithPersonAndPensjon(OpprettOppgaveRequest request) {
-		assertThat(request.getAktoerId(), is(AKTOER_ID));
-		assertNull(request.getOrgnr());
-		assertThat(request.getTema(), is(FAGOMRAADE_HJE));
-		assertNull(request.getSaksreferanse());
+		assertThat(request.getAktoerId()).isEqualTo(AKTOER_ID);
+		assertThat(request.getOrgnr()).isNull();
+		assertThat(request.getTema()).isEqualTo(FAGOMRAADE_HJE);
+		assertThat(request.getSaksreferanse()).isNull();
 		assertOpprettOppgaveRequest(request);
 	}
 
 	private void assertOpprettOppgaveRequestWithTemaFar(OpprettOppgaveRequest request) {
-		assertThat(request.getAktoerId(), is(AKTOER_ID));
-		assertNull(request.getOrgnr());
-		assertThat(request.getTema(), is(FAGOMRAADE_BID));
-		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertThat(request.getAktoerId()).isEqualTo(AKTOER_ID);
+		assertThat(request.getOrgnr()).isNull();
+		assertThat(request.getTema()).isEqualTo(FAGOMRAADE_BID);
+		assertThat(request.getSaksreferanse()).isEqualTo(SAKSNUMMER);
 		assertOpprettOppgaveRequest(request);
 	}
 
 	private void assertOpprettOppgaveRequestWithPersonAndGosys(OpprettOppgaveRequest request) {
-		assertThat(request.getAktoerId(), is(AKTOER_ID));
-		assertNull(request.getOrgnr());
-		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
-		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertThat(request.getAktoerId()).isEqualTo(AKTOER_ID);
+		assertThat(request.getOrgnr()).isNull();
+		assertThat(request.getTema()).isEqualTo(FAGOMRAADE_IAR);
+		assertThat(request.getSaksreferanse()).isEqualTo(SAKSNUMMER);
 		assertOpprettOppgaveRequest(request);
 	}
 
 	private void assertOpprettOppgaveRequestWithOrganisasjon(OpprettOppgaveRequest request) {
-		assertNull(request.getAktoerId());
-		assertThat(request.getOrgnr(), is(ORGNR));
-		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
-		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertThat(request.getAktoerId()).isNull();
+		assertThat(request.getOrgnr()).isEqualTo(ORGNR);
+		assertThat(request.getTema()).isEqualTo(FAGOMRAADE_IAR);
+		assertThat(request.getSaksreferanse()).isEqualTo(SAKSNUMMER);
 		assertOpprettOppgaveRequest(request);
 	}
 
 	private void assertOpprettOppgaveRequestWithOrganisasjonOgEnhetNrNull(OpprettOppgaveRequest request) {
-		assertNull(request.getAktoerId());
-		assertThat(request.getOrgnr(), is(ORGNR));
-		assertThat(request.getTema(), is(FAGOMRAADE_IAR));
-		assertThat(request.getSaksreferanse(), is(SAKSNUMMER));
+		assertThat(request.getAktoerId()).isNull();
+		assertThat(request.getOrgnr()).isEqualTo(ORGNR);
+		assertThat(request.getTema()).isEqualTo(FAGOMRAADE_IAR);
+		assertThat(request.getSaksreferanse()).isEqualTo(SAKSNUMMER);
 		assertOpprettOppgaveRequestWithEnhetNrNull(request);
 	}
 
 	private void assertOpprettOppgaveRequestWithEnhetNrNull(OpprettOppgaveRequest request) {
-		assertThat(request.getTildeltEnhetsnr(), nullValue());
-		assertThat(request.getOpprettetAvEnhetsnr(), is(ENHETS_ID));
-		assertThat(request.getJournalpostId(), is(JOURNALPOST_ID));
-		assertThat(request.getBeskrivelse(), is(OPPGAVEBESKRIVELSE));
-		assertThat(request.getOppgavetype(), is(OPPGAVETYPE_RETURPOST));
-		assertThat(request.getFristFerdigstillelse(), is(LocalDate.now().plusDays(ANTALL_DAGER_AKTIV).toString()));
-		assertThat(request.getAktivDato(), is(LocalDate.now().toString()));
-		assertThat(request.getPrioritet(), is(PRIORITETKODE_LAV));
+		assertThat(request.getTildeltEnhetsnr()).isNull();;
+		assertThat(request.getOpprettetAvEnhetsnr()).isEqualTo(ENHETS_ID);
+		assertThat(request.getJournalpostId()).isEqualTo(JOURNALPOST_ID);
+		assertThat(request.getBeskrivelse()).isEqualTo(OPPGAVEBESKRIVELSE);
+		assertThat(request.getOppgavetype()).isEqualTo(OPPGAVETYPE_RETURPOST);
+		assertThat(request.getFristFerdigstillelse()).isEqualTo(LocalDate.now().plusDays(ANTALL_DAGER_AKTIV).toString());
+		assertThat(request.getAktivDato()).isEqualTo(LocalDate.now().toString());
+		assertThat(request.getPrioritet()).isEqualTo(PRIORITETKODE_LAV);
 	}
 
 	private void assertOpprettOppgaveRequest(OpprettOppgaveRequest request) {
-		assertThat(request.getTildeltEnhetsnr(), is(JOURNALF_ENHET));
-		assertThat(request.getOpprettetAvEnhetsnr(), is(ENHETS_ID));
-		assertThat(request.getJournalpostId(), is(JOURNALPOST_ID));
-		assertThat(request.getBeskrivelse(), is(OPPGAVEBESKRIVELSE));
-		assertThat(request.getOppgavetype(), is(OPPGAVETYPE_RETURPOST));
-		assertThat(request.getFristFerdigstillelse(), is(LocalDate.now().plusDays(ANTALL_DAGER_AKTIV).toString()));
-		assertThat(request.getAktivDato(), is(LocalDate.now().toString()));
-		assertThat(request.getPrioritet(), is(PRIORITETKODE_LAV));
+		assertThat(request.getTildeltEnhetsnr()).isEqualTo(JOURNALF_ENHET);
+		assertThat(request.getOpprettetAvEnhetsnr()).isEqualTo(ENHETS_ID);
+		assertThat(request.getJournalpostId()).isEqualTo(JOURNALPOST_ID);
+		assertThat(request.getBeskrivelse()).isEqualTo(OPPGAVEBESKRIVELSE);
+		assertThat(request.getOppgavetype()).isEqualTo(OPPGAVETYPE_RETURPOST);
+		assertThat(request.getFristFerdigstillelse()).isEqualTo(LocalDate.now().plusDays(ANTALL_DAGER_AKTIV).toString());
+		assertThat(request.getAktivDato()).isEqualTo(LocalDate.now().toString());
+		assertThat(request.getPrioritet()).isEqualTo(PRIORITETKODE_LAV);
 	}
 
 	private OpprettOppgave createOpprettReturpostOppgave() {
@@ -351,4 +347,5 @@ public class OpprettOppgaveMapperTest {
 		opprettOppgave.setArkivKode(JOURNALPOST_ID);
 		return opprettOppgave;
 	}
+
 }
