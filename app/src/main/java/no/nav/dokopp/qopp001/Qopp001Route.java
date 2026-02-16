@@ -6,12 +6,14 @@ import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.DokoppFunctionalException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
 import no.nav.opprettoppgave.tjenestespesifikasjon.OpprettOppgave;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.support.processor.validation.SchemaValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.apache.camel.LoggingLevel.ERROR;
+import static org.apache.camel.LoggingLevel.INFO;
+import static org.apache.camel.LoggingLevel.WARN;
 
 @Slf4j
 @Component
@@ -25,7 +27,6 @@ public class Qopp001Route extends RouteBuilder {
 	private final Queue qopp001FunksjonellFeil;
 	private final Qopp001Service qopp001Service;
 
-	@Autowired
 	public Qopp001Route(Queue qopp001,
 						Queue qopp001FunksjonellFeil,
 						Qopp001Service qopp001Service) {
@@ -38,10 +39,10 @@ public class Qopp001Route extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		errorHandler(defaultErrorHandler()
-				.retryAttemptedLogLevel(LoggingLevel.INFO)
+				.retryAttemptedLogLevel(INFO)
 				.logRetryStackTrace(false)
 				.logExhaustedMessageBody(true)
-				.loggingLevel(LoggingLevel.ERROR));
+				.loggingLevel(ERROR));
 
 		onException(DokoppFunctionalException.class, SchemaValidationException.class)
 				.handled(true)
@@ -50,7 +51,7 @@ public class Qopp001Route extends RouteBuilder {
 				.logExhaustedMessageHistory(false)
 				.logStackTrace(false)
 				.logRetryAttempted(false)
-				.log(LoggingLevel.WARN, log, "${exception}, journalpostId=" + "${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "}")
+				.log(WARN, log, "${exception}, journalpostId=" + "${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "}")
 				.setBody(simple("${exchangeProperty." + PROPERTY_ORIGINAL_MESSAGE + "}"))
 				.to("jms:" + qopp001FunksjonellFeil.getQueueName());
 
@@ -59,7 +60,7 @@ public class Qopp001Route extends RouteBuilder {
 				.maximumRedeliveries(0)
 				.logExhaustedMessageBody(false)
 				.logExhaustedMessageHistory(false)
-				.log(LoggingLevel.WARN, log, "Avslutter behandling og kaster melding. ${exception}");
+				.log(WARN, log, "Avslutter behandling og kaster melding. ${exception}");
 
 		from("jms:" + qopp001.getQueueName() +
 				"?transacted=true" +
@@ -72,7 +73,7 @@ public class Qopp001Route extends RouteBuilder {
 				.to("validator:xsd/opprett_oppgave.xsd")
 				.unmarshal(new JaxbDataFormat(OpprettOppgave.class.getPackage().getName()))
 				.setProperty(PROPERTY_JOURNALPOST_ID, simple("${body.arkivKode}", String.class))
-				.log(LoggingLevel.INFO, log, "qopp001 har mottatt og validert forespørsel med journalpostId=${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "} OK.")
+				.log(INFO, log, "qopp001 har mottatt og validert forespørsel med journalpostId=${exchangeProperty." + PROPERTY_JOURNALPOST_ID + "} OK.")
 				.bean(qopp001Service);
 	}
 }
