@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.7</version>
+		<version>3.5.10</version>
 	</parent>
 
 	<groupId>no.nav.dokopp</groupId>
@@ -26,12 +26,12 @@
 		<com.ibm.mq.jakarta.client.version>9.4.5.0</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encode.version>8.1</logstash-logback-encode.version>
 		<cxf.version>4.1.4</cxf.version>
-		<context-propagation.version>1.2.0</context-propagation.version>
+		<context-propagation.version>1.2.1</context-propagation.version>
 
-		<dok-legacy-tjenestespesifikasjoner.version>43-5bca208</dok-legacy-tjenestespesifikasjoner.version>
+		<dok-legacy-tjenestespesifikasjoner.version>44-7d14e70</dok-legacy-tjenestespesifikasjoner.version>
 
 		<!-- Test dependencies -->
-		<spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>4.3.1</spring-cloud-contract-wiremock.version>
 
 		<!-- plugins -->
 		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>

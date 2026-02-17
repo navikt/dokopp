@@ -20,7 +20,7 @@ public class Tjoark110SettJournalpostAttributter {
 		this.arkiverDokumentproduksjonV1 = arkiverDokumentproduksjonV1;
 	}
 
-	@Retryable(value = DokoppTechnicalException.class, backoff = @Backoff(delay = 500))
+	@Retryable(retryFor = DokoppTechnicalException.class, backoff = @Backoff(delay = 500))
 	public void settJournalpostAttributter(SettJournalpostAttributterRequestTo settJournalpostAttributterRequestTo) {
 		try {
 			arkiverDokumentproduksjonV1.settJournalpostAttributter(mapRequest(settJournalpostAttributterRequestTo));
