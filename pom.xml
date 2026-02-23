@@ -25,7 +25,7 @@
 		<camel.version>4.17.0</camel.version>
 		<com.ibm.mq.jakarta.client.version>9.4.5.0</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encode.version>8.1</logstash-logback-encode.version>
-		<cxf.version>4.1.4</cxf.version>
+		<cxf.version>4.2.0</cxf.version>
 		<context-propagation.version>1.2.1</context-propagation.version>
 
 		<dok-legacy-tjenestespesifikasjoner.version>44-7d14e70</dok-legacy-tjenestespesifikasjoner.version>
