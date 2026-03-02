@@ -22,7 +22,7 @@
 	<properties>
 		<java.version>25</java.version>
 
-		<camel.version>4.17.0</camel.version>
+		<camel.version>4.18.0</camel.version>
 		<com.ibm.mq.jakarta.client.version>9.4.5.0</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encode.version>8.1</logstash-logback-encode.version>
 		<cxf.version>4.2.0</cxf.version>
