@@ -6,7 +6,7 @@ import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
 import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
-import no.nav.dokopp.consumer.azure.AzureProperties;
+import no.nav.dokopp.config.nais.NaisProperties;
 import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.Qopp001Route;
 import no.nav.dokopp.qopp001.Qopp001Service;
@@ -24,7 +24,7 @@ import org.springframework.retry.annotation.EnableRetry;
 		ServiceuserAlias.class,
 		ArkiverDokumentproduksjonV1Alias.class,
 		DokoppProperties.class,
-		AzureProperties.class
+		NaisProperties.class
 
 })
 @Import({

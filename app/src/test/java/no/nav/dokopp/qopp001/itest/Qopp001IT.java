@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import wiremock.org.apache.commons.io.IOUtils;
 
@@ -41,6 +40,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -58,7 +58,6 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFORE_METHOD;
 
 @Import({JmsTestConfig.class, ApplicationItestConfig.class})
 @SpringBootTest(classes = {Application.class}, webEnvironment = RANDOM_PORT)
@@ -99,15 +98,11 @@ public class Qopp001IT {
 	 * HVIS kall mot BehandleOppgave_v1 er ok SÅ skal input og output behandles som angitt i behandlingssteg
 	 */
 	@ParameterizedTest
-	//Resetter contexten da det ikke blir gjort et nytt kall til Azure fordi oAuth2AuthorizedClientManager gjør noe automagisk caching av tokenet.
-	//Dette gjør at asserten av antall kall til Azure blir feil da vi gjenbruker "gamle" tokens
-	//Har ikke funnet ut av hvordan vi kan cleare denne cachen, eller resette clientRegistrationRepository'et
-	@DirtiesContext(methodMode = BEFORE_METHOD)
 	@CsvSource({"qopp001_happy_returpost.xml", "qopp001_happy_manglende_adresse.xml"})
 	public void shouldOppretteOppgaveGosys(String inputFilename) throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-happy.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
 		stubOppgave("oppgaver/opprett_oppgave_happy.json");
 
@@ -118,7 +113,7 @@ public class Qopp001IT {
 			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 		});
 
-		verify(3, postRequestedFor(urlEqualTo("/azure_token")));
+		verify(3, postRequestedFor(urlPathEqualTo("/nais-texas")));
 		verify(1, postRequestedFor(urlEqualTo("/pdl/graphql")));
 		verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
@@ -131,14 +126,10 @@ public class Qopp001IT {
 	}
 
 	@Test
-	//Resetter contexten da det ikke blir gjort et nytt kall til Azure fordi oAuth2AuthorizedClientManager gjør noe automagisk caching av tokenet.
-	//Dette gjør at asserten av antall kall til Azure blir feil da vi gjenbruker "gamle" tokens
-	//Har ikke funnet ut av hvordan vi kan cleare denne cachen, eller resette clientRegistrationRepository'et
-	@DirtiesContext(methodMode = BEFORE_METHOD)
 	public void shouldOppretteOppgaveGosysMedAvsenderMottaker() throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-happyAvsenderMottaker.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
 		stubOppgave("oppgaver/opprett_oppgave_happy.json");
 
@@ -149,7 +140,7 @@ public class Qopp001IT {
 			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
 		});
 
-		verify(3, postRequestedFor(urlEqualTo("/azure_token")));
+		verify(3, postRequestedFor(urlPathEqualTo("/nais-texas")));
 		verify(1, postRequestedFor(urlEqualTo("/pdl/graphql")));
 		verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
@@ -165,7 +156,7 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWithSaksreferanseWhenFagomradeNotGosys() throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-pensjon.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
 		stubOppgave("oppgaver/opprett_oppgave_pensjon.json");
 
@@ -181,7 +172,7 @@ public class Qopp001IT {
 	public void shouldOppretteOppgaveWithOrgnrGosys() throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-organisasjon.json");
-		stubAzureToken();
+		stubTexas();
 		stubOppgave("oppgaver/opprett_oppgave_organisasjon.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -197,7 +188,7 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWithFagomraadeSTO() throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-fagomraade_STO.json");
-		stubAzureToken();
+		stubTexas();
 
 		Logger fooLogger = (Logger) LoggerFactory.getLogger(Qopp001Service.class);
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -220,7 +211,7 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWhenSkjermet(String skjermingNotNullIn) throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-skjerming-" + skjermingNotNullIn + ".json");
-		stubAzureToken();
+		stubTexas();
 
 		Logger fooLogger = (Logger) LoggerFactory.getLogger(Qopp001Service.class);
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -241,7 +232,7 @@ public class Qopp001IT {
 	void shouldOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFails() throws IOException {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-happy.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
 		stubFor(post("/api/v1/oppgaver")
 				.inScenario(SCENARIO_NEDLAGT_ENHET)
@@ -275,7 +266,7 @@ public class Qopp001IT {
 	void shouldDiscardMessageAndNotOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFailsAndEnhet9999() throws IOException {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-happy_maskin.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
 		stubFor(post("/api/v1/oppgaver")
 				.willReturn(aResponse()
@@ -296,6 +287,7 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowUkjentBrukertypeException() throws Exception {
+		stubTexas();
 		stubSaf("saf/safGraphQlResponse-ukjent.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -326,6 +318,7 @@ public class Qopp001IT {
 	 */
 	@Test
 	public void shouldThrowJournalpostIkkeFunnetException() throws Exception {
+		stubTexas();
 		stubSaf("saf/safGraphQlResponse-journalpostIkkeFunnet.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -338,6 +331,7 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowUkjentBrukertypeExceptionWhenNoBrukerAndAvsenderMottaker() throws Exception {
+		stubTexas();
 		stubSaf("saf/safGraphQlResponse-ingenBruker.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -353,6 +347,7 @@ public class Qopp001IT {
 	 */
 	@Test
 	public void shouldThrowTechnicalExceptionSAF() throws Exception {
+		stubTexas();
 		stubSaf("saf/safGraphQlResponse-internalServerError.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -375,7 +370,7 @@ public class Qopp001IT {
 						.withStatus(OK.value())
 						.withBodyFile("tjoark110/tjoark110_internalServerError.xml")));
 		stubSaf("saf/safGraphQlResponse-happy.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
 		stubOppgave("oppgaver/opprett_oppgave_happy.json");
 
@@ -392,7 +387,7 @@ public class Qopp001IT {
 	 */
 	@Test
 	public void shouldThrowTechnicalExceptionOpprettOppgave() throws Exception {
-		stubAzureToken();
+		stubTexas();
 		stubSaf("saf/safGraphQlResponse-happy.json");
 		stubPdl("pdl/pdl-happy.json");
 		stubFor(post("/api/v1/oppgaver")
@@ -414,7 +409,7 @@ public class Qopp001IT {
 	public void shouldThrowSikkerhetsbegrensningExceptionGosys() throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-happy.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
 		stubFor(post("/api/v1/oppgaver")
 				.willReturn(aResponse()
@@ -445,6 +440,7 @@ public class Qopp001IT {
 	@Test
 	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturpostReturnedFromSaf() throws Exception {
 		resetAllRequests();
+		stubTexas();
 		stubSaf("saf/safGraphQlResponse-returpostFlagget.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -459,7 +455,7 @@ public class Qopp001IT {
 	@Test
 	public void shouldThrowAktoerHentAktoerIdForFnrFunctionalException() throws Exception {
 		stubSaf("saf/safGraphQlResponse-happy.json");
-		stubAzureToken();
+		stubTexas();
 		stubFor(post("/pdl/graphql")
 				.willReturn(aResponse()
 						.withStatus(FORBIDDEN.value())));
@@ -475,7 +471,7 @@ public class Qopp001IT {
 	@Test
 	public void shouldThrowAktoerHentAktoerIdForFnrTechnicalException() throws Exception {
 		stubSaf("saf/safGraphQlResponse-happy.json");
-		stubAzureToken();
+		stubTexas();
 		stubFor(post("/pdl/graphql")
 				.willReturn(aResponse()
 						.withStatus(INTERNAL_SERVER_ERROR.value())));
@@ -489,13 +485,9 @@ public class Qopp001IT {
 	}
 
 	@Test
-	//Resetter contexten da det ikke blir gjort et nytt kall til Azure fordi oAuth2AuthorizedClientManager gjør noe automagisk caching av tokenet.
-	//Dette gjør at asserten av antall kall til Azure blir feil da vi gjenbruker "gamle" tokens
-	//Har ikke funnet ut av hvordan vi kan cleare denne cachen, eller resette clientRegistrationRepository'et
-	@DirtiesContext(methodMode = BEFORE_METHOD)
-	public void shouldThrowAzureTechnicalException() throws Exception {
+	public void shouldThrowTexasTechnicalException() throws Exception {
 		stubSaf("saf/safGraphQlResponse-happy.json");
-		stubFor(post("/azure_token")
+		stubFor(post(urlPathEqualTo("/nais-texas"))
 				.willReturn(aResponse()
 						.withStatus(INTERNAL_SERVER_ERROR.value())));
 
@@ -511,7 +503,7 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWhenPdlBadRequest() throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-happyAvsenderMottaker.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-bad-request.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -527,7 +519,7 @@ public class Qopp001IT {
 	public void shouldNotOppretteOppgaveWhenPdlIngenIdenter() throws Exception {
 		stubArkiverdokumentproduksjon();
 		stubSaf("saf/safGraphQlResponse-happyAvsenderMottaker.json");
-		stubAzureToken();
+		stubTexas();
 		stubPdl("pdl/pdl-ingen-identer.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
@@ -565,12 +557,12 @@ public class Qopp001IT {
 		return (T) response;
 	}
 
-	private void stubAzureToken() {
-		stubFor(post("/azure_token")
+	private void stubTexas() {
+		stubFor(post(urlPathEqualTo("/nais-texas"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-						.withBodyFile("azure/token_response_dummy.json")));
+						.withBody("{\"access_token\":\"dummy-texas-token\",\"token_type\":\"Bearer\",\"expires_in\":3600}")));
 	}
 
 	private static void stubSaf(String bodyFile) {

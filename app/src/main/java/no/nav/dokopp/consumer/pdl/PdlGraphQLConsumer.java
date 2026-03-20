@@ -4,58 +4,56 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
-import org.slf4j.MDC;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.function.Consumer;
 
-import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
-import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_PDL;
-import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
+import static no.nav.dokopp.consumer.nais.NaisTexasRequestInterceptor.TARGET_SCOPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Slf4j
 @Component
 public class PdlGraphQLConsumer {
+	private static final String SERVICE_NAME = "pdl";
 	private static final String HEADER_PDL_BEHANDLINGSNUMMER = "behandlingsnummer";
 	// https://behandlingskatalog.nais.adeo.no/process/purpose/ARKIVPLEIE/756fd557-b95e-4b20-9de9-6179fb8317e6
 	private static final String ARKIVPLEIE_BEHANDLINGSNUMMER = "B315";
 	private static final String PERSON_IKKE_FUNNET_CODE = "not_found";
 
-	private final WebClient webClient;
+	private final RestClient restClient;
+	private final String targetScope;
 
-	public PdlGraphQLConsumer(WebClient webClient,
+	public PdlGraphQLConsumer(RestClient restClientTexas,
 							  DokoppProperties dokoppProperties) {
-		this.webClient = webClient.mutate()
+		this.restClient = restClientTexas.mutate()
 				.baseUrl(dokoppProperties.getEndpoints().getPdl().getUrl())
-				.defaultHeaders(httpHeaders -> {
-					httpHeaders.set(HEADER_PDL_BEHANDLINGSNUMMER, ARKIVPLEIE_BEHANDLINGSNUMMER);
-					httpHeaders.setContentType(APPLICATION_JSON);
+				.defaultHeaders(headers -> {
+					headers.setContentType(APPLICATION_JSON);
+					headers.set(HEADER_PDL_BEHANDLINGSNUMMER, ARKIVPLEIE_BEHANDLINGSNUMMER);
 				})
+				.defaultStatusHandler(HttpStatusCode::isError, (_, res) -> handleError(res))
 				.build();
+		this.targetScope = dokoppProperties.getEndpoints().getPdl().getScope();
 	}
 
 	@Retryable(retryFor = PdlHentAktoerIdForFnrTechnicalException.class)
 	public String hentAktoerIdForFolkeregisterident(final String personnummer) {
-		return webClient.post()
+		PdlHentIdenterResponse pdlHentIdenterResponse = restClient.post()
 				.uri("/graphql")
-				.headers(httpHeaders -> {
-					httpHeaders.set(NAV_CALL_ID, MDC.get(MDC_CALL_ID));
-				})
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_PDL))
-				.bodyValue(mapRequest(personnummer))
+				.attribute(TARGET_SCOPE, targetScope)
+				.body(mapRequest(personnummer))
 				.retrieve()
-				.bodyToMono(PdlHentIdenterResponse.class)
-				.onErrorMap(this::mapPdlError)
-				.mapNotNull(this::getAktorIdFromResponse)
-				.block();
+				.body(PdlHentIdenterResponse.class);
+
+		return getAktorIdFromResponse(pdlHentIdenterResponse);
 	}
 
 	private String getAktorIdFromResponse(PdlHentIdenterResponse pdlHentIdenterResponse) {
@@ -95,10 +93,15 @@ public class PdlGraphQLConsumer {
 				.build();
 	}
 
-	private Throwable mapPdlError(Throwable error) {
-		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-			return new PdlHentAktoerIdForFnrFunctionalException("Kall mot pdl feilet funksjonelt.", error);
+	private void handleError(ClientHttpResponse response) throws IOException {
+		String body = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+		String feilmelding = "Kall mot %s feilet %s med status=%s, body=%s"
+				.formatted(SERVICE_NAME,
+						response.getStatusCode().is4xxClientError() ? "funksjonelt" : "teknisk",
+						response.getStatusCode(), body);
+		if (response.getStatusCode().is4xxClientError()) {
+			throw new PdlHentAktoerIdForFnrFunctionalException(feilmelding);
 		}
-		return new PdlHentAktoerIdForFnrTechnicalException("Ukjent teknisk feil mot pdl", error);
+		throw new PdlHentAktoerIdForFnrTechnicalException(feilmelding);
 	}
 }
