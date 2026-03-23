@@ -30,7 +30,7 @@ public class NaisTexasConsumer {
 
     public String getSystemToken(String targetScope) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("identity_provider", "azuread");
+        formData.add("identity_provider", "entra_id");
         formData.add("target", targetScope);
 
         return Optional.ofNullable(restClient.post()
@@ -39,7 +39,7 @@ public class NaisTexasConsumer {
                 .retrieve()
                 .body(NaisTexasToken.class))
                 .map(NaisTexasToken::accessToken)
-                .orElseThrow(() -> new RuntimeException("Tomt token-svar fra NAIS Texas (azuread)"));
+                .orElseThrow(() -> new RuntimeException("Tomt token-svar fra NAIS Texas (entra_id)"));
     }
 
     private void handleError(ClientHttpResponse response) throws IOException {
