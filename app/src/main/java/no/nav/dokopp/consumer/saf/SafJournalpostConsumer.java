@@ -2,59 +2,58 @@ package no.nav.dokopp.consumer.saf;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
+import no.nav.dokopp.consumer.nais.NaisTexasRequestInterceptor;
 import no.nav.dokopp.consumer.saf.exceptions.SafFunctionalException;
 import no.nav.dokopp.consumer.saf.exceptions.SafJournalpostQueryTechnicalException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.dokopp.qopp001.JournalpostResponse;
-import org.slf4j.MDC;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static ch.qos.logback.core.recovery.RecoveryCoordinator.BACKOFF_MULTIPLIER;
-import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
-import static no.nav.dokopp.constants.HeaderConstants.NAV_CALLID;
-import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
-import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_SAF;
+import static no.nav.dokopp.consumer.nais.NaisTexasRequestInterceptor.TARGET_SCOPE;
 import static no.nav.dokopp.consumer.saf.SafJournalpostMapper.map;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Slf4j
 @Component
 public class SafJournalpostConsumer {
+	private static final String SERVICE_NAME = "saf";
 	private static final String JP_NOT_FOUND_ERROR_CODE = "not_found";
 	private static final String FORBIDDEN_ERROR_CODE = "forbidden";
 	private static final String BAD_REQUEST_ERROR_CODE = "bad_request";
 	private static final String SERVER_ERROR_CODE = "server_error";
 
-	private final WebClient webClient;
+	private final RestClient restClient;
+	private final String targetScope;
 
-	public SafJournalpostConsumer(WebClient webClient,
+	public SafJournalpostConsumer(RestClient restClientTexas,
 								  DokoppProperties dokoppProperties) {
-		this.webClient = webClient.mutate()
+		this.restClient = restClientTexas.mutate()
 				.baseUrl(dokoppProperties.getEndpoints().getSaf().getUrl())
-				.defaultHeaders(httpHeaders -> httpHeaders.setContentType(APPLICATION_JSON))
+				.defaultHeaders(headers -> headers.setContentType(APPLICATION_JSON))
+				.defaultStatusHandler(HttpStatusCode::isError, (_, res) -> handleError(res))
 				.build();
+		this.targetScope = dokoppProperties.getEndpoints().getSaf().getScope();
 	}
 
-	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = 2))
 	public JournalpostResponse hentJournalpost(String journalpostId) {
-		SafResponse safResponse = webClient.post()
+		SafResponse safResponse = restClient.post()
 				.uri("/graphql")
-				.headers(httpHeaders -> httpHeaders.add(NAV_CALLID, MDC.get(NAV_CALL_ID)))
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_SAF))
-				.bodyValue(createHentJournalpostRequest(journalpostId))
+				.attribute(TARGET_SCOPE, targetScope)
+				.body(createHentJournalpostRequest(journalpostId))
 				.retrieve()
-				.bodyToMono(SafResponse.class)
-				.onErrorMap(error -> mapSafError(error, journalpostId))
-				.block();
+				.body(SafResponse.class);
 
 		if (safResponse == null) {
 			throw new SafJournalpostQueryTechnicalException("Kall til saf feilet. data feltet er null");
@@ -87,15 +86,20 @@ public class SafJournalpostConsumer {
 		String errorMsg = errors.getFirst().getMessage();
 		switch (errorCode) {
 			case SERVER_ERROR_CODE ->
-					throw new SafJournalpostQueryTechnicalException(format("Teknisk feil ved kall mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
+					throw new SafJournalpostQueryTechnicalException("Teknisk feil ved kall mot SAF for journalpostId=%s, feilmelding:%s"
+							.formatted(journalpostId, errorMsg));
 			case JP_NOT_FOUND_ERROR_CODE ->
-					throw new SafFunctionalException(format("Fant ingen journalpost med journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
+					throw new SafFunctionalException("Fant ingen journalpost med journalpostId=%s, feilmelding:%s"
+							.formatted(journalpostId, errorMsg));
 			case FORBIDDEN_ERROR_CODE ->
-					throw new SafFunctionalException(format("Forbidden i kall mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
+					throw new SafFunctionalException("Forbidden i kall mot SAF for journalpostId=%s, feilmelding:%s"
+							.formatted(journalpostId, errorMsg));
 			case BAD_REQUEST_ERROR_CODE ->
-					throw new SafFunctionalException(format("Bad request mot SAF for journalpostId=%s, feilmelding:%s", journalpostId, errorMsg));
+					throw new SafFunctionalException("Bad request mot SAF for journalpostId=%s, feilmelding:%s"
+							.formatted(journalpostId, errorMsg));
 			case null, default ->
-					throw new SafFunctionalException(format("Ukjent feil:%s i kall mot SAF for journalpostId=%s, feilmelding:%s", errorCode, journalpostId, errorMsg));
+					throw new SafFunctionalException("Ukjent feil:%s i kall mot SAF for journalpostId=%s, feilmelding:%s"
+							.formatted(errorCode, journalpostId, errorMsg));
 		}
 	}
 
@@ -129,12 +133,15 @@ public class SafJournalpostConsumer {
 			}
 			""";
 
-	private Throwable mapSafError(Throwable error, String journalpostId) {
-		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-			return new SafFunctionalException(format("Henting av journalpost=%s feilet med status=%s, feilmelding=%s",
-					journalpostId, response.getStatusCode(), error.getMessage())
-			);
+	private void handleError(ClientHttpResponse response) throws IOException {
+		String body = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+		String feilmelding = "Kall mot %s feilet %s med status=%s, body=%s"
+				.formatted(SERVICE_NAME,
+						response.getStatusCode().is4xxClientError() ? "funksjonelt" : "teknisk",
+						response.getStatusCode(), body);
+		if (response.getStatusCode().is4xxClientError()) {
+			throw new SafFunctionalException(feilmelding);
 		}
-		return new SafJournalpostQueryTechnicalException(format("Kall mot SAF feilet teknisk for journalpost=%s", journalpostId), error);
+		throw new SafJournalpostQueryTechnicalException(feilmelding);
 	}
 }

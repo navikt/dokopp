@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
 import java.security.SecureRandom;
-import java.util.Set;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -14,8 +13,6 @@ public final class MDCOperations {
 	public static final String MDC_USER_ID = "userId";
 	public static final String MDC_CONSUMER_ID = "consumerId";
 	private static final SecureRandom RANDOM = new SecureRandom();
-
-	public static Set<String> ALL_KEYS = Set.of(MDC_CALL_ID);
 
 	private MDCOperations() {
 	}
@@ -28,7 +25,7 @@ public final class MDCOperations {
 
 	public static String getFromMDC(String key) {
 		String value = MDC.get(key);
-		log.debug("Getting key: " + key + " from MDC with value: " + value);
+		log.debug("Getting key: {} from MDC with value: {}", key, value);
 		return value;
 	}
 

@@ -2,66 +2,78 @@ package no.nav.dokopp.consumer.oppgave;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
+import no.nav.dokopp.consumer.nais.NaisTexasRequestInterceptor;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.OpprettOppgaveTechnicalException;
 import org.slf4j.MDC;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
 
-import static java.lang.String.format;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
 import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
-import static no.nav.dokopp.constants.HeaderConstants.NAV_CALL_ID;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
 import static no.nav.dokopp.constants.HeaderConstants.X_CORRELATION_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
-import static no.nav.dokopp.consumer.azure.AzureProperties.CLIENT_REGISTRATION_OPPGAVE;
+import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Component
 @Slf4j
 public class OppgaveConsumer implements Oppgave {
 
-	private final WebClient webClient;
+	private static final String SERVICE_NAME = "oppgave";
 
-	public OppgaveConsumer(WebClient webClient,
+	private final RestClient restClient;
+	private final String targetScope;
+
+	public OppgaveConsumer(RestClient restClientTexas,
 						   DokoppProperties dokoppProperties) {
-		this.webClient = webClient.mutate()
+		this.restClient = restClientTexas.mutate()
 				.baseUrl(dokoppProperties.getEndpoints().getOppgave().getUrl())
-				.defaultHeaders(httpHeaders -> {
-					httpHeaders.setContentType(APPLICATION_JSON);
-					httpHeaders.add(NAV_CONSUMER_ID, APP_NAME);
+				.defaultHeaders(headers -> {
+					headers.setContentType(APPLICATION_JSON);
+					headers.set(NAV_CONSUMER_ID, APP_NAME);
 				})
+				.defaultStatusHandler(HttpStatusCode::isError, (_, res) -> handleError(res))
 				.build();
+		this.targetScope = dokoppProperties.getEndpoints().getOppgave().getScope();
 	}
 
 	@Override
 	@Retryable(retryFor = OpprettOppgaveTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT))
 	public Integer opprettOppgave(OpprettOppgaveRequest opprettOppgaveRequest) {
-		return webClient.post()
+		OpprettOppgaveResponse response = restClient.post()
 				.uri("/api/v1/oppgaver")
-				.headers(httpHeaders -> {
-					httpHeaders.add(NAV_CALL_ID, MDC.get(NAV_CALL_ID));
-					httpHeaders.add(X_CORRELATION_ID, MDC.get(NAV_CALL_ID));
-				})
-				.attributes(clientRegistrationId(CLIENT_REGISTRATION_OPPGAVE))
-				.bodyValue(opprettOppgaveRequest)
+				.headers(headers -> headers.set(X_CORRELATION_ID, getCallId()))
+				.attribute(NaisTexasRequestInterceptor.TARGET_SCOPE, targetScope)
+				.body(opprettOppgaveRequest)
 				.retrieve()
-				.bodyToMono(OpprettOppgaveResponse.class)
-				.onErrorMap(this::mapOpprettOppgaveError)
-				.mapNotNull(OpprettOppgaveResponse::getId)
-				.block();
+				.body(OpprettOppgaveResponse.class);
+
+		return response != null ? response.getId() : null;
 	}
 
-	private Throwable mapOpprettOppgaveError(Throwable error) {
-		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
-			return new OpprettOppgaveFunctionalException(format("Funksjonell feil ved kall mot Oppgave:opprettOppgave: %s",
-					error.getMessage()), error);
+	private static String getCallId() {
+		String callId = MDC.get(MDC_CALL_ID);
+		return callId == null ? UUID.randomUUID().toString() : callId;
+	}
+
+	private void handleError(ClientHttpResponse response) throws IOException {
+		String body = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+		String feilmelding = "Kall mot %s feilet %s med status=%s, body=%s"
+				.formatted(SERVICE_NAME,
+						response.getStatusCode().is4xxClientError() ? "funksjonelt" : "teknisk",
+						response.getStatusCode(), body);
+		if (response.getStatusCode().is4xxClientError()) {
+			throw new OpprettOppgaveFunctionalException(feilmelding);
 		}
-		return new OpprettOppgaveTechnicalException(format("Teknisk feil ved kall mot Oppgave:opprettOppgave: %s",
-				error.getMessage()), error);
+		throw new OpprettOppgaveTechnicalException(feilmelding);
 	}
 }
