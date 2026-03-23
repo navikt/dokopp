@@ -2,11 +2,10 @@ package no.nav.dokopp.consumer.oppgave;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
-import no.nav.dokopp.constants.DomainConstants;
 import no.nav.dokopp.consumer.nais.NaisTexasRequestInterceptor;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.OpprettOppgaveTechnicalException;
-import org.springframework.http.HttpHeaders;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.annotation.Backoff;
@@ -16,14 +15,14 @@ import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
 import static no.nav.dokopp.constants.HeaderConstants.X_CORRELATION_ID;
 import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Component
 @Slf4j
@@ -52,12 +51,18 @@ public class OppgaveConsumer implements Oppgave {
 	public Integer opprettOppgave(OpprettOppgaveRequest opprettOppgaveRequest) {
 		OpprettOppgaveResponse response = restClient.post()
 				.uri("/api/v1/oppgaver")
+				.headers(headers -> headers.set(X_CORRELATION_ID, getCallId()))
 				.attribute(NaisTexasRequestInterceptor.TARGET_SCOPE, targetScope)
 				.body(opprettOppgaveRequest)
 				.retrieve()
 				.body(OpprettOppgaveResponse.class);
 
 		return response != null ? response.getId() : null;
+	}
+
+	private static String getCallId() {
+		String callId = MDC.get(MDC_CALL_ID);
+		return callId == null ? UUID.randomUUID().toString() : callId;
 	}
 
 	private void handleError(ClientHttpResponse response) throws IOException {
