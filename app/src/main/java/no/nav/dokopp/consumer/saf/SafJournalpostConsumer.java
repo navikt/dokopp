@@ -2,15 +2,13 @@ package no.nav.dokopp.consumer.saf;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokopp.config.DokoppProperties;
-import no.nav.dokopp.consumer.nais.NaisTexasRequestInterceptor;
 import no.nav.dokopp.consumer.saf.exceptions.SafFunctionalException;
 import no.nav.dokopp.consumer.saf.exceptions.SafJournalpostQueryTechnicalException;
 import no.nav.dokopp.exception.UgyldigInputverdiException;
 import no.nav.dokopp.qopp001.JournalpostResponse;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -19,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static java.util.Collections.singletonMap;
-import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokopp.consumer.nais.NaisTexasRequestInterceptor.TARGET_SCOPE;
 import static no.nav.dokopp.consumer.saf.SafJournalpostMapper.map;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -46,7 +43,7 @@ public class SafJournalpostConsumer {
 		this.targetScope = dokoppProperties.getEndpoints().getSaf().getScope();
 	}
 
-	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT, multiplier = 2))
+	@Retryable(includes = SafJournalpostQueryTechnicalException.class, multiplier = 2)
 	public JournalpostResponse hentJournalpost(String journalpostId) {
 		SafResponse safResponse = restClient.post()
 				.uri("/graphql")

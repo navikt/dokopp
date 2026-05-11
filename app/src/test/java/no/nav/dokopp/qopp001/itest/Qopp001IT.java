@@ -11,6 +11,7 @@ import no.nav.dokopp.Application;
 import no.nav.dokopp.qopp001.Qopp001Service;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -18,16 +19,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import wiremock.org.apache.commons.io.IOUtils;
+import org.wiremock.spring.EnableWireMock;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -36,7 +35,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingXPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
+import static com.github.tomakehurst.wiremock.client.WireMock.reset;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
@@ -61,7 +60,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Import({JmsTestConfig.class, ApplicationItestConfig.class})
 @SpringBootTest(classes = {Application.class}, webEnvironment = RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock
 @ActiveProfiles("itest")
 public class Qopp001IT {
 
@@ -90,6 +89,11 @@ public class Qopp001IT {
 	@BeforeAll
 	public static void beforeClass() {
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+	}
+
+	@BeforeEach
+	void resetWireMock() {
+		reset();
 	}
 
 	/**
@@ -357,7 +361,7 @@ public class Qopp001IT {
 			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 		});
 
-		verify(exactly(3), postRequestedFor(urlEqualTo("/saf/graphql")));
+		verify(exactly(4), postRequestedFor(urlEqualTo("/saf/graphql")));
 	}
 
 	/**
@@ -439,7 +443,6 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldThrowReturpostAlleredeFlaggetExceptionWhenAntallReturpostReturnedFromSaf() throws Exception {
-		resetAllRequests();
 		stubTexas();
 		stubSaf("saf/safGraphQlResponse-returpostFlagget.json");
 
@@ -542,17 +545,14 @@ public class Qopp001IT {
 	}
 
 	private String classpathToString(String classpathResource) throws IOException {
-		InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
-		String message = IOUtils.toString(inputStream, UTF_8);
-		IOUtils.closeQuietly(inputStream);
-		return message;
+		return new String(new ClassPathResource(classpathResource).getInputStream().readAllBytes(), UTF_8);
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> T receive(Queue queue) {
 		Object response = jmsTemplate.receiveAndConvert(queue);
 		if (response instanceof JAXBElement) {
-			response = ((JAXBElement) response).getValue();
+			response = ((JAXBElement<?>) response).getValue();
 		}
 		return (T) response;
 	}
@@ -581,8 +581,8 @@ public class Qopp001IT {
 						.withBodyFile(bodyFile)));
 	}
 
-	private static StubMapping stubOppgave(String bodyFile) {
-		return stubFor(post("/api/v1/oppgaver")
+	private static void stubOppgave(String bodyFile) {
+		stubFor(post("/api/v1/oppgaver")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
