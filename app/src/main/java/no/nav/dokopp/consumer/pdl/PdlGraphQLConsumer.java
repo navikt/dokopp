@@ -6,7 +6,7 @@ import no.nav.dokopp.exception.PdlHentAktoerIdForFnrFunctionalException;
 import no.nav.dokopp.exception.PdlHentAktoerIdForFnrTechnicalException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClient;
@@ -44,7 +44,7 @@ public class PdlGraphQLConsumer {
 		this.targetScope = dokoppProperties.getEndpoints().getPdl().getScope();
 	}
 
-	@Retryable(retryFor = PdlHentAktoerIdForFnrTechnicalException.class)
+	@Retryable(includes = PdlHentAktoerIdForFnrTechnicalException.class)
 	public String hentAktoerIdForFolkeregisterident(final String personnummer) {
 		PdlHentIdenterResponse pdlHentIdenterResponse = restClient.post()
 				.uri("/graphql")
@@ -67,7 +67,7 @@ public class PdlGraphQLConsumer {
 							.map(PdlHentIdenterResponse.PdlIdentTo::getIdent)
 							.findFirst()).orElseThrow(() -> new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid ident fra PDL. Respons fra PDL inneholdt ikke gjeldende aktørid"));
 		} else {
-			if (PERSON_IKKE_FUNNET_CODE.equals(pdlHentIdenterResponse.getErrors().get(0).getExtensions().getCode())) {
+			if (PERSON_IKKE_FUNNET_CODE.equals(pdlHentIdenterResponse.getErrors().getFirst().getExtensions().getCode())) {
 				throw new PdlHentAktoerIdForFnrFunctionalException("Fant ikke person i Persondataløsningen (PDL).");
 			}
 			throw new PdlHentAktoerIdForFnrFunctionalException("Kunne ikke hente aktørid for folkeregisterident i pdl. " + pdlHentIdenterResponse.getErrors());

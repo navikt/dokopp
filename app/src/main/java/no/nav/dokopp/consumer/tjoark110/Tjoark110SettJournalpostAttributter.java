@@ -4,8 +4,7 @@ import no.nav.dokopp.exception.DokoppTechnicalException;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.ArkiverDokumentproduksjonV1;
 import no.nav.tjeneste.domene.brevogarkiv.arkiverdokumentproduksjon.v1.meldinger.SettJournalpostAttributterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import static java.lang.Long.valueOf;
@@ -20,7 +19,7 @@ public class Tjoark110SettJournalpostAttributter {
 		this.arkiverDokumentproduksjonV1 = arkiverDokumentproduksjonV1;
 	}
 
-	@Retryable(retryFor = DokoppTechnicalException.class, backoff = @Backoff(delay = 500))
+	@Retryable(includes = DokoppTechnicalException.class)
 	public void settJournalpostAttributter(SettJournalpostAttributterRequestTo settJournalpostAttributterRequestTo) {
 		try {
 			arkiverDokumentproduksjonV1.settJournalpostAttributter(mapRequest(settJournalpostAttributterRequestTo));

@@ -8,8 +8,7 @@ import no.nav.dokopp.exception.OpprettOppgaveTechnicalException;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -20,7 +19,6 @@ import java.util.UUID;
 import static no.nav.dokopp.constants.DomainConstants.APP_NAME;
 import static no.nav.dokopp.constants.HeaderConstants.NAV_CONSUMER_ID;
 import static no.nav.dokopp.constants.HeaderConstants.X_CORRELATION_ID;
-import static no.nav.dokopp.constants.RetryConstants.DELAY_SHORT;
 import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -47,7 +45,7 @@ public class OppgaveConsumer implements Oppgave {
 	}
 
 	@Override
-	@Retryable(retryFor = OpprettOppgaveTechnicalException.class, backoff = @Backoff(delay = DELAY_SHORT))
+	@Retryable(includes = OpprettOppgaveTechnicalException.class)
 	public Integer opprettOppgave(OpprettOppgaveRequest opprettOppgaveRequest) {
 		OpprettOppgaveResponse response = restClient.post()
 				.uri("/api/v1/oppgaver")
