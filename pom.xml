@@ -25,7 +25,6 @@
 		<camel.version>4.22.1</camel.version>
 		<com.ibm.mq.jakarta.client.version>10.0.0.5</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encode.version>9.0</logstash-logback-encode.version>
-		<cxf.version>4.2.3</cxf.version>
 
 		<dok-legacy-tjenestespesifikasjoner.version>44-7d14e70</dok-legacy-tjenestespesifikasjoner.version>
 
@@ -53,13 +52,6 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.cxf</groupId>
-				<artifactId>cxf-bom</artifactId>
-				<version>${cxf.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
 				<groupId>com.ibm.mq</groupId>
 				<artifactId>com.ibm.mq.jakarta.client</artifactId>
 				<version>${com.ibm.mq.jakarta.client.version}</version>
@@ -70,11 +62,6 @@
 				<version>${logstash-logback-encode.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>no.nav.dok</groupId>
-				<artifactId>dok-domene-arkiverdokumentproduksjon-v1-tjenestespesifikasjon</artifactId>
-				<version>${dok-legacy-tjenestespesifikasjoner.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>no.nav.tjenester</groupId>
 				<artifactId>opprettoppgave-tjenestespesifikasjon</artifactId>

@@ -34,6 +34,10 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-spring-boot-starter</artifactId>
 		</dependency>
@@ -54,18 +58,6 @@
 			<artifactId>camel-jaxb-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.xml.ws</groupId>
-			<artifactId>jakarta.xml.ws-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-spring-boot-starter-jaxws</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-ws-security</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
@@ -80,10 +72,6 @@
 		</dependency>
 
 		<!-- tjenester -->
-		<dependency>
-			<groupId>no.nav.dok</groupId>
-			<artifactId>dok-domene-arkiverdokumentproduksjon-v1-tjenestespesifikasjon</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>no.nav.tjenester</groupId>
 			<artifactId>opprettoppgave-tjenestespesifikasjon</artifactId>
