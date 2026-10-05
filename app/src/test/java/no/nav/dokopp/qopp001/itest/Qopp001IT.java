@@ -3,11 +3,14 @@ package no.nav.dokopp.qopp001.itest;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import jakarta.jms.Queue;
 import jakarta.jms.TextMessage;
 import jakarta.xml.bind.JAXBElement;
 import no.nav.dokopp.Application;
 import no.nav.dokopp.qopp001.Qopp001Service;
+import org.assertj.core.api.Assertions;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,8 +46,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
+import static io.github.resilience4j.circuitbreaker.CircuitBreaker.State.CLOSED;
+import static io.github.resilience4j.circuitbreaker.CircuitBreaker.State.OPEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.dokopp.consumer.dokarkiv.DokarkivConsumer.DOKARKIV_OPPDATERJOURNALPOST;
 import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,7 +74,6 @@ public class Qopp001IT {
 
 	private static final String CALLID = "itest-callId";
 
-	private static final String JOURNALPOST_ID = "123456";
 	private static final String ENHETS_ID = "9999";
 	private static final String JOURNALF_ENHET_ID = "2990";
 	private static final String SAKS_REFERANSE = "1";
@@ -90,6 +95,9 @@ public class Qopp001IT {
 	@Autowired
 	private Queue backoutQueue;
 
+	@Autowired
+	protected CircuitBreakerRegistry circuitBreakerRegistry;
+
 	@BeforeAll
 	public static void beforeClass() {
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
@@ -98,6 +106,7 @@ public class Qopp001IT {
 	@BeforeEach
 	void resetWireMock() {
 		reset();
+		circuitBreakerRegistry.getAllCircuitBreakers().forEach(CircuitBreaker::reset);
 	}
 
 	/**
@@ -567,7 +576,41 @@ public class Qopp001IT {
 			String response = receive(qopp001FunksjonellFeil);
 			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 		});
+	}
 
+	@Test
+	void skalFlytteMeldingTilBackoutkoeDersomCircuitbreakerMotDokarkivErOpen() throws IOException {
+		stubSaf("saf/safGraphQlResponse-happy.json");
+		stubTexas();
+		stubPdl("pdl/pdl-happy.json");
+		stubOppgave("oppgaver/opprett_oppgave_happy.json");
+		stubDokarkiv(INTERNAL_SERVER_ERROR);
+
+		CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(DOKARKIV_OPPDATERJOURNALPOST);
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		Assertions.assertThat(circuitBreaker.getState()).isEqualTo(CLOSED);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			Assertions.assertThat(circuitBreaker.getState()).isEqualTo(OPEN);
+			verify(4, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
+
+			String response = receive(backoutQueue);
+			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
+		});
+
+		// På dette tidspunktet er circuitbreaker mot Dokarkiv i OPEN-tilstand
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			Assertions.assertThat(circuitBreaker.getState()).isEqualTo(OPEN);
+			// Ingen nye kall blir gjort mot Dokarkiv
+			verify(4, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
+
+			String response = receive(backoutQueue);
+			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
+		});
 	}
 
 	private void sendStringMessage(Queue queue, final String message, String callId) {

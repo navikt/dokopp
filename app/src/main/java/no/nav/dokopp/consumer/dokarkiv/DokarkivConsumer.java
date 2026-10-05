@@ -1,5 +1,6 @@
 package no.nav.dokopp.consumer.dokarkiv;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import no.nav.dokopp.config.DokoppProperties;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
@@ -18,6 +19,8 @@ import static no.nav.dokopp.consumer.nais.NaisTexasRequestInterceptor.TARGET_SCO
 @Component
 public class DokarkivConsumer {
 
+	public static final String DOKARKIV_OPPDATERJOURNALPOST = "dokarkivoppdaterjournalpost";
+
 	private final RestClient restClient;
 	private final String targetScope;
 
@@ -30,6 +33,7 @@ public class DokarkivConsumer {
 		this.targetScope = dokoppProperties.getEndpoints().getDokarkiv().getScope();
 	}
 
+	@CircuitBreaker(name = DOKARKIV_OPPDATERJOURNALPOST)
 	@Retryable(includes = {DokarkivTechnicalException.class, ResourceAccessException.class})
 	public void oppdaterJournalpost(String journalpostId) {
 		LocalDate datoRetur = now();

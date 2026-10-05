@@ -25,6 +25,7 @@
 		<camel.version>4.22.1</camel.version>
 		<com.ibm.mq.jakarta.client.version>10.0.0.5</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encode.version>9.0</logstash-logback-encode.version>
+		<resilience4j.version>2.4.0</resilience4j.version>
 
 		<dok-legacy-tjenestespesifikasjoner.version>44-7d14e70</dok-legacy-tjenestespesifikasjoner.version>
 
@@ -60,6 +61,11 @@
 				<groupId>net.logstash.logback</groupId>
 				<artifactId>logstash-logback-encoder</artifactId>
 				<version>${logstash-logback-encode.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.github.resilience4j</groupId>
+				<artifactId>resilience4j-spring-boot4</artifactId>
+				<version>${resilience4j.version}</version>
 			</dependency>
 
 			<dependency>
