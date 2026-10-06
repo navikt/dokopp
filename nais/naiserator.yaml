@@ -14,6 +14,9 @@ spec:
               -Djavax.net.ssl.trustStorePassword=$(NAV_TRUSTSTORE_PASSWORD)"
     - name: JDK_JAVA_OPTIONS
       value: "-XX:MaxRAMPercentage=75
+              -Dcom.ibm.mq.cfg.TCP.ClntSndBuffSize=32768
+              -Dcom.ibm.mq.cfg.TCP.ClntRcvBuffSize=32768
+              -Dcom.ibm.msg.client.commonservices.log.outputName=System.out
               $(JAVA_PROXY_OPTIONS) $(JAVA_TRUSTSTORE_OPTIONS)"
     - name: MQGATEWAY01_HOSTNAME
       value: {{ MQGATEWAY01_HOSTNAME }}
