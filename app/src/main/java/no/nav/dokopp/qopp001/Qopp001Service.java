@@ -1,11 +1,10 @@
 package no.nav.dokopp.qopp001;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokopp.consumer.dokarkiv.DokarkivConsumer;
 import no.nav.dokopp.consumer.oppgave.Oppgave;
 import no.nav.dokopp.consumer.oppgave.OpprettOppgaveRequest;
 import no.nav.dokopp.consumer.saf.SafJournalpostConsumer;
-import no.nav.dokopp.consumer.tjoark110.SettJournalpostAttributterRequestTo;
-import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.exception.AvsluttBehandlingOgKastMeldingException;
 import no.nav.dokopp.exception.OpprettOppgaveFunctionalException;
 import no.nav.dokopp.exception.ReturpostAlleredeFlaggetException;
@@ -28,21 +27,21 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Service
 public class Qopp001Service {
 
-	private static final int ANTALL_RETUR = 1;
 	private static final String FAGOMRAADE_STO = "STO";
 	private static final String MASKINELL_ENHET = "9999";
+
 	private final Oppgave oppgave;
 	private final OpprettOppgaveMapper opprettOppgaveMapper;
-	private final Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter;
+	private final DokarkivConsumer dokarkivConsumer;
 	private final SafJournalpostConsumer safJournalpostConsumer;
 
 	public Qopp001Service(Oppgave oppgave,
 						  OpprettOppgaveMapper opprettOppgaveMapper,
-						  Tjoark110SettJournalpostAttributter tjoark110SettJournalpostAttributter,
+						  DokarkivConsumer dokarkivConsumer,
 						  SafJournalpostConsumer safJournalpostConsumer) {
 		this.oppgave = oppgave;
 		this.opprettOppgaveMapper = opprettOppgaveMapper;
-		this.tjoark110SettJournalpostAttributter = tjoark110SettJournalpostAttributter;
+		this.dokarkivConsumer = dokarkivConsumer;
 		this.safJournalpostConsumer = safJournalpostConsumer;
 	}
 
@@ -94,7 +93,7 @@ public class Qopp001Service {
 			}
 		}
 
-		tjoark110SettJournalpostAttributter.settJournalpostAttributter(new SettJournalpostAttributterRequestTo(journalpostId, ANTALL_RETUR));
+		dokarkivConsumer.oppdaterJournalpost(journalpostId);
 		log.info("qopp001 har flagget journalpost med journalpostId={} som returpost.", journalpostId);
 	}
 

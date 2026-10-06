@@ -1,13 +1,10 @@
 package no.nav.dokopp;
 
 import no.nav.dokopp.config.DokoppProperties;
-import no.nav.dokopp.config.cxf.ArkiverDokumentproduksjonV1EndpointConfig;
-import no.nav.dokopp.config.fasit.ArkiverDokumentproduksjonV1Alias;
 import no.nav.dokopp.config.fasit.MqChannelAlias;
 import no.nav.dokopp.config.fasit.MqGatewayAlias;
 import no.nav.dokopp.config.fasit.ServiceuserAlias;
 import no.nav.dokopp.config.nais.NaisProperties;
-import no.nav.dokopp.consumer.tjoark110.Tjoark110SettJournalpostAttributter;
 import no.nav.dokopp.qopp001.Qopp001Route;
 import no.nav.dokopp.qopp001.Qopp001Service;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,14 +19,11 @@ import org.springframework.resilience.annotation.EnableResilientMethods;
 		MqChannelAlias.class,
 		MqGatewayAlias.class,
 		ServiceuserAlias.class,
-		ArkiverDokumentproduksjonV1Alias.class,
 		DokoppProperties.class,
 		NaisProperties.class
 
 })
 @Import({
-		ArkiverDokumentproduksjonV1EndpointConfig.class,
-		Tjoark110SettJournalpostAttributter.class,
 		Qopp001Service.class,
 		Qopp001Route.class,
 })

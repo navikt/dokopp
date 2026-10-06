@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-10-02T12:15:13.619Z",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Kunne ikke finne journalpost med journalpostId=123456 i joark",
+  "path": "/rest/journalpostapi/v1/journalpost/123456"
+}

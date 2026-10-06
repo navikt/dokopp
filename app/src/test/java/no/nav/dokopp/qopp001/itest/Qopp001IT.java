@@ -3,12 +3,14 @@ package no.nav.dokopp.qopp001.itest;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import jakarta.jms.Queue;
 import jakarta.jms.TextMessage;
 import jakarta.xml.bind.JAXBElement;
 import no.nav.dokopp.Application;
 import no.nav.dokopp.qopp001.Qopp001Service;
+import org.assertj.core.api.Assertions;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,21 +32,25 @@ import org.wiremock.spring.EnableWireMock;
 import java.io.IOException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
-import static com.github.tomakehurst.wiremock.client.WireMock.matchingXPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.reset;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
+import static io.github.resilience4j.circuitbreaker.CircuitBreaker.State.CLOSED;
+import static io.github.resilience4j.circuitbreaker.CircuitBreaker.State.OPEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.dokopp.consumer.dokarkiv.DokarkivConsumer.DOKARKIV_OPPDATERJOURNALPOST;
 import static no.nav.dokopp.util.MDCOperations.MDC_CALL_ID;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -55,6 +62,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -66,13 +74,14 @@ public class Qopp001IT {
 
 	private static final String CALLID = "itest-callId";
 
-	private static final String JOURNALPOST_ID = "123456";
 	private static final String ENHETS_ID = "9999";
 	private static final String JOURNALF_ENHET_ID = "2990";
 	private static final String SAKS_REFERANSE = "1";
 	private static final String AKTOER_ID = "1000012345678";
 	private static final String ORGNR = "123456789";
 	public static final String SCENARIO_NEDLAGT_ENHET = "Nedlagt enhet";
+
+	private static final String DOKARKIV_URL = "/dokarkiv/rest/journalpostapi/v1/journalpost/{journalpostId}";
 
 	@Autowired
 	private JmsTemplate jmsTemplate;
@@ -86,6 +95,9 @@ public class Qopp001IT {
 	@Autowired
 	private Queue backoutQueue;
 
+	@Autowired
+	protected CircuitBreakerRegistry circuitBreakerRegistry;
+
 	@BeforeAll
 	public static void beforeClass() {
 		System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
@@ -94,17 +106,18 @@ public class Qopp001IT {
 	@BeforeEach
 	void resetWireMock() {
 		reset();
+		circuitBreakerRegistry.getAllCircuitBreakers().forEach(CircuitBreaker::reset);
 	}
 
 	/**
 	 * HVIS kall er gjort mot SAF SÅ SKAL input til tjenesten sendes som angitt i behandlingssteg
-	 * HVIS kall mot TJOARK110 går ok SÅ skal input og output behandles som angitt i behandlingssteg
+	 * HVIS kall mot Dokarkiv går ok SÅ skal input og output behandles som angitt i behandlingssteg
 	 * HVIS kall mot BehandleOppgave_v1 er ok SÅ skal input og output behandles som angitt i behandlingssteg
 	 */
 	@ParameterizedTest
 	@CsvSource({"qopp001_happy_returpost.xml", "qopp001_happy_manglende_adresse.xml"})
 	public void shouldOppretteOppgaveGosys(String inputFilename) throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-happy.json");
 		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
@@ -114,10 +127,10 @@ public class Qopp001IT {
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			// vent på siste API-kall før videre verifisering
-			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
+			verify(1, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
 		});
 
-		verify(3, postRequestedFor(urlPathEqualTo("/nais-texas")));
+		verify(4, postRequestedFor(urlPathEqualTo("/nais-texas")));
 		verify(1, postRequestedFor(urlEqualTo("/pdl/graphql")));
 		verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
@@ -125,13 +138,11 @@ public class Qopp001IT {
 				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == '" + SAKS_REFERANSE + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.aktoerId == '" + AKTOER_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.orgnr == null)]")));
-		verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon"))
-				.withRequestBody(matchingXPath("//journalpostIdListe/text()", equalTo(JOURNALPOST_ID))));
 	}
 
 	@Test
 	public void shouldOppretteOppgaveGosysMedAvsenderMottaker() throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-happyAvsenderMottaker.json");
 		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
@@ -141,10 +152,10 @@ public class Qopp001IT {
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			// vent på siste API-kall før videre verifisering
-			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
+			verify(1, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
 		});
 
-		verify(3, postRequestedFor(urlPathEqualTo("/nais-texas")));
+		verify(4, postRequestedFor(urlPathEqualTo("/nais-texas")));
 		verify(1, postRequestedFor(urlEqualTo("/pdl/graphql")));
 		verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
 				.withRequestBody(matchingJsonPath("$[?(@.opprettetAvEnhetsnr == '" + ENHETS_ID + "')]"))
@@ -152,13 +163,11 @@ public class Qopp001IT {
 				.withRequestBody(matchingJsonPath("$[?(@.saksreferanse == '" + SAKS_REFERANSE + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.aktoerId == '" + AKTOER_ID + "')]"))
 				.withRequestBody(matchingJsonPath("$[?(@.orgnr == null)]")));
-		verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon"))
-				.withRequestBody(matchingXPath("//journalpostIdListe/text()", equalTo(JOURNALPOST_ID))));
 	}
 
 	@Test
 	public void shouldNotOppretteOppgaveWithSaksreferanseWhenFagomradeNotGosys() throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-pensjon.json");
 		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
@@ -174,23 +183,25 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldOppretteOppgaveWithOrgnrGosys() throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-organisasjon.json");
 		stubTexas();
 		stubOppgave("oppgaver/opprett_oppgave_organisasjon.json");
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
-		await().atMost(10, SECONDS).untilAsserted(() ->
-				verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
-						.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
-						.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]")))
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+					verify(postRequestedFor(urlEqualTo("/api/v1/oppgaver"))
+							.withRequestBody(matchingJsonPath("$[?(@.aktoerId == null)]"))
+							.withRequestBody(matchingJsonPath("$[?(@.orgnr == '" + ORGNR + "')]")));
+					verify(1, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
+				}
 		);
 	}
 
 	@Test
 	public void shouldNotOppretteOppgaveWithFagomraadeSTO() throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-fagomraade_STO.json");
 		stubTexas();
 
@@ -207,13 +218,14 @@ public class Qopp001IT {
 			assertThat(listAppender.list.get(1).getFormattedMessage(), is("qopp001 lager ikke oppgave i Gosys for journalpostId=123456 da den er returpost fra fagområde=STO og ikke vil bli behandlet."));
 			assertThat(listAppender.list.get(2).getFormattedMessage(), is("qopp001 har flagget journalpost med journalpostId=123456 som returpost."));
 			verify(exactly(0), postRequestedFor(urlEqualTo("/api/v1/oppgaver")));
+			verify(1, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
 		});
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {"arkiv", "dokument", "journalpost"})
 	public void shouldNotOppretteOppgaveWhenSkjermet(String skjermingNotNullIn) throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-skjerming-" + skjermingNotNullIn + ".json");
 		stubTexas();
 
@@ -234,7 +246,7 @@ public class Qopp001IT {
 
 	@Test
 	void shouldOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFails() throws IOException {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-happy.json");
 		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
@@ -258,7 +270,7 @@ public class Qopp001IT {
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			// vent på siste API-kall før videre verifisering
-			verify(postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
+			verify(1, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
 		});
 
 		verify(2, postRequestedFor(urlEqualTo("/api/v1/oppgaver")));
@@ -268,7 +280,7 @@ public class Qopp001IT {
 
 	@Test
 	void shouldDiscardMessageAndNotOppretteOppgaveWithTildeltEnhetsNummerNullWhenOpprettOppgaveFailsAndEnhet9999() throws IOException {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-happy_maskin.json");
 		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
@@ -364,24 +376,56 @@ public class Qopp001IT {
 		verify(exactly(4), postRequestedFor(urlEqualTo("/saf/graphql")));
 	}
 
-	/**
-	 * HVIS TJOARK110 ikke er tilgjengelig SÅ prøv igjen før avslutt
-	 */
 	@Test
-	public void shouldThrowTechnicalExceptionTjoark110() throws Exception {
-		stubFor(post("/arkiverdokumentproduksjon")
-				.willReturn(aResponse()
-						.withStatus(OK.value())
-						.withBodyFile("tjoark110/tjoark110_internalServerError.xml")));
+	public void skalFlytteMeldingTilFunksjonellKoeHvisDokarkivReturnerer400() throws Exception {
 		stubSaf("saf/safGraphQlResponse-happy.json");
 		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
 		stubOppgave("oppgaver/opprett_oppgave_happy.json");
+		stubDokarkiv(BAD_REQUEST, "bad_request.json");
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String response = receive(qopp001FunksjonellFeil);
+
+			verify(1, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
+			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
+		});
+	}
+
+	@Test
+	public void skalFlytteMeldingTilFunksjonellKoeHvisDokarkivReturnerer404() throws Exception {
+		stubSaf("saf/safGraphQlResponse-happy.json");
+		stubTexas();
+		stubPdl("pdl/pdl-happy.json");
+		stubOppgave("oppgaver/opprett_oppgave_happy.json");
+		stubDokarkiv(NOT_FOUND, "not_found.json");
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String response = receive(qopp001FunksjonellFeil);
+
+			verify(1, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
+			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
+		});
+	}
+
+	@Test
+	public void skalFlytteMeldingTilBackoutkoeHvisDokarkivReturnerer5xx() throws Exception {
+		stubSaf("saf/safGraphQlResponse-happy.json");
+		stubTexas();
+		stubPdl("pdl/pdl-happy.json");
+		stubOppgave("oppgaver/opprett_oppgave_happy.json");
+		stubDokarkiv(INTERNAL_SERVER_ERROR);
 
 		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(backoutQueue);
+
+			verify(4, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
 			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 		});
 	}
@@ -411,7 +455,7 @@ public class Qopp001IT {
 	 */
 	@Test
 	public void shouldThrowSikkerhetsbegrensningExceptionGosys() throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-happy.json");
 		stubTexas();
 		stubPdl("pdl/pdl-happy.json");
@@ -452,7 +496,7 @@ public class Qopp001IT {
 				verify(exactly(0), postRequestedFor(urlEqualTo("/api/v1/oppgaver")))
 		);
 
-		verify(exactly(0), postRequestedFor(urlEqualTo("/arkiverdokumentproduksjon")));
+		verify(0, putRequestedFor(urlEqualTo("/dokarkiv")));
 	}
 
 	@Test
@@ -504,7 +548,7 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldNotOppretteOppgaveWhenPdlBadRequest() throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-happyAvsenderMottaker.json");
 		stubTexas();
 		stubPdl("pdl/pdl-bad-request.json");
@@ -520,7 +564,7 @@ public class Qopp001IT {
 
 	@Test
 	public void shouldNotOppretteOppgaveWhenPdlIngenIdenter() throws Exception {
-		stubArkiverdokumentproduksjon();
+		stubDokarkiv();
 		stubSaf("saf/safGraphQlResponse-happyAvsenderMottaker.json");
 		stubTexas();
 		stubPdl("pdl/pdl-ingen-identer.json");
@@ -532,7 +576,41 @@ public class Qopp001IT {
 			String response = receive(qopp001FunksjonellFeil);
 			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
 		});
+	}
 
+	@Test
+	void skalFlytteMeldingTilBackoutkoeDersomCircuitbreakerMotDokarkivErOpen() throws IOException {
+		stubSaf("saf/safGraphQlResponse-happy.json");
+		stubTexas();
+		stubPdl("pdl/pdl-happy.json");
+		stubOppgave("oppgaver/opprett_oppgave_happy.json");
+		stubDokarkiv(INTERNAL_SERVER_ERROR);
+
+		CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(DOKARKIV_OPPDATERJOURNALPOST);
+
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		Assertions.assertThat(circuitBreaker.getState()).isEqualTo(CLOSED);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			Assertions.assertThat(circuitBreaker.getState()).isEqualTo(OPEN);
+			verify(4, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
+
+			String response = receive(backoutQueue);
+			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
+		});
+
+		// På dette tidspunktet er circuitbreaker mot Dokarkiv i OPEN-tilstand
+		sendStringMessage(qopp001, classpathToString("qopp001/qopp001_happy_returpost.xml"), CALLID);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			Assertions.assertThat(circuitBreaker.getState()).isEqualTo(OPEN);
+			// Ingen nye kall blir gjort mot Dokarkiv
+			verify(4, putRequestedFor(urlEqualTo("/dokarkiv/rest/journalpostapi/v1/journalpost/123456")));
+
+			String response = receive(backoutQueue);
+			assertThat(response, is(classpathToString("qopp001/qopp001_happy_returpost.xml")));
+		});
 	}
 
 	private void sendStringMessage(Queue queue, final String message, String callId) {
@@ -589,11 +667,25 @@ public class Qopp001IT {
 						.withBodyFile(bodyFile)));
 	}
 
-	private static void stubArkiverdokumentproduksjon() {
-		stubFor(post("/arkiverdokumentproduksjon")
+	private static void stubDokarkiv() {
+		stubFor(put(urlPathTemplate(DOKARKIV_URL))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withBodyFile("tjoark110/tjoark110_happy.xml")));
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("dokarkiv/ok.json")));
+	}
+
+	private static void stubDokarkiv(HttpStatus httpStatus) {
+		stubFor(put(urlPathTemplate(DOKARKIV_URL))
+				.willReturn(aResponse()
+						.withStatus(httpStatus.value())));
+	}
+
+	private static void stubDokarkiv(HttpStatus httpStatus, String bodyFile) {
+		stubFor(put(urlPathTemplate(DOKARKIV_URL))
+				.willReturn(aResponse()
+						.withStatus(httpStatus.value())
+						.withBodyFile("dokarkiv/%s".formatted(bodyFile))));
 	}
 
 }
